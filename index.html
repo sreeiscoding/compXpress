@@ -1,0 +1,3064 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Compressor + Passport Photo Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+  <style>
+    @font-face {
+      font-family: "Sora";
+      src: url("./assets/fonts/Sora-Variable.ttf") format("truetype");
+      font-weight: 100 800;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Inconsolata";
+      src: url("./assets/fonts/Inconsolata-Variable.ttf") format("truetype");
+      font-weight: 200 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --font-base: "Inconsolata", "Inconsolas", "Courier New", monospace;
+      --font-heading: "Sora", "Segoe UI", "SF Pro Display", Arial, sans-serif;
+      --font-secondary: "Inconsolata", "Inconsolas", "Courier New", monospace;
+      --bg: #0f172a;
+      --bg-soft: #111c33;
+      --card: #1e293b;
+      --card-2: #162137;
+      --accent: #3b82f6;
+      --accent-2: #60a5fa;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: rgba(148, 163, 184, 0.2);
+      --shadow-soft: 0 18px 46px rgba(2, 6, 23, 0.35);
+      --shadow-card: 0 26px 64px rgba(2, 6, 23, 0.45);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 10px;
+      --transition: 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-base);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(59, 130, 246, 0.2), transparent 55%),
+        radial-gradient(900px 500px at 90% 10%, rgba(30, 64, 175, 0.14), transparent 55%),
+        linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 40%);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1120px, 92%);
+      margin: 0 auto;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 50;
+      background: rgba(15, 23, 42, 0.62);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .nav-wrap {
+      height: 76px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-heading);
+      font-weight: 650;
+      letter-spacing: 0.1px;
+      justify-self: start;
+    }
+
+    .logo {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background: linear-gradient(160deg, var(--accent-2), var(--accent));
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+        0 0 0 4px rgba(59, 130, 246, 0.16);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      padding: 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(15, 23, 42, 0.55);
+      justify-self: center;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 8px 12px;
+      border-radius: 999px;
+      transition: color var(--transition), background var(--transition);
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      background: rgba(148, 163, 184, 0.14);
+    }
+
+    .notif {
+      appearance: none;
+      padding: 0;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(15, 23, 42, 0.55);
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .nav-actions {
+      justify-self: end;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-btn {
+      appearance: none;
+      padding: 0;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(15, 23, 42, 0.55);
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .settings-btn:hover {
+      border-color: rgba(96, 165, 250, 0.66);
+      background: rgba(15, 23, 42, 0.8);
+      transform: translateY(-1px);
+    }
+
+    .settings-btn:focus-visible {
+      outline: 2px solid rgba(96, 165, 250, 0.9);
+      outline-offset: 2px;
+    }
+
+    .settings-btn i {
+      font-size: 0.92rem;
+      color: var(--text);
+      opacity: 0.92;
+    }
+
+    .notif:hover {
+      border-color: rgba(96, 165, 250, 0.66);
+      background: rgba(15, 23, 42, 0.8);
+      transform: translateY(-1px);
+    }
+
+    .notif:focus-visible {
+      outline: 2px solid rgba(96, 165, 250, 0.9);
+      outline-offset: 2px;
+    }
+
+    .notif i {
+      font-size: 1rem;
+      font-size: 0.92rem;
+      color: var(--text);
+      opacity: 0.92;
+    }
+
+    .notif-drawer {
+      position: fixed;
+      top: 84px;
+      right: 4%;
+      width: min(360px, 92vw);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9));
+      box-shadow: 0 26px 60px rgba(2, 6, 23, 0.6);
+      transform: translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition), transform var(--transition);
+      z-index: 65;
+      overflow: hidden;
+    }
+
+    .notif-drawer.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .privacy-drawer {
+      position: fixed;
+      top: 84px;
+      left: 50%;
+      width: min(640px, 94vw);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9));
+      box-shadow: 0 26px 60px rgba(2, 6, 23, 0.6);
+      transform: translate(-50%, -8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition), transform var(--transition);
+      z-index: 67;
+      overflow: hidden;
+    }
+
+    .privacy-drawer.open {
+      transform: translate(-50%, 0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .privacy-body {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .privacy-text {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .settings-drawer {
+      position: fixed;
+      top: 84px;
+      right: 4%;
+      width: min(340px, 92vw);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9));
+      box-shadow: 0 26px 60px rgba(2, 6, 23, 0.6);
+      transform: translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition), transform var(--transition);
+      z-index: 66;
+      overflow: hidden;
+    }
+
+    .settings-drawer.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .settings-body {
+      padding: 12px 14px 14px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .signin-prompt {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(15, 23, 42, 0.58);
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .signin-prompt:hover {
+      border-color: rgba(96, 165, 250, 0.65);
+      background: rgba(15, 23, 42, 0.72);
+      transform: translateY(-1px);
+    }
+
+    .signin-prompt-text {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .signin-prompt-arrow {
+      color: #bfdbfe;
+      font-size: 0.85rem;
+      opacity: 0.9;
+      flex-shrink: 0;
+    }
+
+    .auth-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .auth-btn {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: var(--font-secondary);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .auth-btn:hover {
+      border-color: rgba(96, 165, 250, 0.7);
+      transform: translateY(-1px);
+    }
+
+    .setting-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .setting-label {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.78rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #bfdbfe;
+    }
+
+    .theme-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .theme-option {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      background: rgba(15, 23, 42, 0.58);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-family: var(--font-secondary);
+      font-size: 0.82rem;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .theme-option:hover {
+      transform: translateY(-1px);
+      border-color: rgba(96, 165, 250, 0.65);
+    }
+
+    .theme-option.active {
+      border-color: rgba(96, 165, 250, 0.9);
+      background: rgba(30, 64, 175, 0.32);
+      color: #dbeafe;
+    }
+
+    .logout-btn {
+      width: 100%;
+      appearance: none;
+      border: 1px solid rgba(248, 113, 113, 0.55);
+      background: rgba(127, 29, 29, 0.34);
+      color: #fecaca;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-family: var(--font-secondary);
+      font-size: 0.83rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .logout-btn:hover {
+      border-color: rgba(248, 113, 113, 0.85);
+      background: rgba(127, 29, 29, 0.5);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.62);
+      backdrop-filter: blur(4px);
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+      z-index: 120;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .auth-page {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.72);
+      backdrop-filter: blur(5px);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+      z-index: 130;
+    }
+
+    .auth-page.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .auth-card {
+      width: min(460px, 100%);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.97), rgba(15, 23, 42, 0.94));
+      box-shadow: 0 30px 80px rgba(2, 6, 23, 0.65);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .auth-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .auth-title {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 1.12rem;
+    }
+
+    .auth-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-family: var(--font-secondary);
+      font-size: 0.82rem;
+    }
+
+    .auth-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .auth-row {
+      display: grid;
+      gap: 5px;
+    }
+
+    .auth-label {
+      margin: 0;
+      color: #bfdbfe;
+      font-family: var(--font-secondary);
+      font-size: 0.76rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .auth-input {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: var(--font-secondary);
+      font-size: 0.84rem;
+      outline: none;
+    }
+
+    .auth-input:focus {
+      border-color: rgba(96, 165, 250, 0.8);
+    }
+
+    .auth-actions {
+      margin-top: 4px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .auth-submit {
+      appearance: none;
+      border: 1px solid rgba(191, 219, 254, 0.35);
+      background: linear-gradient(180deg, var(--accent-2), var(--accent));
+      color: #f8fbff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: var(--font-secondary);
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+
+    .auth-switch {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-family: var(--font-secondary);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .modal-card {
+      width: min(440px, 100%);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.97), rgba(15, 23, 42, 0.94));
+      box-shadow: 0 30px 80px rgba(2, 6, 23, 0.65);
+      padding: 16px;
+    }
+
+    .modal-title {
+      margin: 0 0 8px;
+      font-family: var(--font-heading);
+      font-size: 1.08rem;
+    }
+
+    .modal-text {
+      margin: 0;
+      color: var(--muted);
+      font-family: var(--font-secondary);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: var(--font-secondary);
+      cursor: pointer;
+    }
+
+    .modal-btn:hover {
+      border-color: rgba(96, 165, 250, 0.68);
+    }
+
+    .modal-btn.danger {
+      border-color: rgba(248, 113, 113, 0.55);
+      background: rgba(127, 29, 29, 0.36);
+      color: #fecaca;
+    }
+
+    .modal-btn.danger:hover {
+      border-color: rgba(248, 113, 113, 0.85);
+    }
+
+    body[data-theme="light"] {
+      --bg: #f1f5f9;
+      --bg-soft: #eff6ff;
+      --text: #0f172a;
+      --muted: #475569;
+    }
+
+    body[data-theme="light"] .navbar,
+    body[data-theme="light"] .nav-links,
+    body[data-theme="light"] .card,
+    body[data-theme="light"] .flow-card,
+    body[data-theme="light"] .upload-box,
+    body[data-theme="light"] .info-item,
+    body[data-theme="light"] .preview-card,
+    body[data-theme="light"] #status,
+    body[data-theme="light"] footer,
+    body[data-theme="light"] .notif-drawer,
+    body[data-theme="light"] .privacy-drawer,
+    body[data-theme="light"] .settings-drawer,
+    body[data-theme="light"] .modal-card {
+      background: rgba(255, 255, 255, 0.94);
+      border-color: rgba(100, 116, 139, 0.25);
+      color: #0f172a;
+    }
+
+    body[data-theme="light"] .drawer-item,
+    body[data-theme="light"] .drawer-close,
+    body[data-theme="light"] .theme-option,
+    body[data-theme="light"] .modal-btn,
+    body[data-theme="light"] .notif,
+    body[data-theme="light"] .settings-btn {
+      background: rgba(241, 245, 249, 0.95);
+      border-color: rgba(100, 116, 139, 0.3);
+      color: #0f172a;
+    }
+
+    body[data-theme="light"] .signin-prompt {
+      background: rgba(241, 245, 249, 0.96);
+      border-color: rgba(100, 116, 139, 0.3);
+    }
+
+    body[data-theme="light"] .drawer-item-title,
+    body[data-theme="light"] .setting-label {
+      color: #1d4ed8;
+    }
+
+    body[data-theme="light"] .drawer-tip,
+    body[data-theme="light"] .drawer-item-text,
+    body[data-theme="light"] .drawer-item-meta,
+    body[data-theme="light"] .modal-text,
+    body[data-theme="light"] .subtitle,
+    body[data-theme="light"] .flow-note,
+    body[data-theme="light"] .about,
+    body[data-theme="light"] .policy {
+      color: #475569;
+    }
+
+    body[data-theme="light"] .file-chip {
+      background: rgba(241, 245, 249, 0.95);
+      border-color: rgba(100, 116, 139, 0.3);
+      color: #1e3a8a;
+    }
+
+    body[data-theme="light"] .pricing-wrap,
+    body[data-theme="light"] .pricing-card {
+      background: rgba(255, 255, 255, 0.94);
+      border-color: rgba(100, 116, 139, 0.25);
+    }
+
+    body[data-theme="light"] .pricing-card.featured {
+      background: linear-gradient(180deg, rgba(191, 219, 254, 0.5), rgba(255, 255, 255, 0.95));
+    }
+
+    body[data-theme="light"] .pricing-price {
+      color: #1d4ed8;
+    }
+
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .drawer-title {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 1rem;
+    }
+
+    .drawer-close {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text);
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .drawer-close:hover {
+      border-color: rgba(96, 165, 250, 0.7);
+      background: rgba(30, 41, 59, 0.95);
+    }
+
+    .drawer-list {
+      list-style: none;
+      margin: 0;
+      padding: 8px;
+      display: grid;
+      gap: 6px;
+      max-height: 290px;
+      overflow: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .drawer-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .drawer-item {
+      display: grid;
+      gap: 4px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: rgba(15, 23, 42, 0.55);
+    }
+
+    .drawer-item-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .drawer-item-title {
+      margin: 0;
+      font-size: 0.82rem;
+      font-family: var(--font-secondary);
+      color: #dbeafe;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .drawer-item-text {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-family: var(--font-secondary);
+    }
+
+    .drawer-item-meta {
+      margin: 3px 0 0;
+      font-size: 0.74rem;
+      color: #9fb1cf;
+      font-family: var(--font-secondary);
+      letter-spacing: 0.03em;
+    }
+
+    .notif-delete {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.55);
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), color var(--transition);
+    }
+
+    .notif-delete:hover {
+      border-color: rgba(248, 113, 113, 0.75);
+      color: #fca5a5;
+      background: rgba(127, 29, 29, 0.25);
+    }
+
+    .drawer-empty {
+      margin: 0;
+      padding: 14px 12px;
+      border-radius: 10px;
+      border: 1px dashed rgba(148, 163, 184, 0.24);
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-family: var(--font-secondary);
+      text-align: center;
+    }
+
+    .drawer-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px 14px;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .drawer-link {
+      color: #bfdbfe;
+      font-family: var(--font-secondary);
+      font-size: 0.82rem;
+      letter-spacing: 0.03em;
+    }
+
+    .drawer-link:hover {
+      text-decoration: underline;
+    }
+
+    .drawer-tips {
+      margin: 0;
+      padding: 6px 12px 10px;
+      display: grid;
+      gap: 6px;
+      border-top: 1px dashed rgba(148, 163, 184, 0.18);
+    }
+
+    .drawer-tips-title {
+      margin: 0;
+      font-size: 0.68rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: #9fb1cf;
+      font-family: var(--font-secondary);
+    }
+
+    .drawer-tip {
+      margin: 0;
+      font-size: 0.74rem;
+      color: #8da2c3;
+      font-family: var(--font-secondary);
+      line-height: 1.35;
+      opacity: 0.9;
+    }
+
+    .hero {
+      padding-top: 148px;
+      padding-bottom: 86px;
+      text-align: center;
+    }
+
+    .label {
+      font-family: var(--font-secondary);
+      display: inline-block;
+      font-size: 0.76rem;
+      color: var(--muted);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.5);
+      padding: 6px 12px;
+      border-radius: 999px;
+    }
+
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2.1rem, 5vw, 3.7rem);
+      margin: 0 0 18px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 700px;
+      margin: 0 auto 34px;
+      font-size: 1.03rem;
+    }
+
+    .btn {
+      font-family: var(--font-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(180deg, var(--accent-2), var(--accent));
+      color: #f8fbff;
+      border: 1px solid rgba(191, 219, 254, 0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
+      transition: transform var(--transition), filter var(--transition), opacity var(--transition), box-shadow var(--transition);
+    }
+
+    .btn i {
+      font-size: 0.9em;
+    }
+
+    .btn:hover:not(:disabled) {
+      filter: brightness(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(37, 99, 235, 0.32);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-cta {
+      position: relative;
+      overflow: hidden;
+      padding: 13px 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(191, 219, 254, 0.42);
+      box-shadow:
+        0 16px 30px rgba(37, 99, 235, 0.34),
+        0 0 0 5px rgba(59, 130, 246, 0.14);
+    }
+
+    .btn-cta::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 20%, rgba(255, 255, 255, 0.35) 45%, transparent 70%);
+      transform: translateX(-120%);
+      transition: transform 0.55s ease;
+    }
+
+    .btn-cta:hover:not(:disabled)::before {
+      transform: translateX(120%);
+    }
+
+    .btn-cta .cta-icon {
+      font-size: 0.88rem;
+      transition: transform var(--transition);
+    }
+
+    .btn-cta:hover:not(:disabled) .cta-icon {
+      transform: translateX(2px);
+    }
+
+    .app-section {
+      padding-bottom: 72px;
+    }
+
+    .pricing-section {
+      padding-bottom: 26px;
+    }
+
+    .pricing-wrap {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.56), rgba(15, 23, 42, 0.7));
+      box-shadow: var(--shadow-soft);
+      padding: clamp(16px, 3vw, 24px);
+    }
+
+    .pricing-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .pricing-title {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 1.18rem;
+    }
+
+    .pricing-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-family: var(--font-secondary);
+      font-size: 0.82rem;
+    }
+
+    .plan-pill {
+      border: 1px solid rgba(96, 165, 250, 0.55);
+      background: rgba(30, 64, 175, 0.28);
+      color: #dbeafe;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      font-family: var(--font-secondary);
+      white-space: nowrap;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .pricing-card {
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.58);
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .pricing-card.featured {
+      border-color: rgba(96, 165, 250, 0.72);
+      background: linear-gradient(180deg, rgba(30, 64, 175, 0.22), rgba(15, 23, 42, 0.72));
+    }
+
+    .pricing-plan {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 1rem;
+    }
+
+    .pricing-price {
+      margin: 0;
+      color: #dbeafe;
+      font-family: var(--font-secondary);
+      font-size: 0.85rem;
+    }
+
+    .pricing-list {
+      margin: 0;
+      padding-left: 16px;
+      color: var(--muted);
+      font-family: var(--font-secondary);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .pricing-actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .pricing-btn {
+      appearance: none;
+      border: 1px solid rgba(191, 219, 254, 0.35);
+      background: linear-gradient(180deg, var(--accent-2), var(--accent));
+      color: #f8fbff;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-family: var(--font-secondary);
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .pricing-btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .app-intro {
+      margin-bottom: 18px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.44), rgba(15, 23, 42, 0.62));
+    }
+
+    .app-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px;
+      font-family: var(--font-secondary);
+      font-size: 0.76rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #bfdbfe;
+    }
+
+    .app-eyebrow i {
+      font-size: 0.75rem;
+    }
+
+    .app-copy {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-family: var(--font-secondary);
+      font-size: 0.92rem;
+      max-width: 860px;
+    }
+
+    .app-flow {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 4px;
+    }
+
+    .flow-card {
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: var(--radius-md);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.46), rgba(15, 23, 42, 0.6));
+      padding: 14px;
+    }
+
+    .flow-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .flow-step {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-secondary);
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #bfdbfe;
+    }
+
+    .flow-step i {
+      font-size: 0.78rem;
+      color: var(--accent-2);
+    }
+
+    .flow-note {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.88), rgba(22, 33, 55, 0.92));
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(4px);
+      padding: clamp(18px, 3vw, 30px);
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      margin: 0;
+      font-size: 1.24rem;
+      letter-spacing: 0.01em;
+      line-height: 1.2;
+    }
+
+    .label,
+    .subtitle,
+    .nav-links a,
+    .upload-box p,
+    .info-item small,
+    .preview-card h4,
+    #status,
+    .about,
+    .policy,
+    footer {
+      font-family: var(--font-secondary);
+    }
+
+    .upload-box {
+      border: 1.5px dashed rgba(96, 165, 250, 0.42);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.48), rgba(15, 23, 42, 0.62));
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .upload-box.drag-over {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .upload-box p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .file-control {
+      margin-top: 12px;
+      display: grid;
+      justify-items: center;
+      gap: 9px;
+    }
+
+    .file-input-native {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+      white-space: nowrap;
+    }
+
+    .file-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      cursor: pointer;
+      font-family: var(--font-secondary);
+      font-size: 0.86rem;
+      letter-spacing: 0.02em;
+      transition: transform var(--transition), border-color var(--transition), background var(--transition);
+    }
+
+    .file-trigger i {
+      color: var(--accent-2);
+      font-size: 0.84rem;
+    }
+
+    .file-trigger:hover {
+      transform: translateY(-1px);
+      border-color: rgba(96, 165, 250, 0.7);
+      background: rgba(15, 23, 42, 0.86);
+    }
+
+    .file-name {
+      margin: 0;
+      font-family: var(--font-secondary);
+      color: var(--muted);
+      font-size: 0.8rem;
+      max-width: min(460px, 92%);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: min(500px, 96%);
+    }
+
+    .file-clear {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      background: rgba(15, 23, 42, 0.68);
+      color: #cbd5e1;
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-family: var(--font-secondary);
+      font-size: 0.74rem;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), color var(--transition);
+    }
+
+    .file-clear:hover:not(:disabled) {
+      border-color: rgba(248, 113, 113, 0.72);
+      background: rgba(127, 29, 29, 0.22);
+      color: #fecaca;
+    }
+
+    .file-clear:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .file-limit-note {
+      margin: 0;
+      color: #9fb1cf;
+      font-size: 0.74rem;
+      font-family: var(--font-secondary);
+      letter-spacing: 0.02em;
+    }
+
+    .file-queue {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      min-height: 24px;
+    }
+
+    .file-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.66);
+      color: #dbeafe;
+      border-radius: 999px;
+      padding: 5px 8px 5px 10px;
+      font-family: var(--font-secondary);
+      font-size: 0.74rem;
+      cursor: pointer;
+      max-width: 180px;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .file-chip-name {
+      max-width: 128px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-chip-delete {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.38);
+      background: rgba(15, 23, 42, 0.65);
+      color: #cbd5e1;
+      border-radius: 999px;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      cursor: pointer;
+      font-size: 0.62rem;
+      transition: border-color var(--transition), background var(--transition), color var(--transition);
+      flex-shrink: 0;
+    }
+
+    .file-chip-delete:hover {
+      border-color: rgba(248, 113, 113, 0.8);
+      background: rgba(127, 29, 29, 0.26);
+      color: #fecaca;
+    }
+
+    .file-chip:hover {
+      transform: translateY(-1px);
+      border-color: rgba(96, 165, 250, 0.7);
+    }
+
+    .file-chip.active {
+      border-color: rgba(96, 165, 250, 0.9);
+      background: rgba(30, 64, 175, 0.35);
+      color: #eff6ff;
+    }
+
+    .upload-box.is-busy .file-trigger {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .upload-preview-wrap {
+      margin-top: 14px;
+      display: none;
+    }
+
+    .upload-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .upload-preview-item {
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(11, 18, 36, 0.8);
+      padding: 8px;
+      display: grid;
+      gap: 6px;
+      cursor: pointer;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+
+    .upload-preview-item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(96, 165, 250, 0.65);
+    }
+
+    .upload-preview-item.active {
+      border-color: rgba(96, 165, 250, 0.95);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.16);
+    }
+
+    .upload-preview-canvas {
+      width: 100%;
+      height: auto;
+      max-height: 190px;
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+      background: #0b1224;
+      display: block;
+    }
+
+    .upload-preview-meta {
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: var(--font-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .info-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(160px, 1fr));
+      gap: 14px;
+    }
+
+    .info-item {
+      background: rgba(15, 23, 42, 0.52);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .info-item small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .info-item strong {
+      font-size: 1.03rem;
+    }
+
+    .preview-grid {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .preview-card {
+      background: rgba(15, 23, 42, 0.54);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .preview-card h4 {
+      margin: 1px 0 10px;
+      font-size: 0.84rem;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .preview-media {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: contain;
+      border-radius: 9px;
+      background: #0b1224;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    #passportPreview {
+      aspect-ratio: 413 / 531;
+      object-fit: cover;
+    }
+
+    .preview-shell-original {
+      position: relative;
+      border-radius: 9px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background:
+        radial-gradient(600px 200px at 50% -30%, rgba(59, 130, 246, 0.18), transparent 55%),
+        #0b1224;
+      overflow: hidden;
+    }
+
+    .preview-shell-original::before {
+      content: "\f03e";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(148, 163, 184, 0.55);
+      font-size: 1.5rem;
+      pointer-events: none;
+    }
+
+    .preview-shell-original::after {
+      content: "Original image will appear here";
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      color: rgba(148, 163, 184, 0.82);
+      font-family: var(--font-secondary);
+      font-size: 0.76rem;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .preview-shell-original.has-image::before,
+    .preview-shell-original.has-image::after {
+      display: none;
+    }
+
+    .preview-shell-original:not(.has-image) .preview-media {
+      display: none;
+    }
+
+    .actions {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(90px, 1fr));
+      gap: 12px;
+    }
+
+    .btn-reset {
+      min-width: 48px;
+      padding: 12px 0;
+      border-radius: 12px;
+    }
+
+    #status {
+      margin-top: 14px;
+      color: var(--muted);
+      min-height: 22px;
+      font-size: 0.88rem;
+      letter-spacing: 0.02em;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: rgba(15, 23, 42, 0.42);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 34px 12px 40px;
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
+      margin-top: 24px;
+      background: rgba(15, 23, 42, 0.36);
+    }
+
+    .about,
+    .policy {
+      padding: 22px 0 10px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 900px) {
+      .nav-wrap {
+        grid-template-columns: 1fr auto;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .preview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+
+      .hero {
+        padding-top: 132px;
+      }
+
+      .flow-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .flow-note {
+        text-align: left;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 118px;
+        padding-bottom: 64px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .subtitle {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-wrap">
+      <a href="#home" class="brand">
+        <span class="logo"></span>
+        <span>ComXpress</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#app">Upload</a>
+        <a href="#pricing">Pricing</a>
+        <a id="privacyNavLink" href="#privacy" aria-controls="privacyDrawer" aria-expanded="false">Privacy Policy</a>
+      </nav>
+      <div class="nav-actions">
+        <button id="settingsBtn" class="settings-btn" type="button" aria-label="Settings" aria-expanded="false" aria-controls="settingsDrawer"><i class="fa-solid fa-gear"></i></button>
+        <button id="notifBtn" class="notif" type="button" aria-label="Notifications" aria-expanded="false" aria-controls="notifDrawer"><i class="fa-regular fa-bell"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <aside id="privacyDrawer" class="privacy-drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <h3 class="drawer-title">Privacy Policy</h3>
+      <button id="privacyCloseBtn" class="drawer-close" type="button" aria-label="Close privacy policy"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="privacy-body">
+      <p class="privacy-text">ComXpress processes your images fully in your browser. No image files are uploaded to any server by default.</p>
+      <p class="privacy-text">Generated previews and outputs are stored locally only for your active session to support refresh recovery and user convenience.</p>
+      <p class="privacy-text">Notification history and theme preferences are saved on your device and can be cleared by browser storage cleanup or logout actions.</p>
+      <p class="privacy-text">By using this tool, you confirm you have rights to process uploaded photos and comply with any applicable local privacy regulations.</p>
+    </div>
+  </aside>
+
+  <aside id="notifDrawer" class="notif-drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <h3 class="drawer-title">Notifications</h3>
+      <button id="notifCloseBtn" class="drawer-close" type="button" aria-label="Close notifications"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <ul id="notifList" class="drawer-list"></ul>
+    <div class="drawer-tips">
+      <p class="drawer-tips-title">Quick Tips</p>
+      <p class="drawer-tip">Upload higher-resolution photos for cleaner compression quality.</p>
+      <p class="drawer-tip">Use passport generation after compression for faster final exports.</p>
+    </div>
+    <div class="drawer-foot">
+      <a class="drawer-link" href="#about">Learn More</a>
+      <a class="drawer-link" href="#privacy">Privacy Policy</a>
+    </div>
+  </aside>
+
+  <aside id="settingsDrawer" class="settings-drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <h3 class="drawer-title">Settings</h3>
+      <button id="settingsCloseBtn" class="drawer-close" type="button" aria-label="Close settings"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="settings-body">
+      <div id="signinPrompt" class="signin-prompt" role="button" tabindex="0" aria-label="Sign in for better experience">
+        <p id="signinPromptText" class="signin-prompt-text">You're not signed in, signing for better experience.</p>
+        <i class="fa-solid fa-arrow-right signin-prompt-arrow" aria-hidden="true"></i>
+      </div>
+      <div id="authActions" class="auth-actions">
+        <button id="signInBtn" class="auth-btn" type="button">Sign In</button>
+        <button id="signUpBtn" class="auth-btn" type="button">Sign Up</button>
+      </div>
+      <div class="setting-group">
+        <p class="setting-label">Color Theme</p>
+        <div class="theme-toggle">
+          <button id="themeDarkBtn" class="theme-option active" type="button">Dark</button>
+          <button id="themeLightBtn" class="theme-option" type="button">Light</button>
+        </div>
+      </div>
+      <div class="setting-group">
+        <button id="logoutBtn" class="logout-btn" type="button"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+      </div>
+    </div>
+  </aside>
+
+  <div id="logoutModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" aria-describedby="logoutText">
+      <h3 id="logoutTitle" class="modal-title">Confirm Logout</h3>
+      <p id="logoutText" class="modal-text">Are you sure you want to logout? This will clear your current session progress on this device.</p>
+      <div class="modal-actions">
+        <button id="logoutCancelBtn" class="modal-btn" type="button">Cancel</button>
+        <button id="logoutConfirmBtn" class="modal-btn danger" type="button">Yes, Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="upgradeModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="upgradeTitle" aria-describedby="upgradeText">
+      <h3 id="upgradeTitle" class="modal-title">Free Limit Reached</h3>
+      <p id="upgradeText" class="modal-text">You can upload up to 5 images on the free version without login. Login and subscribe to continue uploading more images.</p>
+      <div class="modal-actions">
+        <button id="upgradeCancelBtn" class="modal-btn" type="button">Maybe Later</button>
+        <button id="upgradeConfirmBtn" class="modal-btn danger" type="button">Login & Subscribe</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="authPage" class="auth-page" aria-hidden="true">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle" aria-describedby="authSubtitle">
+      <div class="auth-head">
+        <div>
+          <h3 id="authTitle" class="auth-title">Sign In</h3>
+          <p id="authSubtitle" class="auth-subtitle">Access better experience and unlock premium workflow.</p>
+        </div>
+        <button id="authCloseBtn" class="auth-close" type="button" aria-label="Close authentication"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="authForm" class="auth-form">
+        <div id="authNameRow" class="auth-row" style="display:none;">
+          <label class="auth-label" for="authNameInput">Full Name</label>
+          <input id="authNameInput" class="auth-input" type="text" autocomplete="name" />
+        </div>
+        <div class="auth-row">
+          <label class="auth-label" for="authEmailInput">Email</label>
+          <input id="authEmailInput" class="auth-input" type="email" autocomplete="email" required />
+        </div>
+        <div class="auth-row">
+          <label class="auth-label" for="authPassInput">Password</label>
+          <input id="authPassInput" class="auth-input" type="password" autocomplete="current-password" required />
+        </div>
+        <div class="auth-actions">
+          <button id="authSubmitBtn" class="auth-submit" type="submit">Sign In</button>
+          <button id="authSwitchBtn" class="auth-switch" type="button">Create account instead</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <main id="home">
+    <section class="hero container">
+      <span class="label">ComXpress Utility</span>
+      <h1>Compress Images & Create Passport Photos Instantly</h1>
+      <p class="subtitle">
+        Compress images and generate passport-ready photos in seconds—simple, fast, and built for real-world applications.
+      </p>
+      <button id="getStartedBtn" class="btn btn-cta"><i class="fa-solid fa-arrow-right cta-icon"></i>Get Started</button>
+    </section>
+
+    <section id="app" class="app-section container">
+      <div class="card">
+        <div class="app-intro">
+          <p class="app-eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i>Customer-Ready Workflow</p>
+          <h2 class="section-title">Upload once. Get optimized and passport-ready output.</h2>
+          <p class="app-copy">Built for freelancers, studios, and support teams who need fast image optimization with compliant passport dimensions in one smooth flow.</p>
+        </div>
+
+        <div class="app-flow">
+          <div class="flow-card">
+            <div class="flow-head">
+              <p class="flow-step"><i class="fa-solid fa-1"></i>Step 1 - Upload Your Image</p>
+              <p class="flow-note">Drag and drop or browse from your device</p>
+            </div>
+            <div id="dropZone" class="upload-box">
+              <p>Drag & drop an image here or choose a file</p>
+              <div class="file-control">
+                <input id="fileInput" class="file-input-native" type="file" accept="image/*" multiple />
+                <label for="fileInput" class="file-trigger"><i class="fa-regular fa-image"></i>Select Image File</label>
+                <div class="file-meta">
+                  <p id="fileNameText" class="file-name">No file selected</p>
+                  <button id="clearFileBtn" class="file-clear" type="button" disabled>Clear</button>
+                </div>
+                <p class="file-limit-note">Free plan: up to 5 images without login.</p>
+                <div id="fileQueue" class="file-queue" aria-live="polite"></div>
+              </div>
+              <div id="uploadPreviewWrap" class="upload-preview-wrap">
+                <div id="uploadPreviewGrid" class="upload-preview-grid"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-card">
+            <div class="flow-head">
+              <p class="flow-step"><i class="fa-solid fa-2"></i>Step 2 - Review Optimization</p>
+              <p class="flow-note">Compare file sizes and visual output</p>
+            </div>
+            <div class="info-grid">
+              <div class="info-item">
+                <small>Original File Size</small>
+                <strong id="originalSize">-</strong>
+              </div>
+              <div class="info-item">
+                <small>Compressed File Size</small>
+                <strong id="compressedSize">-</strong>
+              </div>
+            </div>
+
+            <div class="preview-grid">
+              <div class="preview-card">
+                <h4>Original Image</h4>
+                <div id="originalPreviewShell" class="preview-shell-original">
+                  <img id="originalPreview" class="preview-media" alt="" />
+                </div>
+              </div>
+              <div class="preview-card">
+                <h4>Compressed Image</h4>
+                <img id="compressedPreview" class="preview-media" alt="Compressed Image Preview" />
+              </div>
+              <div class="preview-card">
+                <h4>Passport Photo</h4>
+                <img id="passportPreview" class="preview-media" alt="Passport Photo Preview" />
+              </div>
+            </div>
+          </div>
+
+          <div class="flow-card">
+            <div class="flow-head">
+              <p class="flow-step"><i class="fa-solid fa-3"></i>Step 3 - Generate and Deliver</p>
+              <p class="flow-note">Create outputs and download instantly</p>
+            </div>
+            <div class="actions">
+              <button id="compressBtn" class="btn" disabled><i class="fa-solid fa-compress"></i>Compress Image</button>
+              <button id="passportBtn" class="btn" disabled><i class="fa-regular fa-id-card"></i>Generate Passport Photo</button>
+              <button id="downloadCompressedBtn" class="btn" disabled><i class="fa-solid fa-download"></i>Download Compressed</button>
+              <button id="downloadPassportBtn" class="btn" disabled><i class="fa-solid fa-file-arrow-down"></i>Download Passport</button>
+              <button id="resetRegenerateBtn" class="btn btn-reset" type="button" title="Reset and regenerate once" aria-label="Reset and regenerate once" disabled><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+
+            <div id="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" class="pricing-section container">
+      <div class="pricing-wrap">
+        <div class="pricing-head">
+          <div>
+            <h2 class="pricing-title">Simple Pricing for Every Workflow</h2>
+            <p class="pricing-subtitle">Start free, then upgrade when you need higher-volume image processing.</p>
+          </div>
+          <span id="planPill" class="plan-pill">Current Plan: Free</span>
+        </div>
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <h3 class="pricing-plan">Free</h3>
+            <p class="pricing-price">$0 / month</p>
+            <ul class="pricing-list">
+              <li>Upload up to 5 images without login</li>
+              <li>Image compression and passport generation</li>
+              <li>Local processing in browser</li>
+            </ul>
+          </article>
+          <article class="pricing-card featured">
+            <h3 class="pricing-plan">Pro</h3>
+            <p class="pricing-price">$9 / month</p>
+            <ul class="pricing-list">
+              <li>Unlimited uploads and batch-ready workflow</li>
+              <li>Priority processing experience</li>
+              <li>Best for creators, studios, and teams</li>
+            </ul>
+          </article>
+        </div>
+        <div class="pricing-actions">
+          <button id="pricingUpgradeBtn" class="pricing-btn" type="button">Login & Upgrade to Pro</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="about container">
+      Fast, private, and fully offline image utility for compression and passport-ready output.
+    </section>
+
+  </main>
+
+  <footer>
+    © 2026 ComXpress. All rights reserved.
+  </footer>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const fileNameText = document.getElementById("fileNameText");
+    const clearFileBtn = document.getElementById("clearFileBtn");
+    const fileQueue = document.getElementById("fileQueue");
+    const dropZone = document.getElementById("dropZone");
+    const getStartedBtn = document.getElementById("getStartedBtn");
+    const privacyNavLink = document.getElementById("privacyNavLink");
+    const privacyDrawer = document.getElementById("privacyDrawer");
+    const privacyCloseBtn = document.getElementById("privacyCloseBtn");
+    const notifBtn = document.getElementById("notifBtn");
+    const notifDrawer = document.getElementById("notifDrawer");
+    const notifCloseBtn = document.getElementById("notifCloseBtn");
+    const notifList = document.getElementById("notifList");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const settingsDrawer = document.getElementById("settingsDrawer");
+    const settingsCloseBtn = document.getElementById("settingsCloseBtn");
+    const themeDarkBtn = document.getElementById("themeDarkBtn");
+    const themeLightBtn = document.getElementById("themeLightBtn");
+    const signinPrompt = document.getElementById("signinPrompt");
+    const signinPromptText = document.getElementById("signinPromptText");
+    const authActions = document.getElementById("authActions");
+    const signInBtn = document.getElementById("signInBtn");
+    const signUpBtn = document.getElementById("signUpBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const logoutModal = document.getElementById("logoutModal");
+    const logoutCancelBtn = document.getElementById("logoutCancelBtn");
+    const logoutConfirmBtn = document.getElementById("logoutConfirmBtn");
+    const upgradeModal = document.getElementById("upgradeModal");
+    const upgradeCancelBtn = document.getElementById("upgradeCancelBtn");
+    const upgradeConfirmBtn = document.getElementById("upgradeConfirmBtn");
+    const authPage = document.getElementById("authPage");
+    const authCloseBtn = document.getElementById("authCloseBtn");
+    const authForm = document.getElementById("authForm");
+    const authTitle = document.getElementById("authTitle");
+    const authNameRow = document.getElementById("authNameRow");
+    const authNameInput = document.getElementById("authNameInput");
+    const authEmailInput = document.getElementById("authEmailInput");
+    const authPassInput = document.getElementById("authPassInput");
+    const authSubmitBtn = document.getElementById("authSubmitBtn");
+    const authSwitchBtn = document.getElementById("authSwitchBtn");
+    const planPill = document.getElementById("planPill");
+    const pricingUpgradeBtn = document.getElementById("pricingUpgradeBtn");
+
+    const uploadPreviewWrap = document.getElementById("uploadPreviewWrap");
+    const uploadPreviewGrid = document.getElementById("uploadPreviewGrid");
+    const originalPreviewShell = document.getElementById("originalPreviewShell");
+    const originalPreview = document.getElementById("originalPreview");
+    const compressedPreview = document.getElementById("compressedPreview");
+    const passportPreview = document.getElementById("passportPreview");
+
+    const originalSizeEl = document.getElementById("originalSize");
+    const compressedSizeEl = document.getElementById("compressedSize");
+
+    const compressBtn = document.getElementById("compressBtn");
+    const passportBtn = document.getElementById("passportBtn");
+    const downloadCompressedBtn = document.getElementById("downloadCompressedBtn");
+    const downloadPassportBtn = document.getElementById("downloadPassportBtn");
+    const resetRegenerateBtn = document.getElementById("resetRegenerateBtn");
+
+    const statusEl = document.getElementById("status");
+
+    let originalFile = null;
+    let originalObjectUrl = "";
+    let compressedBlob = null;
+    let compressedObjectUrl = "";
+    let passportBlob = null;
+    let passportObjectUrl = "";
+    let uploadedFiles = [];
+    let activeFileId = null;
+    let isSubscribed = false;
+    let isSignedIn = false;
+    let previewRenderToken = 0;
+    let isPrivacyDrawerOpen = false;
+    let isNotifDrawerOpen = false;
+    let isSettingsDrawerOpen = false;
+    let authMode = "signin";
+    const APP_STATE_KEY = "comxpress_session_state_v1";
+    const NOTIF_STATE_KEY = "comxpress_notifications_v1";
+    const NOTIF_TTL_MS = 2 * 24 * 60 * 60 * 1000;
+    const THEME_KEY = "comxpress_theme_v1";
+    const AUTH_KEY = "comxpress_auth_v1";
+    const SUBSCRIPTION_KEY = "comxpress_subscription_v1";
+    const FREE_UPLOAD_LIMIT = 5;
+    const MAX_SELECTED_IMAGES = 5;
+    const PASSPORT_PLACEHOLDER_SRC = "assets/fonts/image/placeholder_img.jpg";
+
+    function readNotifications() {
+      try {
+        const raw = localStorage.getItem(NOTIF_STATE_KEY);
+        const data = raw ? JSON.parse(raw) : [];
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function writeNotifications(list) {
+      try {
+        localStorage.setItem(NOTIF_STATE_KEY, JSON.stringify(list));
+      } catch (error) {
+      }
+    }
+
+    function pruneNotifications() {
+      const now = Date.now();
+      const notifications = readNotifications().filter((item) => now - item.createdAt < NOTIF_TTL_MS);
+      writeNotifications(notifications);
+      return notifications;
+    }
+
+    function formatNotifTime(timestamp) {
+      try {
+        return new Date(timestamp).toLocaleString();
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function renderNotifications() {
+      const notifications = pruneNotifications().sort((a, b) => b.createdAt - a.createdAt);
+      notifList.innerHTML = "";
+
+      if (!notifications.length) {
+        const empty = document.createElement("p");
+        empty.className = "drawer-empty";
+        empty.textContent = "No notifications yet.";
+        notifList.appendChild(empty);
+        return;
+      }
+
+      for (const item of notifications) {
+        const li = document.createElement("li");
+        li.className = "drawer-item";
+        li.dataset.id = item.id;
+
+        const head = document.createElement("div");
+        head.className = "drawer-item-head";
+
+        const title = document.createElement("p");
+        title.className = "drawer-item-title";
+        title.textContent = item.title;
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "notif-delete";
+        delBtn.dataset.id = item.id;
+        delBtn.setAttribute("aria-label", "Delete notification");
+        delBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i>";
+
+        head.appendChild(title);
+        head.appendChild(delBtn);
+
+        const text = document.createElement("p");
+        text.className = "drawer-item-text";
+        text.textContent = item.text;
+
+        const meta = document.createElement("p");
+        meta.className = "drawer-item-meta";
+        meta.textContent = formatNotifTime(item.createdAt);
+
+        li.appendChild(head);
+        li.appendChild(text);
+        li.appendChild(meta);
+        notifList.appendChild(li);
+      }
+    }
+
+    function addNotification(title, text) {
+      const notifications = pruneNotifications();
+      notifications.push({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        title,
+        text,
+        createdAt: Date.now()
+      });
+      writeNotifications(notifications);
+      renderNotifications();
+    }
+
+    function deleteNotification(id) {
+      const notifications = pruneNotifications().filter((item) => item.id !== id);
+      writeNotifications(notifications);
+      renderNotifications();
+    }
+
+    function readAppState() {
+      try {
+        const raw = sessionStorage.getItem(APP_STATE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeAppState(state) {
+      try {
+        sessionStorage.setItem(APP_STATE_KEY, JSON.stringify(state));
+      } catch (error) {
+      }
+    }
+
+    async function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Failed to read blob."));
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function dataUrlToBlob(dataUrl) {
+      const parts = dataUrl.split(",");
+      const mimeMatch = parts[0].match(/:(.*?);/);
+      const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+      const binary = atob(parts[1] || "");
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return new Blob([bytes], { type: mime });
+    }
+
+    function setNotifDrawerState(open) {
+      renderNotifications();
+      isNotifDrawerOpen = open;
+      notifDrawer.classList.toggle("open", open);
+      notifDrawer.setAttribute("aria-hidden", String(!open));
+      notifBtn.setAttribute("aria-expanded", String(open));
+    }
+
+    function setPrivacyDrawerState(open) {
+      isPrivacyDrawerOpen = open;
+      privacyDrawer.classList.toggle("open", open);
+      privacyDrawer.setAttribute("aria-hidden", String(!open));
+      privacyNavLink.setAttribute("aria-expanded", String(open));
+    }
+
+    function setSettingsDrawerState(open) {
+      isSettingsDrawerOpen = open;
+      settingsDrawer.classList.toggle("open", open);
+      settingsDrawer.setAttribute("aria-hidden", String(!open));
+      settingsBtn.setAttribute("aria-expanded", String(open));
+    }
+
+    function setTheme(theme) {
+      const resolvedTheme = theme === "light" ? "light" : "dark";
+      document.body.setAttribute("data-theme", resolvedTheme);
+      themeDarkBtn.classList.toggle("active", resolvedTheme === "dark");
+      themeLightBtn.classList.toggle("active", resolvedTheme === "light");
+      try {
+        localStorage.setItem(THEME_KEY, resolvedTheme);
+      } catch (error) {
+      }
+    }
+
+    function initializeTheme() {
+      let savedTheme = "dark";
+      try {
+        const raw = localStorage.getItem(THEME_KEY);
+        if (raw === "light" || raw === "dark") {
+          savedTheme = raw;
+        }
+      } catch (error) {
+      }
+      setTheme(savedTheme);
+    }
+
+    function setLogoutModalState(open) {
+      logoutModal.classList.toggle("open", open);
+      logoutModal.setAttribute("aria-hidden", String(!open));
+    }
+
+    function renderAuthMode() {
+      const isSignUp = authMode === "signup";
+      authTitle.textContent = isSignUp ? "Sign Up" : "Sign In";
+      authNameRow.style.display = isSignUp ? "grid" : "none";
+      authSubmitBtn.textContent = isSignUp ? "Create Account" : "Sign In";
+      authSwitchBtn.textContent = isSignUp ? "Already have an account? Sign in" : "Create account instead";
+      authEmailInput.autocomplete = isSignUp ? "email" : "email";
+      authPassInput.autocomplete = isSignUp ? "new-password" : "current-password";
+    }
+
+    function setAuthPageState(open) {
+      authPage.classList.toggle("open", open);
+      authPage.setAttribute("aria-hidden", String(!open));
+      if (open) {
+        renderAuthMode();
+      } else {
+        authForm.reset();
+      }
+    }
+
+    function openAuthPage(mode) {
+      authMode = mode === "signup" ? "signup" : "signin";
+      setAuthPageState(true);
+    }
+
+    function setUpgradeModalState(open) {
+      upgradeModal.classList.toggle("open", open);
+      upgradeModal.setAttribute("aria-hidden", String(!open));
+    }
+
+    function initializeSubscriptionState() {
+      isSubscribed = false;
+      try {
+        localStorage.removeItem(SUBSCRIPTION_KEY);
+      } catch (error) {
+      }
+      updatePricingState();
+    }
+
+    function initializeAuthState() {
+      isSignedIn = false;
+      try {
+        isSignedIn = localStorage.getItem(AUTH_KEY) === "signed-in";
+      } catch (error) {
+      }
+      updateAuthUI();
+    }
+
+    function updateAuthUI() {
+      if (isSignedIn) {
+        signinPromptText.textContent = "Signed in. Enjoy your personalized experience.";
+        signinPrompt.style.display = "none";
+        authActions.style.display = "none";
+        logoutBtn.disabled = false;
+        logoutBtn.style.display = "inline-flex";
+      } else {
+        signinPromptText.textContent = "You're not signed in, signing for better experience.";
+        signinPrompt.style.display = "flex";
+        authActions.style.display = "grid";
+        logoutBtn.disabled = true;
+        logoutBtn.style.display = "none";
+      }
+    }
+
+    function completeAuth(mode) {
+      isSignedIn = true;
+      try {
+        localStorage.setItem(AUTH_KEY, "signed-in");
+      } catch (error) {
+      }
+      updateAuthUI();
+      const message = mode === "signup" ? "Account created and signed in successfully." : "Signed in successfully.";
+      setStatus(message);
+      addNotification(mode === "signup" ? "Sign Up Successful" : "Sign In Successful", message);
+    }
+
+    function updatePricingState() {
+      if (isSubscribed) {
+        planPill.textContent = "Current Plan: Pro";
+        pricingUpgradeBtn.textContent = "Pro Active";
+        pricingUpgradeBtn.disabled = true;
+      } else {
+        planPill.textContent = "Current Plan: Free";
+        pricingUpgradeBtn.textContent = "Login & Upgrade to Pro";
+        pricingUpgradeBtn.disabled = false;
+      }
+    }
+
+    function getActiveUpload() {
+      return uploadedFiles.find((item) => item.id === activeFileId) || null;
+    }
+
+    function renderStepOneCanvases() {
+      const currentToken = ++previewRenderToken;
+      uploadPreviewGrid.innerHTML = "";
+
+      if (!uploadedFiles.length) {
+        uploadPreviewWrap.style.display = "none";
+        return;
+      }
+
+      uploadPreviewWrap.style.display = "block";
+
+      for (const item of uploadedFiles) {
+        const previewItem = document.createElement("div");
+        previewItem.className = "upload-preview-item";
+        if (item.id === activeFileId) {
+          previewItem.classList.add("active");
+        }
+        previewItem.addEventListener("click", () => {
+          setActiveUpload(item.id);
+        });
+
+        const canvas = document.createElement("canvas");
+        canvas.className = "upload-preview-canvas";
+
+        const meta = document.createElement("p");
+        meta.className = "upload-preview-meta";
+        meta.textContent = item.file.name;
+
+        previewItem.appendChild(canvas);
+        previewItem.appendChild(meta);
+        uploadPreviewGrid.appendChild(previewItem);
+
+        const objectUrl = URL.createObjectURL(item.file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          if (currentToken !== previewRenderToken) return;
+          canvas.width = img.naturalWidth || img.width;
+          canvas.height = img.naturalHeight || img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          meta.textContent = `${item.file.name} - ${canvas.width}x${canvas.height}`;
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          meta.textContent = `${item.file.name} - preview unavailable`;
+        };
+        img.src = objectUrl;
+      }
+    }
+
+    function renderFileQueue() {
+      fileQueue.innerHTML = "";
+      if (!uploadedFiles.length) return;
+
+      for (const item of uploadedFiles) {
+        const chip = document.createElement("div");
+        chip.className = "file-chip";
+        if (item.id === activeFileId) {
+          chip.classList.add("active");
+        }
+        const chipName = document.createElement("span");
+        chipName.className = "file-chip-name";
+        chipName.textContent = item.file.name;
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "file-chip-delete";
+        deleteBtn.setAttribute("aria-label", `Remove ${item.file.name}`);
+        deleteBtn.innerHTML = "<i class=\"fa-solid fa-xmark\"></i>";
+        deleteBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          removeUploadById(item.id);
+        });
+        chip.appendChild(chipName);
+        chip.appendChild(deleteBtn);
+        chip.title = item.file.name;
+        chip.addEventListener("click", () => {
+          setActiveUpload(item.id);
+        });
+        fileQueue.appendChild(chip);
+      }
+    }
+
+    async function persistActiveFileToSession() {
+      if (!originalFile) return;
+      try {
+        const originalDataUrl = await blobToDataUrl(originalFile);
+        writeAppState({
+          original: {
+            name: originalFile.name || "uploaded-image",
+            type: originalFile.type || "image/jpeg",
+            size: originalFile.size || 0,
+            dataUrl: originalDataUrl
+          },
+          compressed: null,
+          passport: null,
+          pendingTask: null
+        });
+      } catch (error) {
+      }
+    }
+
+    function setActiveUpload(fileId) {
+      const selected = uploadedFiles.find((item) => item.id === fileId);
+      if (!selected) return;
+
+      clearGeneratedOutputs();
+      activeFileId = selected.id;
+      originalFile = selected.file;
+      fileNameText.textContent = `${selected.file.name} (${uploadedFiles.length}/${MAX_SELECTED_IMAGES})`;
+      originalSizeEl.textContent = formatBytes(selected.file.size);
+
+      if (originalObjectUrl) {
+        URL.revokeObjectURL(originalObjectUrl);
+      }
+      originalObjectUrl = URL.createObjectURL(selected.file);
+      originalPreview.src = originalObjectUrl;
+      originalPreviewShell.classList.add("has-image");
+      renderStepOneCanvases();
+      setProcessingState(false);
+      renderFileQueue();
+      persistActiveFileToSession();
+    }
+
+    function removeUploadById(fileId) {
+      const exists = uploadedFiles.some((item) => item.id === fileId);
+      if (!exists) return;
+
+      uploadedFiles = uploadedFiles.filter((item) => item.id !== fileId);
+
+      if (!uploadedFiles.length) {
+        clearSelectedFile();
+        return;
+      }
+
+      if (activeFileId === fileId) {
+        const next = uploadedFiles[0];
+        setActiveUpload(next.id);
+      } else {
+        fileNameText.textContent = `${getActiveUpload().file.name} (${uploadedFiles.length}/${MAX_SELECTED_IMAGES})`;
+        renderFileQueue();
+      }
+
+      setStatus("Selected file removed.");
+      setProcessingState(false);
+    }
+
+    function handleIncomingFiles(fileList) {
+      const incoming = Array.from(fileList || []).filter((file) => file && file.type.startsWith("image/"));
+      if (!incoming.length) {
+        setStatus("Please select valid image files.");
+        return;
+      }
+
+      const freeSlots = Math.max(0, MAX_SELECTED_IMAGES - uploadedFiles.length);
+      let acceptedFiles = incoming;
+      let blockedCount = 0;
+
+      if (incoming.length > freeSlots) {
+        acceptedFiles = incoming.slice(0, freeSlots);
+        blockedCount = incoming.length - acceptedFiles.length;
+      }
+
+      for (const file of acceptedFiles) {
+        uploadedFiles.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          file
+        });
+      }
+
+      if (acceptedFiles.length) {
+        const newActiveId = uploadedFiles[uploadedFiles.length - 1].id;
+        setActiveUpload(newActiveId);
+        setStatus(`${acceptedFiles.length} image(s) added successfully.`);
+      }
+
+      if (blockedCount > 0) {
+        if (!acceptedFiles.length) {
+          setStatus("Maximum 5 images can be selected at once. Remove some files to add new ones.");
+        }
+        if (!isSubscribed) {
+          setUpgradeModalState(true);
+          addNotification("Upload Limit Reached", "Login and subscribe for higher-volume workflow.");
+        } else {
+          addNotification("Selection Limit Reached", "Only 5 images can stay selected at once.");
+        }
+      }
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+      const units = ["B", "KB", "MB", "GB"];
+      let size = bytes;
+      let idx = 0;
+      while (size >= 1024 && idx < units.length - 1) {
+        size /= 1024;
+        idx++;
+      }
+      return `${size.toFixed(size >= 100 || idx === 0 ? 0 : 2)} ${units[idx]}`;
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message || "";
+    }
+
+    function setProcessingState(isProcessing) {
+      const hasImage = !!getActiveUpload();
+      compressBtn.disabled = isProcessing || !hasImage;
+      passportBtn.disabled = isProcessing || !hasImage;
+      downloadCompressedBtn.disabled = isProcessing || !compressedBlob;
+      downloadPassportBtn.disabled = isProcessing || !passportBlob;
+      resetRegenerateBtn.disabled = isProcessing || !compressedBlob || !hasImage;
+      clearFileBtn.disabled = isProcessing || uploadedFiles.length === 0;
+      fileInput.disabled = isProcessing;
+      dropZone.classList.toggle("is-busy", isProcessing);
+    }
+
+    function clearCompressedOutput() {
+      compressedBlob = null;
+      compressedSizeEl.textContent = "-";
+      compressedPreview.removeAttribute("src");
+      downloadCompressedBtn.disabled = true;
+      resetRegenerateBtn.disabled = true;
+
+      if (compressedObjectUrl) {
+        URL.revokeObjectURL(compressedObjectUrl);
+        compressedObjectUrl = "";
+      }
+    }
+
+    function clearGeneratedOutputs() {
+      clearCompressedOutput();
+      passportBlob = null;
+      passportPreview.src = PASSPORT_PLACEHOLDER_SRC;
+      downloadPassportBtn.disabled = true;
+
+      if (passportObjectUrl) {
+        URL.revokeObjectURL(passportObjectUrl);
+        passportObjectUrl = "";
+      }
+    }
+
+    function resetImageState(clearQueue = true) {
+      clearGeneratedOutputs();
+      if (clearQueue) {
+        uploadedFiles = [];
+        activeFileId = null;
+      }
+      originalFile = null;
+      originalSizeEl.textContent = "-";
+      fileNameText.textContent = "No file selected";
+      renderFileQueue();
+      uploadPreviewGrid.innerHTML = "";
+      originalPreview.removeAttribute("src");
+      originalPreviewShell.classList.remove("has-image");
+      uploadPreviewWrap.style.display = "none";
+
+      if (originalObjectUrl) {
+        URL.revokeObjectURL(originalObjectUrl);
+        originalObjectUrl = "";
+      }
+      setProcessingState(false);
+      setStatus("");
+    }
+
+    function fileToImage(file) {
+      return new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(img);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Unable to load image."));
+        };
+        img.src = objectUrl;
+      });
+    }
+
+    function canvasToBlob(canvas, quality = 0.92) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error("Failed to generate image blob."));
+            return;
+          }
+          resolve(blob);
+        }, "image/jpeg", quality);
+      });
+    }
+
+    function handleFile(file) {
+      handleIncomingFiles(file ? [file] : []);
+    }
+
+    async function compressImage() {
+      if (!originalFile) return;
+
+      try {
+        setStatus("Processing...");
+        setProcessingState(true);
+
+        const state = readAppState();
+        if (state) {
+          state.pendingTask = "compress";
+          writeAppState(state);
+        }
+
+        const img = await fileToImage(originalFile);
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        compressedBlob = await canvasToBlob(canvas, 0.6);
+
+        if (compressedObjectUrl) URL.revokeObjectURL(compressedObjectUrl);
+        compressedObjectUrl = URL.createObjectURL(compressedBlob);
+        compressedPreview.src = compressedObjectUrl;
+        compressedSizeEl.textContent = formatBytes(compressedBlob.size);
+
+        try {
+          const currentState = readAppState() || {};
+          const compressedDataUrl = await blobToDataUrl(compressedBlob);
+          currentState.compressed = {
+            size: compressedBlob.size || 0,
+            dataUrl: compressedDataUrl
+          };
+          currentState.pendingTask = null;
+          writeAppState(currentState);
+        } catch (error) {
+        }
+
+        setStatus("Compression completed.");
+        addNotification("Compression Completed", `Compressed image is ready (${formatBytes(compressedBlob.size)}).`);
+      } catch (error) {
+        const state = readAppState();
+        if (state) {
+          state.pendingTask = null;
+          writeAppState(state);
+        }
+        setStatus("Compression cancelled or failed. Please try another image.");
+        addNotification("Compression Cancelled", "Compression was cancelled or could not be completed.");
+      } finally {
+        setProcessingState(false);
+      }
+    }
+
+    async function resetAndRegenerateCompression() {
+      if (!originalFile || !compressedBlob) return;
+
+      clearCompressedOutput();
+      setStatus("Regenerating compressed image...");
+
+      const state = readAppState();
+      if (state) {
+        state.compressed = null;
+        writeAppState(state);
+      }
+
+      await compressImage();
+    }
+
+    async function generatePassport() {
+      if (!originalFile) return;
+
+      try {
+        setStatus("Processing...");
+        setProcessingState(true);
+
+        const state = readAppState();
+        if (state) {
+          state.pendingTask = "passport";
+          writeAppState(state);
+        }
+
+        const img = await fileToImage(originalFile);
+        const canvas = document.createElement("canvas");
+        const targetW = 413;
+        const targetH = 531;
+        canvas.width = targetW;
+        canvas.height = targetH;
+
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, targetW, targetH);
+
+        const scale = Math.min(targetW / img.width, targetH / img.height);
+        const drawW = img.width * scale;
+        const drawH = img.height * scale;
+        const x = (targetW - drawW) / 2;
+        const y = (targetH - drawH) / 2;
+
+        ctx.drawImage(img, x, y, drawW, drawH);
+
+        passportBlob = await canvasToBlob(canvas, 0.95);
+
+        if (passportObjectUrl) URL.revokeObjectURL(passportObjectUrl);
+        passportObjectUrl = URL.createObjectURL(passportBlob);
+        passportPreview.src = passportObjectUrl;
+
+        try {
+          const currentState = readAppState() || {};
+          const passportDataUrl = await blobToDataUrl(passportBlob);
+          currentState.passport = {
+            size: passportBlob.size || 0,
+            dataUrl: passportDataUrl
+          };
+          currentState.pendingTask = null;
+          writeAppState(currentState);
+        } catch (error) {
+        }
+
+        setStatus("Passport photo generated.");
+      } catch (error) {
+        const state = readAppState();
+        if (state) {
+          state.pendingTask = null;
+          writeAppState(state);
+        }
+        setStatus("Passport generation failed. Please try another image.");
+      } finally {
+        setProcessingState(false);
+      }
+    }
+
+    async function restoreAppState() {
+      const saved = readAppState();
+      if (!saved || !saved.original || !saved.original.dataUrl) return;
+
+      try {
+        resetImageState();
+
+        const originalBlob = dataUrlToBlob(saved.original.dataUrl);
+        const restoredFile = new File([originalBlob], saved.original.name || "uploaded-image", {
+          type: saved.original.type || originalBlob.type || "image/jpeg"
+        });
+        uploadedFiles = [{ id: `restored-${Date.now()}`, file: restoredFile }];
+        activeFileId = uploadedFiles[0].id;
+        setActiveUpload(activeFileId);
+
+        if (saved.compressed && saved.compressed.dataUrl) {
+          compressedBlob = dataUrlToBlob(saved.compressed.dataUrl);
+          if (compressedObjectUrl) URL.revokeObjectURL(compressedObjectUrl);
+          compressedObjectUrl = URL.createObjectURL(compressedBlob);
+          compressedPreview.src = compressedObjectUrl;
+          compressedSizeEl.textContent = formatBytes(saved.compressed.size || compressedBlob.size);
+        }
+
+        if (saved.passport && saved.passport.dataUrl) {
+          passportBlob = dataUrlToBlob(saved.passport.dataUrl);
+          if (passportObjectUrl) URL.revokeObjectURL(passportObjectUrl);
+          passportObjectUrl = URL.createObjectURL(passportBlob);
+          passportPreview.src = passportObjectUrl;
+        }
+
+        setProcessingState(false);
+
+        if (saved.pendingTask === "compress") {
+          setStatus("Resuming compression after refresh...");
+          await compressImage();
+          return;
+        }
+
+        if (saved.pendingTask === "passport") {
+          setStatus("Resuming passport generation after refresh...");
+          await generatePassport();
+          return;
+        }
+
+        setStatus("Session restored.");
+      } catch (error) {
+        setStatus("Could not restore previous session.");
+      }
+    }
+
+    function performLogout() {
+      if (!isSignedIn) {
+        setStatus("No active signed-in user.");
+        setLogoutModalState(false);
+        return;
+      }
+      isSignedIn = false;
+      isSubscribed = false;
+      updateAuthUI();
+      updatePricingState();
+      try {
+        localStorage.removeItem(AUTH_KEY);
+        localStorage.removeItem(SUBSCRIPTION_KEY);
+      } catch (error) {
+      }
+      sessionStorage.removeItem(APP_STATE_KEY);
+      resetImageState();
+      renderNotifications();
+      setUpgradeModalState(false);
+      setPrivacyDrawerState(false);
+      setNotifDrawerState(false);
+      setSettingsDrawerState(false);
+      setLogoutModalState(false);
+      setStatus("You have been logged out.");
+    }
+
+    function clearSelectedFile() {
+      fileInput.value = "";
+      sessionStorage.removeItem(APP_STATE_KEY);
+      setUpgradeModalState(false);
+      resetImageState();
+      setStatus("Selected file cleared.");
+    }
+
+    function downloadBlob(blob, filename) {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    getStartedBtn.addEventListener("click", () => {
+      document.getElementById("app").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    privacyNavLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isNotifDrawerOpen) {
+        setNotifDrawerState(false);
+      }
+      if (isSettingsDrawerOpen) {
+        setSettingsDrawerState(false);
+      }
+      setPrivacyDrawerState(!isPrivacyDrawerOpen);
+    });
+
+    privacyCloseBtn.addEventListener("click", () => {
+      setPrivacyDrawerState(false);
+    });
+
+    notifBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (isPrivacyDrawerOpen) {
+        setPrivacyDrawerState(false);
+      }
+      if (isSettingsDrawerOpen) {
+        setSettingsDrawerState(false);
+      }
+      setNotifDrawerState(!isNotifDrawerOpen);
+    });
+
+    notifCloseBtn.addEventListener("click", () => {
+      setNotifDrawerState(false);
+    });
+
+    settingsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (isPrivacyDrawerOpen) {
+        setPrivacyDrawerState(false);
+      }
+      if (isNotifDrawerOpen) {
+        setNotifDrawerState(false);
+      }
+      setSettingsDrawerState(!isSettingsDrawerOpen);
+    });
+
+    settingsCloseBtn.addEventListener("click", () => {
+      setSettingsDrawerState(false);
+    });
+
+    signinPrompt.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openAuthPage("signin");
+    });
+
+    signinPrompt.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openAuthPage("signin");
+      }
+    });
+
+    signInBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openAuthPage("signin");
+    });
+
+    signUpBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openAuthPage("signup");
+    });
+
+    authSwitchBtn.addEventListener("click", () => {
+      authMode = authMode === "signup" ? "signin" : "signup";
+      renderAuthMode();
+    });
+
+    authCloseBtn.addEventListener("click", () => {
+      setAuthPageState(false);
+    });
+
+    authForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = authEmailInput.value.trim();
+      const pass = authPassInput.value.trim();
+      const name = authNameInput.value.trim();
+      if (!email || !pass || (authMode === "signup" && !name)) {
+        setStatus("Please fill all required authentication fields.");
+        return;
+      }
+      completeAuth(authMode);
+      setAuthPageState(false);
+    });
+
+    themeDarkBtn.addEventListener("click", () => {
+      setTheme("dark");
+      addNotification("Theme Updated", "Dark theme is now active.");
+    });
+
+    themeLightBtn.addEventListener("click", () => {
+      setTheme("light");
+      addNotification("Theme Updated", "Light theme is now active.");
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      setLogoutModalState(true);
+    });
+
+    logoutCancelBtn.addEventListener("click", () => {
+      setLogoutModalState(false);
+    });
+
+    logoutConfirmBtn.addEventListener("click", () => {
+      performLogout();
+      addNotification("Logged Out", "Your local session was cleared.");
+    });
+
+    upgradeCancelBtn.addEventListener("click", () => {
+      setUpgradeModalState(false);
+    });
+
+    upgradeConfirmBtn.addEventListener("click", () => {
+      isSubscribed = true;
+      isSignedIn = true;
+      try {
+        localStorage.setItem(SUBSCRIPTION_KEY, "pro");
+        localStorage.setItem(AUTH_KEY, "signed-in");
+      } catch (error) {
+      }
+      updateAuthUI();
+      updatePricingState();
+      setUpgradeModalState(false);
+      setStatus("Subscription unlocked. You can now upload more images.");
+      addNotification("Subscription Active", "Upload limit unlocked for this device.");
+      if (uploadedFiles.length) {
+        setActiveUpload(activeFileId || uploadedFiles[uploadedFiles.length - 1].id);
+      }
+    });
+
+    pricingUpgradeBtn.addEventListener("click", () => {
+      if (isSubscribed) return;
+      setUpgradeModalState(true);
+    });
+
+    notifList.addEventListener("click", (e) => {
+      const deleteBtn = e.target.closest(".notif-delete");
+      if (!deleteBtn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const id = deleteBtn.dataset.id;
+      if (!id) return;
+      deleteNotification(id);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (upgradeModal.classList.contains("open") && !e.target.closest("#upgradeModal .modal-card")) {
+        setUpgradeModalState(false);
+      }
+      if (authPage.classList.contains("open") && !e.target.closest(".auth-card")) {
+        setAuthPageState(false);
+      }
+      if (logoutModal.classList.contains("open") && !e.target.closest(".modal-card")) {
+        setLogoutModalState(false);
+      }
+      if (isPrivacyDrawerOpen && !privacyDrawer.contains(e.target) && !privacyNavLink.contains(e.target)) {
+        setPrivacyDrawerState(false);
+      }
+      if (isNotifDrawerOpen && !notifDrawer.contains(e.target) && !notifBtn.contains(e.target)) {
+        setNotifDrawerState(false);
+      }
+      if (isSettingsDrawerOpen && !settingsDrawer.contains(e.target) && !settingsBtn.contains(e.target)) {
+        setSettingsDrawerState(false);
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (authPage.classList.contains("open")) {
+          setAuthPageState(false);
+          return;
+        }
+        if (upgradeModal.classList.contains("open")) {
+          setUpgradeModalState(false);
+          return;
+        }
+        if (logoutModal.classList.contains("open")) {
+          setLogoutModalState(false);
+          return;
+        }
+        if (isNotifDrawerOpen) {
+          setNotifDrawerState(false);
+        }
+        if (isSettingsDrawerOpen) {
+          setSettingsDrawerState(false);
+        }
+        if (isPrivacyDrawerOpen) {
+          setPrivacyDrawerState(false);
+        }
+      }
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      const files = e.target.files ? Array.from(e.target.files) : [];
+      handleIncomingFiles(files);
+      fileInput.value = "";
+    });
+
+    clearFileBtn.addEventListener("click", clearSelectedFile);
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add("drag-over");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove("drag-over");
+      });
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+      if (files.length) {
+        fileInput.value = "";
+        handleIncomingFiles(files);
+      }
+    });
+
+    compressBtn.addEventListener("click", compressImage);
+    passportBtn.addEventListener("click", generatePassport);
+    resetRegenerateBtn.addEventListener("click", resetAndRegenerateCompression);
+
+    downloadCompressedBtn.addEventListener("click", () => {
+      downloadBlob(compressedBlob, "compressed-image.jpg");
+      addNotification("Download Complete", "Compressed image downloaded successfully.");
+    });
+
+    downloadPassportBtn.addEventListener("click", () => {
+      downloadBlob(passportBlob, "passport-photo.jpg");
+      addNotification("Download Complete", "Passport photo downloaded successfully.");
+    });
+
+    initializeTheme();
+    initializeAuthState();
+    initializeSubscriptionState();
+    passportPreview.src = PASSPORT_PLACEHOLDER_SRC;
+    renderFileQueue();
+    renderNotifications();
+    restoreAppState();
+
+    window.addEventListener("beforeunload", () => {
+      if (originalObjectUrl) URL.revokeObjectURL(originalObjectUrl);
+      if (compressedObjectUrl) URL.revokeObjectURL(compressedObjectUrl);
+      if (passportObjectUrl) URL.revokeObjectURL(passportObjectUrl);
+    });
+  </script>
+</body>
+</html>
+
