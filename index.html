@@ -328,7 +328,7 @@
       flex-shrink: 0;
     }
 
-    .auth-actions {
+    .settings-auth-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
@@ -461,7 +461,9 @@
       width: min(460px, 100%);
       border-radius: 14px;
       border: 1px solid rgba(148, 163, 184, 0.24);
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.97), rgba(15, 23, 42, 0.94));
+      background:
+        radial-gradient(500px 220px at 15% -10%, rgba(59, 130, 246, 0.2), transparent 55%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.95));
       box-shadow: 0 30px 80px rgba(2, 6, 23, 0.65);
       padding: 16px;
       display: grid;
@@ -478,14 +480,15 @@
     .auth-title {
       margin: 0;
       font-family: var(--font-heading);
-      font-size: 1.12rem;
+      font-size: 1.2rem;
+      letter-spacing: 0.01em;
     }
 
     .auth-subtitle {
       margin: 4px 0 0;
       color: var(--muted);
       font-family: var(--font-secondary);
-      font-size: 0.82rem;
+      font-size: 0.83rem;
     }
 
     .auth-close {
@@ -501,6 +504,30 @@
     .auth-form {
       display: grid;
       gap: 10px;
+    }
+
+    .auth-badge {
+      margin: 2px 0 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(96, 165, 250, 0.45);
+      background: rgba(30, 64, 175, 0.2);
+      color: #dbeafe;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-family: var(--font-secondary);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+    }
+
+    .auth-benefits {
+      margin: 0;
+      padding-left: 16px;
+      color: #9fb1cf;
+      font-family: var(--font-secondary);
+      font-size: 0.78rem;
+      line-height: 1.45;
     }
 
     .auth-row {
@@ -549,6 +576,7 @@
       font-family: var(--font-secondary);
       font-size: 0.84rem;
       cursor: pointer;
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.26);
     }
 
     .auth-switch {
@@ -560,6 +588,338 @@
       padding: 9px 12px;
       font-family: var(--font-secondary);
       font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .oauth-divider {
+      margin: 2px 0 0;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-family: var(--font-secondary);
+      font-size: 0.74rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .oauth-divider::before,
+    .oauth-divider::after {
+      content: "";
+      height: 1px;
+      background: rgba(148, 163, 184, 0.24);
+    }
+
+    .oauth-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .oauth-btn {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.66);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-family: var(--font-secondary);
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .oauth-btn:hover {
+      border-color: rgba(96, 165, 250, 0.7);
+      transform: translateY(-1px);
+      background: rgba(15, 23, 42, 0.82);
+    }
+
+    .billing-page {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.75);
+      backdrop-filter: blur(6px);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+      z-index: 140;
+    }
+
+    .billing-page.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .billing-card {
+      width: min(840px, 100%);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background:
+        radial-gradient(600px 260px at 10% -10%, rgba(59, 130, 246, 0.22), transparent 58%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.95));
+      box-shadow: 0 30px 90px rgba(2, 6, 23, 0.7);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .billing-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .billing-panel {
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.58);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .billing-summary {
+      align-content: start;
+      height: fit-content;
+    }
+
+    .billing-title {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+    }
+
+    .billing-subtitle {
+      margin: 4px 0 0;
+      font-family: var(--font-secondary);
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .billing-row {
+      display: grid;
+      gap: 5px;
+    }
+
+    .billing-label {
+      margin: 0;
+      font-family: var(--font-secondary);
+      color: #bfdbfe;
+      font-size: 0.76rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .billing-input {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: var(--font-secondary);
+      font-size: 0.84rem;
+      outline: none;
+    }
+
+    .billing-input:focus {
+      border-color: rgba(96, 165, 250, 0.8);
+    }
+
+    .billing-methods {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .billing-method {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 8px;
+      font-family: var(--font-secondary);
+      font-size: 0.76rem;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .billing-method i {
+      color: #bfdbfe;
+      font-size: 0.84rem;
+    }
+
+    .billing-method:hover {
+      border-color: rgba(96, 165, 250, 0.7);
+      transform: translateY(-1px);
+    }
+
+    .billing-method.active {
+      border-color: rgba(96, 165, 250, 0.9);
+      background: rgba(30, 64, 175, 0.35);
+      color: #eff6ff;
+    }
+
+    .billing-method-panel {
+      display: none;
+      gap: 8px;
+    }
+
+    .billing-method-panel.active {
+      display: grid;
+    }
+
+    .billing-method-note {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.75rem;
+      color: #9fb1cf;
+      line-height: 1.45;
+    }
+
+    .upi-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .upi-btn {
+      appearance: none;
+      border: 1px solid rgba(96, 165, 250, 0.45);
+      background: rgba(30, 64, 175, 0.25);
+      color: #dbeafe;
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-family: var(--font-secondary);
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: border-color var(--transition), transform var(--transition), background var(--transition);
+    }
+
+    .upi-btn:hover {
+      border-color: rgba(96, 165, 250, 0.8);
+      transform: translateY(-1px);
+      background: rgba(30, 64, 175, 0.35);
+    }
+
+    .upi-qr-wrap {
+      display: none;
+      gap: 8px;
+      justify-items: center;
+      border: 1px dashed rgba(148, 163, 184, 0.34);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(15, 23, 42, 0.58);
+    }
+
+    .upi-qr-wrap.open {
+      display: grid;
+    }
+
+    .upi-qr-image {
+      width: min(220px, 84vw);
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: #fff;
+      object-fit: contain;
+    }
+
+    .upi-qr-hint {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.73rem;
+      color: #9fb1cf;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .billing-trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .billing-trust-pill {
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      background: rgba(15, 23, 42, 0.64);
+      color: #cbd5e1;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.72rem;
+      font-family: var(--font-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .billing-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .billing-price {
+      margin: 0;
+      font-family: var(--font-secondary);
+      color: #dbeafe;
+      font-size: 0.9rem;
+    }
+
+    .billing-list {
+      margin: 0;
+      padding-left: 16px;
+      color: var(--muted);
+      font-family: var(--font-secondary);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .billing-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .billing-pay {
+      appearance: none;
+      border: 1px solid rgba(191, 219, 254, 0.36);
+      background: linear-gradient(180deg, var(--accent-2), var(--accent));
+      color: #f8fbff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: var(--font-secondary);
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.26);
+    }
+
+    .billing-cancel {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-family: var(--font-secondary);
       cursor: pointer;
     }
 
@@ -1560,6 +1920,126 @@
       background: rgba(15, 23, 42, 0.42);
     }
 
+    .recent-wrap {
+      margin-top: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.48);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .recent-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .recent-title {
+      margin: 0;
+      font-family: var(--font-heading);
+      font-size: 0.92rem;
+      color: #dbeafe;
+    }
+
+    .recent-warning {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.73rem;
+      color: #fcd34d;
+      letter-spacing: 0.02em;
+    }
+
+    .recent-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .recent-item {
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: rgba(11, 18, 36, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .recent-meta {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .recent-name {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.8rem;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: min(460px, 86vw);
+    }
+
+    .recent-info {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.72rem;
+      color: #9fb1cf;
+    }
+
+    .recent-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .recent-btn {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.66);
+      color: #cbd5e1;
+      padding: 6px 8px;
+      cursor: pointer;
+      font-family: var(--font-secondary);
+      font-size: 0.72rem;
+      transition: border-color var(--transition), background var(--transition), color var(--transition);
+    }
+
+    .recent-btn:hover {
+      border-color: rgba(96, 165, 250, 0.75);
+      background: rgba(30, 64, 175, 0.25);
+      color: #e2e8f0;
+    }
+
+    .recent-btn.delete:hover {
+      border-color: rgba(248, 113, 113, 0.75);
+      background: rgba(127, 29, 29, 0.26);
+      color: #fecaca;
+    }
+
+    .recent-empty {
+      margin: 0;
+      border: 1px dashed rgba(148, 163, 184, 0.26);
+      border-radius: 10px;
+      padding: 11px 10px;
+      text-align: center;
+      font-family: var(--font-secondary);
+      font-size: 0.77rem;
+      color: var(--muted);
+    }
+
     footer {
       text-align: center;
       color: var(--muted);
@@ -1610,15 +2090,56 @@
       .pricing-grid {
         grid-template-columns: 1fr;
       }
+
+      .billing-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 520px) {
+      .container {
+        width: min(1120px, 94%);
+      }
+
+      .nav-wrap {
+        height: 68px;
+        gap: 10px;
+      }
+
+      .brand {
+        font-size: 0.94rem;
+        gap: 8px;
+      }
+
+      .logo {
+        width: 16px;
+        height: 16px;
+      }
+
+      .nav-actions {
+        gap: 6px;
+      }
+
+      .notif,
+      .settings-btn {
+        width: 34px;
+        height: 34px;
+      }
+
       .info-grid {
         grid-template-columns: 1fr;
       }
 
       .actions {
         grid-template-columns: 1fr;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .btn-reset {
+        min-width: 0;
       }
 
       .hero {
@@ -1632,6 +2153,142 @@
 
       .subtitle {
         font-size: 0.95rem;
+      }
+
+      .pricing-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .pricing-actions {
+        justify-content: stretch;
+      }
+
+      .pricing-btn {
+        width: 100%;
+      }
+
+      .flow-step {
+        flex-wrap: wrap;
+        row-gap: 4px;
+      }
+
+      .file-meta {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .file-name {
+        max-width: 100%;
+      }
+
+      .upload-preview-grid {
+        grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      }
+
+      .drawer-foot {
+        flex-wrap: wrap;
+      }
+
+      .auth-card,
+      .billing-card,
+      .modal-card {
+        padding: 14px;
+      }
+
+      .modal-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .billing-split {
+        grid-template-columns: 1fr;
+      }
+
+      .billing-methods {
+        grid-template-columns: 1fr;
+      }
+
+      .oauth-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-shell-original::after {
+        white-space: normal;
+        text-align: center;
+        width: calc(100% - 22px);
+      }
+    }
+
+    @media (max-width: 380px) {
+      .container {
+        width: 96%;
+      }
+
+      h1 {
+        font-size: clamp(1.55rem, 8.2vw, 2rem);
+      }
+
+      .label {
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+      }
+
+      .subtitle {
+        font-size: 0.86rem;
+      }
+
+      .hero {
+        padding-top: 104px;
+        padding-bottom: 52px;
+      }
+
+      .section-title {
+        font-size: 1.06rem;
+      }
+
+      .card,
+      .flow-card,
+      .app-intro,
+      .upload-box {
+        padding: 12px;
+      }
+
+      .preview-card,
+      .info-item {
+        padding: 10px;
+      }
+
+      .notif-drawer,
+      .settings-drawer,
+      .privacy-drawer {
+        top: 72px;
+        width: 96vw;
+      }
+
+      .auth-page,
+      .billing-page,
+      .modal-overlay {
+        padding: 10px;
+      }
+
+      .auth-title,
+      .billing-title {
+        font-size: 1rem;
+      }
+
+      .auth-subtitle,
+      .billing-subtitle,
+      .modal-text,
+      #status {
+        font-size: 0.8rem;
+      }
+
+      .drawer-head {
+        padding: 11px 11px 9px;
+      }
+
+      .drawer-title {
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -1697,7 +2354,7 @@
         <p id="signinPromptText" class="signin-prompt-text">You're not signed in, signing for better experience.</p>
         <i class="fa-solid fa-arrow-right signin-prompt-arrow" aria-hidden="true"></i>
       </div>
-      <div id="authActions" class="auth-actions">
+      <div id="authActions" class="settings-auth-actions">
         <button id="signInBtn" class="auth-btn" type="button">Sign In</button>
         <button id="signUpBtn" class="auth-btn" type="button">Sign Up</button>
       </div>
@@ -1728,10 +2385,10 @@
   <div id="upgradeModal" class="modal-overlay" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="upgradeTitle" aria-describedby="upgradeText">
       <h3 id="upgradeTitle" class="modal-title">Free Limit Reached</h3>
-      <p id="upgradeText" class="modal-text">You can upload up to 5 images on the free version without login. Login and subscribe to continue uploading more images.</p>
+      <p id="upgradeText" class="modal-text">You can upload up to 5 images on the free version without login. Open subscription billing to upgrade for higher upload limits.</p>
       <div class="modal-actions">
         <button id="upgradeCancelBtn" class="modal-btn" type="button">Maybe Later</button>
-        <button id="upgradeConfirmBtn" class="modal-btn danger" type="button">Login & Subscribe</button>
+        <button id="upgradeConfirmBtn" class="modal-btn danger" type="button">Open Subscription Billing</button>
       </div>
     </div>
   </div>
@@ -1742,9 +2399,14 @@
         <div>
           <h3 id="authTitle" class="auth-title">Sign In</h3>
           <p id="authSubtitle" class="auth-subtitle">Access better experience and unlock premium workflow.</p>
+          <p class="auth-badge"><i class="fa-solid fa-shield-heart"></i> Secure Customer Access</p>
         </div>
         <button id="authCloseBtn" class="auth-close" type="button" aria-label="Close authentication"><i class="fa-solid fa-xmark"></i></button>
       </div>
+      <ul class="auth-benefits">
+        <li>Keep your workflow personalized across sessions</li>
+        <li>Unlock premium upload capacity and faster processing</li>
+      </ul>
       <form id="authForm" class="auth-form">
         <div id="authNameRow" class="auth-row" style="display:none;">
           <label class="auth-label" for="authNameInput">Full Name</label>
@@ -1759,10 +2421,105 @@
           <input id="authPassInput" class="auth-input" type="password" autocomplete="current-password" required />
         </div>
         <div class="auth-actions">
-          <button id="authSubmitBtn" class="auth-submit" type="submit">Sign In</button>
-          <button id="authSwitchBtn" class="auth-switch" type="button">Create account instead</button>
+          <button id="authSubmitBtn" class="auth-submit" type="submit">Continue to Account</button>
+          <button id="authSwitchBtn" class="auth-switch" type="button">Need an account? Sign up</button>
         </div>
       </form>
+      <p class="oauth-divider"><span>or continue with</span></p>
+      <div class="oauth-actions">
+        <button id="oauthGoogleBtn" class="oauth-btn" type="button"><i class="fa-brands fa-google"></i>Google</button>
+        <button id="oauthGithubBtn" class="oauth-btn" type="button"><i class="fa-brands fa-github"></i>GitHub</button>
+        <button id="oauthMicrosoftBtn" class="oauth-btn" type="button"><i class="fa-brands fa-microsoft"></i>Microsoft</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="billingPage" class="billing-page" aria-hidden="true">
+    <div class="billing-card" role="dialog" aria-modal="true" aria-labelledby="billingTitle" aria-describedby="billingSubtitle">
+      <div class="auth-head">
+        <div>
+          <h3 id="billingTitle" class="billing-title">ComXpress Pro Billing</h3>
+          <p id="billingSubtitle" class="billing-subtitle">Upgrade to Pro for high-volume uploads and priority processing workflow.</p>
+        </div>
+        <button id="billingCloseBtn" class="auth-close" type="button" aria-label="Close billing"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="billing-grid">
+        <div class="billing-panel billing-summary">
+          <div class="billing-row">
+            <label class="billing-label" for="billingNameInput">Billing Name</label>
+            <input id="billingNameInput" class="billing-input" type="text" autocomplete="cc-name" />
+          </div>
+          <div class="billing-row">
+            <label class="billing-label" for="billingEmailInput">Billing Email</label>
+            <input id="billingEmailInput" class="billing-input" type="email" autocomplete="email" />
+          </div>
+          <div class="billing-methods" role="tablist" aria-label="Choose payment method">
+            <button id="billingMethodUpi" class="billing-method" type="button" aria-controls="billingPanelUpi" aria-selected="false"><i class="fa-solid fa-mobile-screen-button"></i>UPI</button>
+            <button id="billingMethodRazorpay" class="billing-method" type="button" aria-controls="billingPanelRazorpay" aria-selected="false"><i class="fa-solid fa-bolt"></i>Razorpay</button>
+            <button id="billingMethodStripe" class="billing-method active" type="button" aria-controls="billingPanelStripe" aria-selected="true"><i class="fa-solid fa-credit-card"></i>Stripe</button>
+          </div>
+          <div id="billingPanelUpi" class="billing-method-panel" role="tabpanel" aria-label="UPI payment">
+            <div class="billing-row">
+              <label class="billing-label" for="billingUpiInput">UPI ID</label>
+              <input id="billingUpiInput" class="billing-input" type="text" placeholder="name@upi" />
+            </div>
+            <div class="upi-actions">
+              <button id="showUpiQrBtn" class="upi-btn" type="button"><i class="fa-solid fa-qrcode"></i>Show UPI QR</button>
+              <button id="openUpiAppBtn" class="upi-btn" type="button"><i class="fa-solid fa-mobile-screen-button"></i>Open UPI App</button>
+            </div>
+            <div id="upiQrWrap" class="upi-qr-wrap" aria-live="polite">
+              <img id="upiQrImage" class="upi-qr-image" alt="UPI QR Code" />
+              <p class="upi-qr-hint">Scan this QR code from any UPI app, or use the Open UPI App button on mobile.</p>
+            </div>
+            <p class="billing-method-note">Pay instantly with your UPI app for a fast and secure subscription activation.</p>
+          </div>
+          <div id="billingPanelRazorpay" class="billing-method-panel" role="tabpanel" aria-label="Razorpay payment">
+            <div class="billing-row">
+              <label class="billing-label" for="billingRazorPhoneInput">Phone Number</label>
+              <input id="billingRazorPhoneInput" class="billing-input" type="text" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" />
+            </div>
+            <div class="billing-row">
+              <label class="billing-label" for="billingRazorEmailInput">Razorpay Email</label>
+              <input id="billingRazorEmailInput" class="billing-input" type="email" placeholder="you@example.com" />
+            </div>
+            <p class="billing-method-note">Checkout via Razorpay gateway with card, UPI, wallet, or netbanking support.</p>
+          </div>
+          <div id="billingPanelStripe" class="billing-method-panel active" role="tabpanel" aria-label="Stripe payment">
+            <div class="billing-row">
+              <label class="billing-label" for="billingCardInput">Card Number</label>
+              <input id="billingCardInput" class="billing-input" type="text" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242" />
+            </div>
+            <div class="billing-split">
+              <div class="billing-row">
+                <label class="billing-label" for="billingExpiryInput">Expiry (MM/YY)</label>
+                <input id="billingExpiryInput" class="billing-input" type="text" maxlength="5" placeholder="MM/YY" />
+              </div>
+              <div class="billing-row">
+                <label class="billing-label" for="billingCvcInput">CVC</label>
+                <input id="billingCvcInput" class="billing-input" type="text" inputmode="numeric" maxlength="4" placeholder="123" />
+              </div>
+            </div>
+            <p class="billing-method-note">Stripe card checkout with encrypted processing and customer-grade protection.</p>
+          </div>
+        </div>
+        <div class="billing-panel">
+          <p class="billing-price">$9/month - Pro Plan</p>
+          <ul class="billing-list">
+            <li>Upload more than 5 images in one workflow</li>
+            <li>Priority customer processing experience</li>
+            <li>Pro-grade productivity for creators and teams</li>
+          </ul>
+          <div class="billing-trust-row">
+            <span class="billing-trust-pill"><i class="fa-solid fa-lock"></i>Secure Checkout</span>
+            <span class="billing-trust-pill"><i class="fa-solid fa-shield-halved"></i>Protected Billing</span>
+            <span class="billing-trust-pill"><i class="fa-solid fa-receipt"></i>Instant Invoice</span>
+          </div>
+          <div class="billing-actions">
+            <button id="billingPayBtn" class="billing-pay" type="button">Subscribe & Continue</button>
+            <button id="billingCancelBtn" class="billing-cancel" type="button">Cancel</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1856,6 +2613,13 @@
             </div>
 
             <div id="status" aria-live="polite"></div>
+            <div class="recent-wrap">
+              <div class="recent-head">
+                <h4 class="recent-title">Recently Compressed Files</h4>
+                <p class="recent-warning"><i class="fa-solid fa-triangle-exclamation"></i> Auto-deletes after 4 days.</p>
+              </div>
+              <ul id="recentCompressedList" class="recent-list" aria-live="polite"></ul>
+            </div>
           </div>
         </div>
       </div>
@@ -1891,7 +2655,7 @@
           </article>
         </div>
         <div class="pricing-actions">
-          <button id="pricingUpgradeBtn" class="pricing-btn" type="button">Login & Upgrade to Pro</button>
+          <button id="pricingUpgradeBtn" class="pricing-btn" type="button">Upgrade to Pro</button>
         </div>
       </div>
     </section>
@@ -1941,14 +2705,41 @@
     const authCloseBtn = document.getElementById("authCloseBtn");
     const authForm = document.getElementById("authForm");
     const authTitle = document.getElementById("authTitle");
+    const authSubtitle = document.getElementById("authSubtitle");
     const authNameRow = document.getElementById("authNameRow");
     const authNameInput = document.getElementById("authNameInput");
     const authEmailInput = document.getElementById("authEmailInput");
     const authPassInput = document.getElementById("authPassInput");
     const authSubmitBtn = document.getElementById("authSubmitBtn");
     const authSwitchBtn = document.getElementById("authSwitchBtn");
+    const oauthGoogleBtn = document.getElementById("oauthGoogleBtn");
+    const oauthGithubBtn = document.getElementById("oauthGithubBtn");
+    const oauthMicrosoftBtn = document.getElementById("oauthMicrosoftBtn");
+    const billingPage = document.getElementById("billingPage");
+    const billingCloseBtn = document.getElementById("billingCloseBtn");
+    const billingNameInput = document.getElementById("billingNameInput");
+    const billingEmailInput = document.getElementById("billingEmailInput");
+    const billingCardInput = document.getElementById("billingCardInput");
+    const billingExpiryInput = document.getElementById("billingExpiryInput");
+    const billingCvcInput = document.getElementById("billingCvcInput");
+    const billingUpiInput = document.getElementById("billingUpiInput");
+    const showUpiQrBtn = document.getElementById("showUpiQrBtn");
+    const openUpiAppBtn = document.getElementById("openUpiAppBtn");
+    const upiQrWrap = document.getElementById("upiQrWrap");
+    const upiQrImage = document.getElementById("upiQrImage");
+    const billingRazorPhoneInput = document.getElementById("billingRazorPhoneInput");
+    const billingRazorEmailInput = document.getElementById("billingRazorEmailInput");
+    const billingMethodUpi = document.getElementById("billingMethodUpi");
+    const billingMethodRazorpay = document.getElementById("billingMethodRazorpay");
+    const billingMethodStripe = document.getElementById("billingMethodStripe");
+    const billingPanelUpi = document.getElementById("billingPanelUpi");
+    const billingPanelRazorpay = document.getElementById("billingPanelRazorpay");
+    const billingPanelStripe = document.getElementById("billingPanelStripe");
+    const billingPayBtn = document.getElementById("billingPayBtn");
+    const billingCancelBtn = document.getElementById("billingCancelBtn");
     const planPill = document.getElementById("planPill");
     const pricingUpgradeBtn = document.getElementById("pricingUpgradeBtn");
+    const recentCompressedList = document.getElementById("recentCompressedList");
 
     const uploadPreviewWrap = document.getElementById("uploadPreviewWrap");
     const uploadPreviewGrid = document.getElementById("uploadPreviewGrid");
@@ -1982,15 +2773,21 @@
     let isPrivacyDrawerOpen = false;
     let isNotifDrawerOpen = false;
     let isSettingsDrawerOpen = false;
+    let isBillingPageOpen = false;
+    let selectedBillingMethod = "stripe";
     let authMode = "signin";
+    let pendingBillingCheckout = false;
     const APP_STATE_KEY = "comxpress_session_state_v1";
+    const BILLING_OPEN_KEY = "comxpress_billing_open_v1";
+    const RECENT_COMPRESSED_KEY = "comxpress_recent_compressed_v1";
     const NOTIF_STATE_KEY = "comxpress_notifications_v1";
     const NOTIF_TTL_MS = 2 * 24 * 60 * 60 * 1000;
+    const RECENT_COMPRESSED_TTL_MS = 4 * 24 * 60 * 60 * 1000;
     const THEME_KEY = "comxpress_theme_v1";
-    const AUTH_KEY = "comxpress_auth_v1";
-    const SUBSCRIPTION_KEY = "comxpress_subscription_v1";
+    const USERS_KEY = "comxpress_users_v1";
+    const CURRENT_USER_KEY = "comxpress_current_user_v1";
     const FREE_UPLOAD_LIMIT = 5;
-    const MAX_SELECTED_IMAGES = 5;
+    const PRO_UPLOAD_LIMIT = 50;
     const PASSPORT_PLACEHOLDER_SRC = "assets/fonts/image/placeholder_img.jpg";
 
     function readNotifications() {
@@ -2108,6 +2905,148 @@
       }
     }
 
+    function readRecentCompressed() {
+      try {
+        const raw = localStorage.getItem(RECENT_COMPRESSED_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function writeRecentCompressed(list) {
+      try {
+        localStorage.setItem(RECENT_COMPRESSED_KEY, JSON.stringify(list));
+      } catch (error) {
+      }
+    }
+
+    function pruneRecentCompressed() {
+      const now = Date.now();
+      const current = readRecentCompressed();
+      const keep = current.filter((item) => now - Number(item.createdAt || 0) < RECENT_COMPRESSED_TTL_MS);
+      if (keep.length !== current.length) {
+        writeRecentCompressed(keep);
+      }
+      return { keep, removedCount: current.length - keep.length };
+    }
+
+    function formatDateTime(timestamp) {
+      try {
+        return new Date(timestamp).toLocaleString();
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function getCompressedExpiryText(createdAt) {
+      const expiresAt = Number(createdAt || 0) + RECENT_COMPRESSED_TTL_MS;
+      return formatDateTime(expiresAt);
+    }
+
+    function renderRecentCompressed() {
+      const { keep } = pruneRecentCompressed();
+      const recent = keep.sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+      recentCompressedList.innerHTML = "";
+
+      if (!recent.length) {
+        const empty = document.createElement("p");
+        empty.className = "recent-empty";
+        empty.textContent = "No compressed files yet.";
+        recentCompressedList.appendChild(empty);
+        return;
+      }
+
+      for (const item of recent) {
+        const row = document.createElement("li");
+        row.className = "recent-item";
+        row.dataset.id = item.id;
+
+        const meta = document.createElement("div");
+        meta.className = "recent-meta";
+
+        const name = document.createElement("p");
+        name.className = "recent-name";
+        name.textContent = item.name || "compressed-image.jpg";
+
+        const info = document.createElement("p");
+        info.className = "recent-info";
+        info.textContent = `${formatBytes(Number(item.size || 0))} from ${formatBytes(Number(item.originalSize || 0))} | Expires: ${getCompressedExpiryText(item.createdAt)}`;
+
+        meta.appendChild(name);
+        meta.appendChild(info);
+
+        const actions = document.createElement("div");
+        actions.className = "recent-actions";
+
+        const downloadBtn = document.createElement("button");
+        downloadBtn.type = "button";
+        downloadBtn.className = "recent-btn";
+        downloadBtn.dataset.action = "download";
+        downloadBtn.dataset.id = item.id;
+        downloadBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download";
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "recent-btn delete";
+        deleteBtn.dataset.action = "delete";
+        deleteBtn.dataset.id = item.id;
+        deleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i>";
+        deleteBtn.setAttribute("aria-label", "Delete compressed file record");
+
+        actions.appendChild(downloadBtn);
+        actions.appendChild(deleteBtn);
+        row.appendChild(meta);
+        row.appendChild(actions);
+        recentCompressedList.appendChild(row);
+      }
+    }
+
+    function getCompressedDownloadName(originalName) {
+      const source = String(originalName || "image");
+      const clean = source.replace(/\.[^./\\]+$/, "");
+      return `${clean}-compressed.jpg`;
+    }
+
+    async function addRecentCompressed(originalName, blob, originalSize) {
+      if (!blob) return;
+      try {
+        const dataUrl = await blobToDataUrl(blob);
+        const recent = pruneRecentCompressed().keep;
+        recent.unshift({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: getCompressedDownloadName(originalName),
+          size: blob.size || 0,
+          originalSize: Number(originalSize || 0),
+          createdAt: Date.now(),
+          dataUrl
+        });
+        writeRecentCompressed(recent.slice(0, 20));
+        renderRecentCompressed();
+      } catch (error) {
+      }
+    }
+
+    function removeRecentCompressedById(id) {
+      const current = pruneRecentCompressed().keep;
+      const next = current.filter((item) => item.id !== id);
+      writeRecentCompressed(next);
+      renderRecentCompressed();
+    }
+
+    function downloadRecentCompressedById(id) {
+      const current = pruneRecentCompressed().keep;
+      const item = current.find((entry) => entry.id === id);
+      if (!item || !item.dataUrl) {
+        setStatus("Selected recent compressed file is unavailable.");
+        return;
+      }
+      const blob = dataUrlToBlob(item.dataUrl);
+      downloadBlob(blob, item.name || "compressed-image.jpg");
+      addNotification("Download Complete", "Recent compressed file downloaded successfully.");
+    }
+
     async function blobToDataUrl(blob) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -2182,9 +3121,12 @@
     function renderAuthMode() {
       const isSignUp = authMode === "signup";
       authTitle.textContent = isSignUp ? "Sign Up" : "Sign In";
+      authSubtitle.textContent = isSignUp
+        ? "Create your account to unlock premium upload and customer-ready workflow."
+        : "Welcome back. Sign in to continue with your personalized workspace.";
       authNameRow.style.display = isSignUp ? "grid" : "none";
-      authSubmitBtn.textContent = isSignUp ? "Create Account" : "Sign In";
-      authSwitchBtn.textContent = isSignUp ? "Already have an account? Sign in" : "Create account instead";
+      authSubmitBtn.textContent = isSignUp ? "Create Account" : "Continue to Account";
+      authSwitchBtn.textContent = isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up";
       authEmailInput.autocomplete = isSignUp ? "email" : "email";
       authPassInput.autocomplete = isSignUp ? "new-password" : "current-password";
     }
@@ -2201,7 +3143,45 @@
 
     function openAuthPage(mode) {
       authMode = mode === "signup" ? "signup" : "signin";
+      pendingBillingCheckout = false;
+      if (isPrivacyDrawerOpen) {
+        setPrivacyDrawerState(false);
+      }
+      if (isNotifDrawerOpen) {
+        setNotifDrawerState(false);
+      }
+      if (isSettingsDrawerOpen) {
+        setSettingsDrawerState(false);
+      }
       setAuthPageState(true);
+    }
+
+    function openBillingPage() {
+      if (isPrivacyDrawerOpen) {
+        setPrivacyDrawerState(false);
+      }
+      if (isNotifDrawerOpen) {
+        setNotifDrawerState(false);
+      }
+      if (isSettingsDrawerOpen) {
+        setSettingsDrawerState(false);
+      }
+      setUpgradeModalState(false);
+      setAuthPageState(false);
+      setBillingPageState(true);
+      const currentEmail = normalizeEmail(localStorage.getItem(CURRENT_USER_KEY));
+      const users = readUsers();
+      const user = users[currentEmail];
+      if (!billingEmailInput.value) {
+        billingEmailInput.value = user && user.email ? user.email : currentEmail;
+      }
+      if (!billingNameInput.value && user && user.name) {
+        billingNameInput.value = user.name;
+      }
+      if (!billingRazorEmailInput.value) {
+        billingRazorEmailInput.value = billingEmailInput.value;
+      }
+      setBillingMethod(selectedBillingMethod);
     }
 
     function setUpgradeModalState(open) {
@@ -2209,22 +3189,150 @@
       upgradeModal.setAttribute("aria-hidden", String(!open));
     }
 
-    function initializeSubscriptionState() {
-      isSubscribed = false;
+    function setBillingPageState(open) {
+      isBillingPageOpen = open;
+      billingPage.classList.toggle("open", open);
+      billingPage.setAttribute("aria-hidden", String(!open));
       try {
-        localStorage.removeItem(SUBSCRIPTION_KEY);
+        sessionStorage.setItem(BILLING_OPEN_KEY, open ? "1" : "0");
       } catch (error) {
       }
+    }
+
+    function restoreBillingPageState() {
+      try {
+        const saved = sessionStorage.getItem(BILLING_OPEN_KEY);
+        if (saved === "1") {
+          openBillingPage();
+        }
+      } catch (error) {
+      }
+    }
+
+    function getBillingMethodLabel(method) {
+      if (method === "upi") return "UPI";
+      if (method === "razorpay") return "Razorpay";
+      return "Stripe";
+    }
+
+    function buildUpiPaymentUrl() {
+      const payeeVpa = "comxpress@upi";
+      const payeeName = "ComXpress Pro";
+      const amount = "9.00";
+      const currency = "INR";
+      const note = "ComXpress Pro Monthly Subscription";
+      const txnRef = `COMX-${Date.now()}`;
+      const params = new URLSearchParams({
+        pa: payeeVpa,
+        pn: payeeName,
+        am: amount,
+        cu: currency,
+        tn: note,
+        tr: txnRef
+      });
+      return `upi://pay?${params.toString()}`;
+    }
+
+    function renderUpiQr() {
+      const upiUrl = buildUpiPaymentUrl();
+      const qrUrl = `https://quickchart.io/qr?size=300&text=${encodeURIComponent(upiUrl)}`;
+      upiQrImage.src = qrUrl;
+      upiQrWrap.classList.add("open");
+    }
+
+    function setBillingMethod(method) {
+      const resolved = method === "upi" || method === "razorpay" ? method : "stripe";
+      selectedBillingMethod = resolved;
+
+      billingMethodUpi.classList.toggle("active", resolved === "upi");
+      billingMethodRazorpay.classList.toggle("active", resolved === "razorpay");
+      billingMethodStripe.classList.toggle("active", resolved === "stripe");
+      billingMethodUpi.setAttribute("aria-selected", String(resolved === "upi"));
+      billingMethodRazorpay.setAttribute("aria-selected", String(resolved === "razorpay"));
+      billingMethodStripe.setAttribute("aria-selected", String(resolved === "stripe"));
+
+      billingPanelUpi.classList.toggle("active", resolved === "upi");
+      billingPanelRazorpay.classList.toggle("active", resolved === "razorpay");
+      billingPanelStripe.classList.toggle("active", resolved === "stripe");
+      if (resolved !== "upi") {
+        upiQrWrap.classList.remove("open");
+      }
+
+      if (resolved === "upi") {
+        renderUpiQr();
+        billingPayBtn.innerHTML = "<i class=\"fa-solid fa-mobile-screen-button\"></i> Subscribe with UPI";
+      } else if (resolved === "razorpay") {
+        billingPayBtn.innerHTML = "<i class=\"fa-solid fa-bolt\"></i> Subscribe with Razorpay";
+      } else {
+        billingPayBtn.innerHTML = "<i class=\"fa-solid fa-credit-card\"></i> Subscribe with Stripe";
+      }
+    }
+
+    function normalizeEmail(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function getSelectionLimit() {
+      return isSubscribed ? PRO_UPLOAD_LIMIT : FREE_UPLOAD_LIMIT;
+    }
+
+    function readUsers() {
+      try {
+        const raw = localStorage.getItem(USERS_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function writeUsers(users) {
+      try {
+        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      } catch (error) {
+      }
+    }
+
+    async function hashPassword(password) {
+      if (window.crypto && window.crypto.subtle && window.TextEncoder) {
+        const buffer = new TextEncoder().encode(password);
+        const digest = await window.crypto.subtle.digest("SHA-256", buffer);
+        const bytes = Array.from(new Uint8Array(digest));
+        return bytes.map((b) => b.toString(16).padStart(2, "0")).join("");
+      }
+      return btoa(password);
+    }
+
+    function validatePassword(password) {
+      const hasMinLength = password.length >= 8;
+      const hasLetter = /[A-Za-z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      return hasMinLength && hasLetter && hasNumber;
+    }
+
+    function initializeSubscriptionState() {
       updatePricingState();
     }
 
     function initializeAuthState() {
       isSignedIn = false;
       try {
-        isSignedIn = localStorage.getItem(AUTH_KEY) === "signed-in";
+        const email = normalizeEmail(localStorage.getItem(CURRENT_USER_KEY));
+        const users = readUsers();
+        const user = users[email];
+        if (user) {
+          isSignedIn = true;
+          isSubscribed = !!user.subscribed;
+        } else {
+          isSignedIn = false;
+          isSubscribed = false;
+        }
       } catch (error) {
+        isSignedIn = false;
+        isSubscribed = false;
       }
       updateAuthUI();
+      updatePricingState();
     }
 
     function updateAuthUI() {
@@ -2243,26 +3351,271 @@
       }
     }
 
-    function completeAuth(mode) {
-      isSignedIn = true;
+    async function completeAuth(mode) {
+      const email = normalizeEmail(authEmailInput.value);
+      const password = authPassInput.value.trim();
+      const name = authNameInput.value.trim();
+      const users = readUsers();
+
+      if (!email || !password || (mode === "signup" && !name)) {
+        setStatus("Please fill all required authentication fields.");
+        return false;
+      }
+
+      if (mode === "signup") {
+        if (!validatePassword(password)) {
+          setStatus("Password must be at least 8 characters and include letters and numbers.");
+          return false;
+        }
+        if (users[email]) {
+          setStatus("Account already exists. Please sign in instead.");
+          return false;
+        }
+        const passwordHash = await hashPassword(password);
+        users[email] = {
+          name,
+          email,
+          passwordHash,
+          subscribed: false
+        };
+        writeUsers(users);
+      } else {
+        const user = users[email];
+        if (!user) {
+          setStatus("No account found for this email. Please sign up first.");
+          return false;
+        }
+        const incomingHash = await hashPassword(password);
+        if (user.passwordHash !== incomingHash) {
+          setStatus("Invalid credentials. Please try again.");
+          return false;
+        }
+      }
+
       try {
-        localStorage.setItem(AUTH_KEY, "signed-in");
+        localStorage.setItem(CURRENT_USER_KEY, email);
       } catch (error) {
       }
+
+      const savedUsers = readUsers();
+      const currentUser = savedUsers[email];
+      isSignedIn = true;
+      isSubscribed = !!(currentUser && currentUser.subscribed);
       updateAuthUI();
+      updatePricingState();
+
+      if (pendingBillingCheckout) {
+        setStatus("Authentication successful. Continue billing to activate Pro.");
+        addNotification("Authentication Successful", "You're signed in. Complete billing to activate Pro.");
+        setAuthPageState(false);
+        setBillingPageState(true);
+        if (!billingEmailInput.value) {
+          billingEmailInput.value = email;
+        }
+        return true;
+      }
+
       const message = mode === "signup" ? "Account created and signed in successfully." : "Signed in successfully.";
       setStatus(message);
       addNotification(mode === "signup" ? "Sign Up Successful" : "Sign In Successful", message);
+      return true;
+    }
+
+    function getOAuthIdentity(provider) {
+      const providerName = provider === "google"
+        ? "Google"
+        : provider === "github"
+          ? "GitHub"
+          : "Microsoft";
+      return {
+        providerName,
+        email: `oauth.${provider}@comxpress.local`,
+        name: `${providerName} User`
+      };
+    }
+
+    function completeOAuth(provider) {
+      const identity = getOAuthIdentity(provider);
+      const users = readUsers();
+      const email = normalizeEmail(identity.email);
+
+      if (!users[email]) {
+        users[email] = {
+          name: identity.name,
+          email,
+          passwordHash: null,
+          oauthProvider: provider,
+          subscribed: false
+        };
+      }
+
+      writeUsers(users);
+      try {
+        localStorage.setItem(CURRENT_USER_KEY, email);
+      } catch (error) {
+      }
+
+      const refreshedUsers = readUsers();
+      const currentUser = refreshedUsers[email];
+      isSignedIn = true;
+      isSubscribed = !!(currentUser && currentUser.subscribed);
+      updateAuthUI();
+      updatePricingState();
+
+      if (pendingBillingCheckout) {
+        setStatus(`${identity.providerName} authentication successful. Continue billing to activate Pro.`);
+        addNotification("Authentication Successful", `Signed in with ${identity.providerName}. Continue billing to activate Pro.`);
+        setAuthPageState(false);
+        setBillingPageState(true);
+        if (!billingEmailInput.value) {
+          billingEmailInput.value = email;
+        }
+        if (!billingNameInput.value) {
+          billingNameInput.value = identity.name;
+        }
+        return;
+      }
+
+      setAuthPageState(false);
+      setStatus(`Signed in with ${identity.providerName}.`);
+      addNotification("OAuth Sign In Successful", `${identity.providerName} account connected successfully.`);
+    }
+
+    function activateSubscription(email) {
+      const normalizedEmail = normalizeEmail(email);
+      if (!normalizedEmail) return false;
+      const users = readUsers();
+      if (!users[normalizedEmail]) {
+        return false;
+      }
+      users[normalizedEmail].subscribed = true;
+      writeUsers(users);
+      isSubscribed = true;
+      updatePricingState();
+      return true;
+    }
+
+    function validateBillingFields() {
+      const name = billingNameInput.value.trim();
+      const email = normalizeEmail(billingEmailInput.value);
+
+      if (!name || !email) {
+        setStatus("Please fill billing name and email.");
+        return null;
+      }
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        setStatus("Please enter a valid billing email.");
+        return null;
+      }
+      if (selectedBillingMethod === "upi") {
+        const upiId = billingUpiInput.value.trim();
+        if (!upiId) {
+          setStatus("Please enter your UPI ID.");
+          return null;
+        }
+        if (!/^[a-zA-Z0-9._-]{2,}@[a-zA-Z]{2,}$/i.test(upiId)) {
+          setStatus("Please enter a valid UPI ID format (example: name@upi).");
+          return null;
+        }
+        return { name, email, method: selectedBillingMethod };
+      }
+
+      if (selectedBillingMethod === "razorpay") {
+        const razorPhone = billingRazorPhoneInput.value.replace(/\D/g, "");
+        const razorEmail = normalizeEmail(billingRazorEmailInput.value);
+        if (!/^\d{10}$/.test(razorPhone)) {
+          setStatus("Razorpay requires a valid 10-digit phone number.");
+          return null;
+        }
+        if (!/^\S+@\S+\.\S+$/.test(razorEmail)) {
+          setStatus("Please enter a valid Razorpay email.");
+          return null;
+        }
+        return { name, email, method: selectedBillingMethod };
+      }
+
+      const cardNumber = billingCardInput.value.replace(/\s+/g, "");
+      const expiry = billingExpiryInput.value.trim();
+      const cvc = billingCvcInput.value.trim();
+      if (!cardNumber || !expiry || !cvc) {
+        setStatus("Please fill all Stripe card details.");
+        return null;
+      }
+      if (!/^\d{16}$/.test(cardNumber)) {
+        setStatus("Card number must be 16 digits.");
+        return null;
+      }
+      if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+        setStatus("Expiry must use MM/YY format.");
+        return null;
+      }
+      if (!/^\d{3,4}$/.test(cvc)) {
+        setStatus("CVC must be 3 or 4 digits.");
+        return null;
+      }
+      return { name, email, method: selectedBillingMethod };
+    }
+
+    function handleBillingSubscription() {
+      const billingData = validateBillingFields();
+      if (!billingData) return;
+
+      if (!isSignedIn) {
+        pendingBillingCheckout = true;
+        authMode = "signin";
+        setBillingPageState(false);
+        setAuthPageState(true);
+        setStatus("Sign in or sign up to complete your subscription.");
+        return;
+      }
+
+      const currentEmail = normalizeEmail(localStorage.getItem(CURRENT_USER_KEY));
+      const targetEmail = currentEmail || billingData.email;
+      const activated = activateSubscription(targetEmail);
+      if (!activated) {
+        setStatus("Could not activate subscription. Please sign in again and retry.");
+        return;
+      }
+
+      pendingBillingCheckout = false;
+      setBillingPageState(false);
+      setUpgradeModalState(false);
+      const methodName = getBillingMethodLabel(billingData.method);
+      setStatus(`Subscription activated via ${methodName}. ComXpress Pro is now active.`);
+      addNotification("Subscription Active", `Your Pro billing is active via ${methodName}. Upload limits are upgraded.`);
+    }
+
+    function formatBillingCardInput() {
+      const digits = billingCardInput.value.replace(/\D/g, "").slice(0, 16);
+      const groups = digits.match(/.{1,4}/g) || [];
+      billingCardInput.value = groups.join(" ");
+    }
+
+    function formatBillingExpiryInput() {
+      const digits = billingExpiryInput.value.replace(/\D/g, "").slice(0, 4);
+      if (digits.length <= 2) {
+        billingExpiryInput.value = digits;
+        return;
+      }
+      billingExpiryInput.value = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    }
+
+    function formatBillingCvcInput() {
+      billingCvcInput.value = billingCvcInput.value.replace(/\D/g, "").slice(0, 4);
+    }
+
+    function formatRazorPhoneInput() {
+      billingRazorPhoneInput.value = billingRazorPhoneInput.value.replace(/\D/g, "").slice(0, 10);
     }
 
     function updatePricingState() {
       if (isSubscribed) {
         planPill.textContent = "Current Plan: Pro";
-        pricingUpgradeBtn.textContent = "Pro Active";
-        pricingUpgradeBtn.disabled = true;
+        pricingUpgradeBtn.textContent = "Manage Pro Billing";
+        pricingUpgradeBtn.disabled = false;
       } else {
         planPill.textContent = "Current Plan: Free";
-        pricingUpgradeBtn.textContent = "Login & Upgrade to Pro";
+        pricingUpgradeBtn.textContent = "Upgrade to Pro";
         pricingUpgradeBtn.disabled = false;
       }
     }
@@ -2381,7 +3734,7 @@
       clearGeneratedOutputs();
       activeFileId = selected.id;
       originalFile = selected.file;
-      fileNameText.textContent = `${selected.file.name} (${uploadedFiles.length}/${MAX_SELECTED_IMAGES})`;
+      fileNameText.textContent = `${selected.file.name} (${uploadedFiles.length}/${getSelectionLimit()})`;
       originalSizeEl.textContent = formatBytes(selected.file.size);
 
       if (originalObjectUrl) {
@@ -2411,7 +3764,7 @@
         const next = uploadedFiles[0];
         setActiveUpload(next.id);
       } else {
-        fileNameText.textContent = `${getActiveUpload().file.name} (${uploadedFiles.length}/${MAX_SELECTED_IMAGES})`;
+        fileNameText.textContent = `${getActiveUpload().file.name} (${uploadedFiles.length}/${getSelectionLimit()})`;
         renderFileQueue();
       }
 
@@ -2426,7 +3779,7 @@
         return;
       }
 
-      const freeSlots = Math.max(0, MAX_SELECTED_IMAGES - uploadedFiles.length);
+      const freeSlots = Math.max(0, getSelectionLimit() - uploadedFiles.length);
       let acceptedFiles = incoming;
       let blockedCount = 0;
 
@@ -2449,14 +3802,16 @@
       }
 
       if (blockedCount > 0) {
-        if (!acceptedFiles.length) {
-          setStatus("Maximum 5 images can be selected at once. Remove some files to add new ones.");
-        }
+        setStatus(
+          isSubscribed
+            ? `Maximum ${PRO_UPLOAD_LIMIT} images can be selected at once. Remove some files to add new ones.`
+            : "Free limit is 5 images at once. Open subscription billing to upgrade."
+        );
         if (!isSubscribed) {
           setUpgradeModalState(true);
-          addNotification("Upload Limit Reached", "Login and subscribe for higher-volume workflow.");
+          addNotification("Upload Limit Reached", "Free plan allows 5 images at once. Open subscription billing to upgrade.");
         } else {
-          addNotification("Selection Limit Reached", "Only 5 images can stay selected at once.");
+          addNotification("Selection Limit Reached", `Maximum ${PRO_UPLOAD_LIMIT} images can stay selected at once.`);
         }
       }
     }
@@ -2569,6 +3924,49 @@
       handleIncomingFiles(file ? [file] : []);
     }
 
+    async function compressImageWithQualityBalance(image, originalSize) {
+      const canvas = document.createElement("canvas");
+      const width = image.naturalWidth || image.width;
+      const height = image.naturalHeight || image.height;
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(image, 0, 0, width, height);
+
+      const qualityLevels = [0.86, 0.78, 0.7, 0.62, 0.56];
+      let bestBlob = null;
+      let bestQuality = qualityLevels[0];
+      let smallestBlob = null;
+      let smallestQuality = qualityLevels[0];
+
+      for (const quality of qualityLevels) {
+        const blob = await canvasToBlob(canvas, quality);
+        if (!smallestBlob || blob.size < smallestBlob.size) {
+          smallestBlob = blob;
+          smallestQuality = quality;
+        }
+        if (blob.size <= originalSize * 0.9) {
+          bestBlob = blob;
+          bestQuality = quality;
+          break;
+        }
+      }
+
+      if (!bestBlob && smallestBlob) {
+        bestBlob = smallestBlob;
+        bestQuality = smallestQuality;
+      }
+
+      if (!bestBlob) {
+        throw new Error("Compression failed.");
+      }
+
+      return { blob: bestBlob, quality: bestQuality };
+    }
+
     async function compressImage() {
       if (!originalFile) return;
 
@@ -2583,14 +3981,8 @@
         }
 
         const img = await fileToImage(originalFile);
-        const canvas = document.createElement("canvas");
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        compressedBlob = await canvasToBlob(canvas, 0.6);
+        const result = await compressImageWithQualityBalance(img, originalFile.size);
+        compressedBlob = result.blob;
 
         if (compressedObjectUrl) URL.revokeObjectURL(compressedObjectUrl);
         compressedObjectUrl = URL.createObjectURL(compressedBlob);
@@ -2609,7 +4001,11 @@
         } catch (error) {
         }
 
-        setStatus("Compression completed.");
+        const reduction = originalFile.size > 0
+          ? Math.max(0, Math.round(((originalFile.size - compressedBlob.size) / originalFile.size) * 100))
+          : 0;
+        setStatus(`Compression completed (${reduction}% smaller, quality ${Math.round(result.quality * 100)}%).`);
+        await addRecentCompressed(originalFile.name, compressedBlob, originalFile.size);
         addNotification("Compression Completed", `Compressed image is ready (${formatBytes(compressedBlob.size)}).`);
       } catch (error) {
         const state = readAppState();
@@ -2690,6 +4086,7 @@
         }
 
         setStatus("Passport photo generated.");
+        addNotification("Passport Generated", "Passport photo is ready for download.");
       } catch (error) {
         const state = readAppState();
         if (state) {
@@ -2697,6 +4094,7 @@
           writeAppState(state);
         }
         setStatus("Passport generation failed. Please try another image.");
+        addNotification("Passport Generation Failed", "Could not generate passport photo. Please try again.");
       } finally {
         setProcessingState(false);
       }
@@ -2763,8 +4161,7 @@
       updateAuthUI();
       updatePricingState();
       try {
-        localStorage.removeItem(AUTH_KEY);
-        localStorage.removeItem(SUBSCRIPTION_KEY);
+        localStorage.removeItem(CURRENT_USER_KEY);
       } catch (error) {
       }
       sessionStorage.removeItem(APP_STATE_KEY);
@@ -2779,6 +4176,10 @@
     }
 
     function clearSelectedFile() {
+      if (!uploadedFiles.length) {
+        setStatus("No selected files to clear.");
+        return;
+      }
       fileInput.value = "";
       sessionStorage.removeItem(APP_STATE_KEY);
       setUpgradeModalState(false);
@@ -2787,7 +4188,7 @@
     }
 
     function downloadBlob(blob, filename) {
-      if (!blob) return;
+      if (!blob) return false;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -2796,6 +4197,7 @@
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      return true;
     }
 
     getStartedBtn.addEventListener("click", () => {
@@ -2875,21 +4277,87 @@
       renderAuthMode();
     });
 
+    oauthGoogleBtn.addEventListener("click", () => {
+      completeOAuth("google");
+    });
+
+    oauthGithubBtn.addEventListener("click", () => {
+      completeOAuth("github");
+    });
+
+    oauthMicrosoftBtn.addEventListener("click", () => {
+      completeOAuth("microsoft");
+    });
+
     authCloseBtn.addEventListener("click", () => {
+      pendingBillingCheckout = false;
       setAuthPageState(false);
     });
 
     authForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const email = authEmailInput.value.trim();
-      const pass = authPassInput.value.trim();
-      const name = authNameInput.value.trim();
-      if (!email || !pass || (authMode === "signup" && !name)) {
-        setStatus("Please fill all required authentication fields.");
-        return;
+      completeAuth(authMode).then((ok) => {
+        if (!ok) return;
+        if (!pendingBillingCheckout) {
+          setAuthPageState(false);
+        }
+        if (uploadedFiles.length) {
+          setActiveUpload(activeFileId || uploadedFiles[uploadedFiles.length - 1].id);
+        }
+      });
+    });
+
+    billingCloseBtn.addEventListener("click", () => {
+      pendingBillingCheckout = false;
+      setBillingPageState(false);
+    });
+
+    billingCancelBtn.addEventListener("click", () => {
+      pendingBillingCheckout = false;
+      setBillingPageState(false);
+    });
+
+    billingPayBtn.addEventListener("click", () => {
+      handleBillingSubscription();
+    });
+
+    billingMethodUpi.addEventListener("click", () => {
+      setBillingMethod("upi");
+    });
+
+    billingMethodRazorpay.addEventListener("click", () => {
+      setBillingMethod("razorpay");
+    });
+
+    billingMethodStripe.addEventListener("click", () => {
+      setBillingMethod("stripe");
+    });
+
+    showUpiQrBtn.addEventListener("click", () => {
+      setBillingMethod("upi");
+      renderUpiQr();
+      setStatus("UPI QR is ready. Scan to pay or open your UPI app.");
+    });
+
+    openUpiAppBtn.addEventListener("click", () => {
+      setBillingMethod("upi");
+      const upiUrl = buildUpiPaymentUrl();
+      window.location.href = upiUrl;
+      setStatus("Opening UPI app...");
+    });
+
+    billingEmailInput.addEventListener("input", () => {
+      if (!billingRazorEmailInput.value.trim()) {
+        billingRazorEmailInput.value = billingEmailInput.value.trim();
       }
-      completeAuth(authMode);
-      setAuthPageState(false);
+    });
+
+    billingCardInput.addEventListener("input", formatBillingCardInput);
+    billingExpiryInput.addEventListener("input", formatBillingExpiryInput);
+    billingCvcInput.addEventListener("input", formatBillingCvcInput);
+    billingRazorPhoneInput.addEventListener("input", formatRazorPhoneInput);
+    upiQrImage.addEventListener("error", () => {
+      setStatus("Could not load QR image. Use Open UPI App on mobile to continue.");
     });
 
     themeDarkBtn.addEventListener("click", () => {
@@ -2902,7 +4370,8 @@
       addNotification("Theme Updated", "Light theme is now active.");
     });
 
-    logoutBtn.addEventListener("click", () => {
+    logoutBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
       setLogoutModalState(true);
     });
 
@@ -2920,26 +4389,11 @@
     });
 
     upgradeConfirmBtn.addEventListener("click", () => {
-      isSubscribed = true;
-      isSignedIn = true;
-      try {
-        localStorage.setItem(SUBSCRIPTION_KEY, "pro");
-        localStorage.setItem(AUTH_KEY, "signed-in");
-      } catch (error) {
-      }
-      updateAuthUI();
-      updatePricingState();
-      setUpgradeModalState(false);
-      setStatus("Subscription unlocked. You can now upload more images.");
-      addNotification("Subscription Active", "Upload limit unlocked for this device.");
-      if (uploadedFiles.length) {
-        setActiveUpload(activeFileId || uploadedFiles[uploadedFiles.length - 1].id);
-      }
+      openBillingPage();
     });
 
     pricingUpgradeBtn.addEventListener("click", () => {
-      if (isSubscribed) return;
-      setUpgradeModalState(true);
+      openBillingPage();
     });
 
     notifList.addEventListener("click", (e) => {
@@ -2952,14 +4406,48 @@
       deleteNotification(id);
     });
 
+    recentCompressedList.addEventListener("click", (e) => {
+      const actionBtn = e.target.closest(".recent-btn");
+      if (!actionBtn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const id = actionBtn.dataset.id;
+      const action = actionBtn.dataset.action;
+      if (!id || !action) return;
+      if (action === "download") {
+        downloadRecentCompressedById(id);
+        return;
+      }
+      if (action === "delete") {
+        removeRecentCompressedById(id);
+        setStatus("Recent compressed file removed.");
+      }
+    });
+
     document.addEventListener("click", (e) => {
       if (upgradeModal.classList.contains("open") && !e.target.closest("#upgradeModal .modal-card")) {
         setUpgradeModalState(false);
       }
-      if (authPage.classList.contains("open") && !e.target.closest(".auth-card")) {
+      if (
+        authPage.classList.contains("open") &&
+        !e.target.closest(".auth-card") &&
+        !e.target.closest("#signinPrompt") &&
+        !e.target.closest("#signInBtn") &&
+        !e.target.closest("#signUpBtn")
+      ) {
+        pendingBillingCheckout = false;
         setAuthPageState(false);
       }
-      if (logoutModal.classList.contains("open") && !e.target.closest(".modal-card")) {
+      if (
+        billingPage.classList.contains("open") &&
+        !e.target.closest(".billing-card") &&
+        !e.target.closest("#pricingUpgradeBtn") &&
+        !e.target.closest("#upgradeConfirmBtn")
+      ) {
+        pendingBillingCheckout = false;
+        setBillingPageState(false);
+      }
+      if (logoutModal.classList.contains("open") && !e.target.closest(".modal-card") && !e.target.closest("#logoutBtn")) {
         setLogoutModalState(false);
       }
       if (isPrivacyDrawerOpen && !privacyDrawer.contains(e.target) && !privacyNavLink.contains(e.target)) {
@@ -2976,7 +4464,13 @@
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         if (authPage.classList.contains("open")) {
+          pendingBillingCheckout = false;
           setAuthPageState(false);
+          return;
+        }
+        if (billingPage.classList.contains("open")) {
+          pendingBillingCheckout = false;
+          setBillingPageState(false);
           return;
         }
         if (upgradeModal.classList.contains("open")) {
@@ -3036,21 +4530,38 @@
     resetRegenerateBtn.addEventListener("click", resetAndRegenerateCompression);
 
     downloadCompressedBtn.addEventListener("click", () => {
-      downloadBlob(compressedBlob, "compressed-image.jpg");
+      const ok = downloadBlob(compressedBlob, "compressed-image.jpg");
+      if (!ok) {
+        setStatus("No compressed image available to download.");
+        return;
+      }
       addNotification("Download Complete", "Compressed image downloaded successfully.");
     });
 
     downloadPassportBtn.addEventListener("click", () => {
-      downloadBlob(passportBlob, "passport-photo.jpg");
+      const ok = downloadBlob(passportBlob, "passport-photo.jpg");
+      if (!ok) {
+        setStatus("No passport photo available to download.");
+        return;
+      }
       addNotification("Download Complete", "Passport photo downloaded successfully.");
     });
 
     initializeTheme();
     initializeAuthState();
     initializeSubscriptionState();
+    setBillingMethod("stripe");
+    restoreBillingPageState();
     passportPreview.src = PASSPORT_PLACEHOLDER_SRC;
     renderFileQueue();
     renderNotifications();
+    {
+      const pruned = pruneRecentCompressed();
+      renderRecentCompressed();
+      if (pruned.removedCount > 0) {
+        setStatus(`${pruned.removedCount} recent compressed file(s) were auto-deleted after 4 days.`);
+      }
+    }
     restoreAppState();
 
     window.addEventListener("beforeunload", () => {
