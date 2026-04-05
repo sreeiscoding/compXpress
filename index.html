@@ -3100,6 +3100,15 @@
             </button>
           </div>
         </div>
+        <div id="authConfirmRow" class="auth-row" style="display:none;">
+          <label class="auth-label" for="authPassConfirmInput">Confirm Password</label>
+          <div class="auth-pass-wrap">
+            <input id="authPassConfirmInput" class="auth-input" type="password" autocomplete="new-password" />
+            <button id="authPassConfirmToggleBtn" class="auth-pass-toggle" type="button" aria-label="Show confirm password" aria-pressed="false">
+              <i id="authPassConfirmToggleIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
         <button id="forgotPasswordBtn" class="auth-forgot" type="button">Forgot password?</button>
         <div class="auth-actions">
           <button id="authSubmitBtn" class="auth-submit" type="submit">Continue to Account</button>
@@ -3487,8 +3496,12 @@
     const authNameInput = document.getElementById("authNameInput");
     const authEmailInput = document.getElementById("authEmailInput");
     const authPassInput = document.getElementById("authPassInput");
+    const authConfirmRow = document.getElementById("authConfirmRow");
+    const authPassConfirmInput = document.getElementById("authPassConfirmInput");
     const authPassToggleBtn = document.getElementById("authPassToggleBtn");
     const authPassToggleIcon = document.getElementById("authPassToggleIcon");
+    const authPassConfirmToggleBtn = document.getElementById("authPassConfirmToggleBtn");
+    const authPassConfirmToggleIcon = document.getElementById("authPassConfirmToggleIcon");
     const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
     const authSubmitBtn = document.getElementById("authSubmitBtn");
     const authSwitchBtn = document.getElementById("authSwitchBtn");
@@ -4187,6 +4200,7 @@
         ? "Create your account to unlock premium upload and customer-ready workflow."
         : "Welcome back. Sign in to continue with your personalized workspace.";
       authNameRow.style.display = isSignUp ? "grid" : "none";
+      authConfirmRow.style.display = isSignUp ? "grid" : "none";
       forgotPasswordBtn.style.display = isSignUp ? "none" : "inline-flex";
       authSubmitBtn.textContent = isSignUp ? "Create Account" : "Continue to Account";
       authSwitchBtn.textContent = isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up";
@@ -4196,6 +4210,10 @@
       authPassToggleBtn.setAttribute("aria-pressed", "false");
       authPassToggleBtn.setAttribute("aria-label", "Show password");
       authPassToggleIcon.className = "fa-regular fa-eye";
+      authPassConfirmInput.type = "password";
+      authPassConfirmToggleBtn.setAttribute("aria-pressed", "false");
+      authPassConfirmToggleBtn.setAttribute("aria-label", "Show confirm password");
+      authPassConfirmToggleIcon.className = "fa-regular fa-eye";
     }
 
     function setAuthPageState(open) {
@@ -4674,6 +4692,7 @@
     async function completeAuth(mode) {
       const email = normalizeEmail(authEmailInput.value);
       const password = authPassInput.value.trim();
+      const confirmPassword = authPassConfirmInput.value.trim();
       const name = authNameInput.value.trim();
 
       if (!email || !password || (mode === "signup" && !name)) {
@@ -4683,6 +4702,16 @@
       }
 
       if (mode === "signup") {
+        if (!confirmPassword) {
+          setStatus("Please confirm your password.");
+          addNotification("Authentication Failed", "Please confirm your password.");
+          return false;
+        }
+        if (password !== confirmPassword) {
+          setStatus("Password and confirm password must match.");
+          addNotification("Authentication Failed", "Password and confirm password must match.");
+          return false;
+        }
         if (!validatePassword(password)) {
           setStatus("Password must be at least 8 characters and include letters and numbers.");
           addNotification("Authentication Failed", "Password must be at least 8 characters and include letters and numbers.");
@@ -5893,6 +5922,16 @@
 
     authPassToggleBtn.addEventListener("click", () => {
       togglePasswordField(authPassInput, authPassToggleBtn, authPassToggleIcon, "Show password", "Hide password");
+    });
+
+    authPassConfirmToggleBtn.addEventListener("click", () => {
+      togglePasswordField(
+        authPassConfirmInput,
+        authPassConfirmToggleBtn,
+        authPassConfirmToggleIcon,
+        "Show confirm password",
+        "Hide confirm password"
+      );
     });
 
     resetPassToggleBtn.addEventListener("click", () => {
