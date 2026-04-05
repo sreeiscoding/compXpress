@@ -1479,6 +1479,33 @@
       padding: 14px;
     }
 
+    .coming-soon-tag {
+      position: absolute;
+      top: 0;
+      right: 16px;
+      transform: translateY(-52%);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(96, 165, 250, 0.55);
+      background: linear-gradient(180deg, rgba(30, 64, 175, 0.34), rgba(15, 23, 42, 0.88));
+      color: #dbeafe;
+      font-family: var(--font-secondary);
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 24px rgba(30, 64, 175, 0.28);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .coming-soon-tag i {
+      font-size: 0.74rem;
+      color: #93c5fd;
+    }
+
     .flow-head {
       display: flex;
       align-items: center;
@@ -1518,6 +1545,8 @@
       box-shadow: var(--shadow-card);
       backdrop-filter: blur(4px);
       padding: clamp(18px, 3vw, 30px);
+      position: relative;
+      overflow: visible;
     }
 
     .section-title {
@@ -1766,7 +1795,7 @@
     .upload-preview-canvas {
       width: 100%;
       height: auto;
-      max-height: 190px;
+      max-height: 140px;
       object-fit: contain;
       border-radius: var(--radius-sm);
       background: #0b1224;
@@ -1844,13 +1873,9 @@
       border: 1px solid rgba(148, 163, 184, 0.2);
     }
 
-    #passportPreview {
-      aspect-ratio: 413 / 531;
-      object-fit: cover;
-    }
-
-    .preview-shell-original {
+    .preview-shell {
       position: relative;
+      aspect-ratio: 4 / 3;
       border-radius: 9px;
       border: 1px solid rgba(148, 163, 184, 0.2);
       background:
@@ -1859,8 +1884,7 @@
       overflow: hidden;
     }
 
-    .preview-shell-original::before {
-      content: "\f03e";
+    .preview-shell::before {
       font-family: "Font Awesome 6 Free";
       font-weight: 900;
       position: absolute;
@@ -1872,8 +1896,7 @@
       pointer-events: none;
     }
 
-    .preview-shell-original::after {
-      content: "Original image will appear here";
+    .preview-shell::after {
       position: absolute;
       left: 50%;
       bottom: 14px;
@@ -1886,20 +1909,154 @@
       pointer-events: none;
     }
 
-    .preview-shell-original.has-image::before,
-    .preview-shell-original.has-image::after {
+    .preview-shell.original::before {
+      content: "\f03e";
+    }
+
+    .preview-shell.original::after {
+      content: "Original image placeholder";
+    }
+
+    .preview-shell.compressed::before {
+      content: "\f0b2";
+    }
+
+    .preview-shell.compressed::after {
+      content: "Compressed image placeholder";
+    }
+
+    .preview-shell.passport::before {
+      content: "\f2c2";
+    }
+
+    .preview-shell.passport::after {
+      content: "Passport photo placeholder";
+    }
+
+    .preview-shell.has-image::before,
+    .preview-shell.has-image::after {
       display: none;
     }
 
-    .preview-shell-original:not(.has-image) .preview-media {
+    .preview-shell:not(.has-image) .preview-media {
       display: none;
     }
 
     .actions {
       margin-top: 20px;
       display: grid;
-      grid-template-columns: repeat(5, minmax(90px, 1fr));
+      grid-template-columns: repeat(3, minmax(140px, 1fr));
       gap: 12px;
+    }
+
+    .action-dropdown {
+      position: relative;
+    }
+
+    .action-dropdown-toggle {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: var(--font-secondary);
+      font-size: 0.8rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .action-dropdown-toggle:hover {
+      border-color: rgba(96, 165, 250, 0.7);
+      transform: translateY(-1px);
+    }
+
+    .action-dropdown-toggle i {
+      color: #bfdbfe;
+      font-size: 0.76rem;
+    }
+
+    .action-dropdown.open .action-dropdown-toggle {
+      border-color: rgba(96, 165, 250, 0.9);
+      background: rgba(30, 64, 175, 0.25);
+    }
+
+    .action-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      margin: 0;
+      padding: 6px;
+      list-style: none;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.96);
+      box-shadow: 0 16px 32px rgba(2, 6, 23, 0.46);
+      display: grid;
+      gap: 5px;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity var(--transition), transform var(--transition);
+      z-index: 12;
+    }
+
+    .action-dropdown.open .action-dropdown-menu {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .action-dropdown-item {
+      appearance: none;
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      padding: 8px 9px;
+      font-family: var(--font-secondary);
+      font-size: 0.76rem;
+      cursor: pointer;
+      text-align: left;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .action-dropdown-item:hover {
+      border-color: rgba(96, 165, 250, 0.72);
+    }
+
+    .action-dropdown-item.active {
+      border-color: rgba(96, 165, 250, 0.9);
+      background: rgba(30, 64, 175, 0.3);
+      color: #eff6ff;
+    }
+
+    .action-dropdown-item .check {
+      opacity: 0;
+      font-size: 0.72rem;
+      color: #bfdbfe;
+    }
+
+    .action-dropdown-item.active .check {
+      opacity: 1;
+    }
+
+    .action-dropdown.disabled .action-dropdown-toggle {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      pointer-events: none;
     }
 
     .btn-reset {
@@ -2071,7 +2228,7 @@
       }
 
       .actions {
-        grid-template-columns: repeat(2, minmax(120px, 1fr));
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
       }
 
       .hero {
@@ -2093,6 +2250,10 @@
 
       .billing-grid {
         grid-template-columns: 1fr;
+      }
+
+      .coming-soon-tag {
+        right: 12px;
       }
     }
 
@@ -2136,6 +2297,12 @@
 
       .btn {
         width: 100%;
+      }
+
+      .hero .btn-cta {
+        width: auto;
+        min-width: 168px;
+        max-width: 80%;
       }
 
       .btn-reset {
@@ -2212,7 +2379,7 @@
         grid-template-columns: 1fr;
       }
 
-      .preview-shell-original::after {
+      .preview-shell::after {
         white-space: normal;
         text-align: center;
         width: calc(100% - 22px);
@@ -2290,6 +2457,10 @@
       .drawer-title {
         font-size: 0.9rem;
       }
+
+      footer {
+        font-size: 0.8rem;
+      }
     }
   </style>
 </head>
@@ -2366,7 +2537,7 @@
         </div>
       </div>
       <div class="setting-group">
-        <button id="logoutBtn" class="logout-btn" type="button"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+        <button id="logoutBtn" class="logout-btn" type="button" hidden><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
       </div>
     </div>
   </aside>
@@ -2535,6 +2706,7 @@
 
     <section id="app" class="app-section container">
       <div class="card">
+        <p class="coming-soon-tag"><i class="fa-solid fa-video"></i>Video Compressing Coming Soon</p>
         <div class="app-intro">
           <p class="app-eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i>Customer-Ready Workflow</p>
           <h2 class="section-title">Upload once. Get optimized and passport-ready output.</h2>
@@ -2584,17 +2756,21 @@
             <div class="preview-grid">
               <div class="preview-card">
                 <h4>Original Image</h4>
-                <div id="originalPreviewShell" class="preview-shell-original">
+                <div id="originalPreviewShell" class="preview-shell original">
                   <img id="originalPreview" class="preview-media" alt="" />
                 </div>
               </div>
               <div class="preview-card">
                 <h4>Compressed Image</h4>
-                <img id="compressedPreview" class="preview-media" alt="Compressed Image Preview" />
+                <div id="compressedPreviewShell" class="preview-shell compressed">
+                  <img id="compressedPreview" class="preview-media" alt="Compressed Image Preview" />
+                </div>
               </div>
               <div class="preview-card">
                 <h4>Passport Photo</h4>
-                <img id="passportPreview" class="preview-media" alt="Passport Photo Preview" />
+                <div id="passportPreviewShell" class="preview-shell passport">
+                  <img id="passportPreview" class="preview-media" alt="Passport Photo Preview" />
+                </div>
               </div>
             </div>
           </div>
@@ -2607,6 +2783,24 @@
             <div class="actions">
               <button id="compressBtn" class="btn" disabled><i class="fa-solid fa-compress"></i>Compress Image</button>
               <button id="passportBtn" class="btn" disabled><i class="fa-regular fa-id-card"></i>Generate Passport Photo</button>
+              <div id="passportSourceDropdown" class="action-dropdown">
+                <button id="passportSourceToggle" class="action-dropdown-toggle" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="passportSourceMenu">
+                  <span id="passportSourceLabel">Passport Source: Compressed</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <ul id="passportSourceMenu" class="action-dropdown-menu" role="listbox" aria-label="Passport source selection">
+                  <li>
+                    <button class="action-dropdown-item active" type="button" role="option" data-value="compressed" aria-selected="true">
+                      <span>Compressed</span><i class="fa-solid fa-check check"></i>
+                    </button>
+                  </li>
+                  <li>
+                    <button class="action-dropdown-item" type="button" role="option" data-value="original" aria-selected="false">
+                      <span>Original</span><i class="fa-solid fa-check check"></i>
+                    </button>
+                  </li>
+                </ul>
+              </div>
               <button id="downloadCompressedBtn" class="btn" disabled><i class="fa-solid fa-download"></i>Download Compressed</button>
               <button id="downloadPassportBtn" class="btn" disabled><i class="fa-solid fa-file-arrow-down"></i>Download Passport</button>
               <button id="resetRegenerateBtn" class="btn btn-reset" type="button" title="Reset and regenerate once" aria-label="Reset and regenerate once" disabled><i class="fa-solid fa-rotate-right"></i></button>
@@ -2744,6 +2938,8 @@
     const uploadPreviewWrap = document.getElementById("uploadPreviewWrap");
     const uploadPreviewGrid = document.getElementById("uploadPreviewGrid");
     const originalPreviewShell = document.getElementById("originalPreviewShell");
+    const compressedPreviewShell = document.getElementById("compressedPreviewShell");
+    const passportPreviewShell = document.getElementById("passportPreviewShell");
     const originalPreview = document.getElementById("originalPreview");
     const compressedPreview = document.getElementById("compressedPreview");
     const passportPreview = document.getElementById("passportPreview");
@@ -2753,6 +2949,10 @@
 
     const compressBtn = document.getElementById("compressBtn");
     const passportBtn = document.getElementById("passportBtn");
+    const passportSourceDropdown = document.getElementById("passportSourceDropdown");
+    const passportSourceToggle = document.getElementById("passportSourceToggle");
+    const passportSourceLabel = document.getElementById("passportSourceLabel");
+    const passportSourceMenu = document.getElementById("passportSourceMenu");
     const downloadCompressedBtn = document.getElementById("downloadCompressedBtn");
     const downloadPassportBtn = document.getElementById("downloadPassportBtn");
     const resetRegenerateBtn = document.getElementById("resetRegenerateBtn");
@@ -2774,6 +2974,8 @@
     let isNotifDrawerOpen = false;
     let isSettingsDrawerOpen = false;
     let isBillingPageOpen = false;
+    let isPassportSourceMenuOpen = false;
+    let passportSource = "compressed";
     let selectedBillingMethod = "stripe";
     let authMode = "signin";
     let pendingBillingCheckout = false;
@@ -2788,7 +2990,6 @@
     const CURRENT_USER_KEY = "comxpress_current_user_v1";
     const FREE_UPLOAD_LIMIT = 5;
     const PRO_UPLOAD_LIMIT = 50;
-    const PASSPORT_PLACEHOLDER_SRC = "assets/fonts/image/placeholder_img.jpg";
 
     function readNotifications() {
       try {
@@ -3341,13 +3542,13 @@
         signinPrompt.style.display = "none";
         authActions.style.display = "none";
         logoutBtn.disabled = false;
-        logoutBtn.style.display = "inline-flex";
+        logoutBtn.hidden = false;
       } else {
         signinPromptText.textContent = "You're not signed in, signing for better experience.";
         signinPrompt.style.display = "flex";
         authActions.style.display = "grid";
         logoutBtn.disabled = true;
-        logoutBtn.style.display = "none";
+        logoutBtn.hidden = true;
       }
     }
 
@@ -3832,10 +4033,48 @@
       statusEl.textContent = message || "";
     }
 
+    function setPassportSourceMenuState(open) {
+      isPassportSourceMenuOpen = !!open;
+      passportSourceDropdown.classList.toggle("open", isPassportSourceMenuOpen);
+      passportSourceToggle.setAttribute("aria-expanded", String(isPassportSourceMenuOpen));
+    }
+
+    function setPassportSource(value, announce = true) {
+      passportSource = value === "original" ? "original" : "compressed";
+      const labelText = passportSource === "original" ? "Passport Source: Original" : "Passport Source: Compressed";
+      passportSourceLabel.textContent = labelText;
+
+      const options = passportSourceMenu.querySelectorAll(".action-dropdown-item");
+      options.forEach((option) => {
+        const isActive = option.dataset.value === passportSource;
+        option.classList.toggle("active", isActive);
+        option.setAttribute("aria-selected", String(isActive));
+      });
+
+      if (passportBlob) {
+        passportBlob = null;
+        passportPreview.removeAttribute("src");
+        passportPreviewShell.classList.remove("has-image");
+      }
+
+      setProcessingState(false);
+      if (announce) {
+        if (passportSource === "compressed" && !compressedBlob) {
+          setStatus("Passport source set to Compressed. Compress image first to generate passport photo.");
+        } else {
+          setStatus(`Passport source set to ${passportSource}.`);
+        }
+      }
+    }
+
     function setProcessingState(isProcessing) {
       const hasImage = !!getActiveUpload();
+      const wantsCompressedSource = passportSource === "compressed";
+      const hasPassportSource = wantsCompressedSource ? !!compressedBlob : hasImage;
       compressBtn.disabled = isProcessing || !hasImage;
-      passportBtn.disabled = isProcessing || !hasImage;
+      passportBtn.disabled = isProcessing || !hasPassportSource;
+      passportSourceDropdown.classList.toggle("disabled", isProcessing || !hasImage);
+      passportSourceToggle.disabled = isProcessing || !hasImage;
       downloadCompressedBtn.disabled = isProcessing || !compressedBlob;
       downloadPassportBtn.disabled = isProcessing || !passportBlob;
       resetRegenerateBtn.disabled = isProcessing || !compressedBlob || !hasImage;
@@ -3848,6 +4087,7 @@
       compressedBlob = null;
       compressedSizeEl.textContent = "-";
       compressedPreview.removeAttribute("src");
+      compressedPreviewShell.classList.remove("has-image");
       downloadCompressedBtn.disabled = true;
       resetRegenerateBtn.disabled = true;
 
@@ -3860,7 +4100,8 @@
     function clearGeneratedOutputs() {
       clearCompressedOutput();
       passportBlob = null;
-      passportPreview.src = PASSPORT_PLACEHOLDER_SRC;
+      passportPreview.removeAttribute("src");
+      passportPreviewShell.classList.remove("has-image");
       downloadPassportBtn.disabled = true;
 
       if (passportObjectUrl) {
@@ -3903,6 +4144,22 @@
         img.onerror = () => {
           URL.revokeObjectURL(objectUrl);
           reject(new Error("Unable to load image."));
+        };
+        img.src = objectUrl;
+      });
+    }
+
+    function blobToImage(blob) {
+      return new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(img);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Unable to load image blob."));
         };
         img.src = objectUrl;
       });
@@ -3987,6 +4244,7 @@
         if (compressedObjectUrl) URL.revokeObjectURL(compressedObjectUrl);
         compressedObjectUrl = URL.createObjectURL(compressedBlob);
         compressedPreview.src = compressedObjectUrl;
+        compressedPreviewShell.classList.add("has-image");
         compressedSizeEl.textContent = formatBytes(compressedBlob.size);
 
         try {
@@ -4037,6 +4295,11 @@
 
     async function generatePassport() {
       if (!originalFile) return;
+      const sourceType = passportSource === "original" ? "original" : "compressed";
+      if (sourceType === "compressed" && !compressedBlob) {
+        setStatus("Compress the image first, or switch passport source to Original.");
+        return;
+      }
 
       try {
         setStatus("Processing...");
@@ -4048,10 +4311,13 @@
           writeAppState(state);
         }
 
-        const img = await fileToImage(originalFile);
+        const img = sourceType === "compressed"
+          ? await blobToImage(compressedBlob)
+          : await fileToImage(originalFile);
         const canvas = document.createElement("canvas");
         const targetW = 413;
         const targetH = 531;
+        const paddingRatio = 0.08;
         canvas.width = targetW;
         canvas.height = targetH;
 
@@ -4059,7 +4325,9 @@
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, targetW, targetH);
 
-        const scale = Math.min(targetW / img.width, targetH / img.height);
+        const innerW = targetW * (1 - paddingRatio * 2);
+        const innerH = targetH * (1 - paddingRatio * 2);
+        const scale = Math.min(innerW / img.width, innerH / img.height);
         const drawW = img.width * scale;
         const drawH = img.height * scale;
         const x = (targetW - drawW) / 2;
@@ -4072,6 +4340,7 @@
         if (passportObjectUrl) URL.revokeObjectURL(passportObjectUrl);
         passportObjectUrl = URL.createObjectURL(passportBlob);
         passportPreview.src = passportObjectUrl;
+        passportPreviewShell.classList.add("has-image");
 
         try {
           const currentState = readAppState() || {};
@@ -4085,8 +4354,8 @@
         } catch (error) {
         }
 
-        setStatus("Passport photo generated.");
-        addNotification("Passport Generated", "Passport photo is ready for download.");
+        setStatus(`Passport photo generated from ${sourceType} image.`);
+        addNotification("Passport Generated", `Passport photo is ready from ${sourceType} source.`);
       } catch (error) {
         const state = readAppState();
         if (state) {
@@ -4120,6 +4389,7 @@
           if (compressedObjectUrl) URL.revokeObjectURL(compressedObjectUrl);
           compressedObjectUrl = URL.createObjectURL(compressedBlob);
           compressedPreview.src = compressedObjectUrl;
+          compressedPreviewShell.classList.add("has-image");
           compressedSizeEl.textContent = formatBytes(saved.compressed.size || compressedBlob.size);
         }
 
@@ -4128,6 +4398,7 @@
           if (passportObjectUrl) URL.revokeObjectURL(passportObjectUrl);
           passportObjectUrl = URL.createObjectURL(passportBlob);
           passportPreview.src = passportObjectUrl;
+          passportPreviewShell.classList.add("has-image");
         }
 
         setProcessingState(false);
@@ -4425,6 +4696,9 @@
     });
 
     document.addEventListener("click", (e) => {
+      if (isPassportSourceMenuOpen && !passportSourceDropdown.contains(e.target)) {
+        setPassportSourceMenuState(false);
+      }
       if (upgradeModal.classList.contains("open") && !e.target.closest("#upgradeModal .modal-card")) {
         setUpgradeModalState(false);
       }
@@ -4463,6 +4737,10 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
+        if (isPassportSourceMenuOpen) {
+          setPassportSourceMenuState(false);
+          return;
+        }
         if (authPage.classList.contains("open")) {
           pendingBillingCheckout = false;
           setAuthPageState(false);
@@ -4529,6 +4807,21 @@
     passportBtn.addEventListener("click", generatePassport);
     resetRegenerateBtn.addEventListener("click", resetAndRegenerateCompression);
 
+    passportSourceToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (passportSourceToggle.disabled) return;
+      setPassportSourceMenuState(!isPassportSourceMenuOpen);
+    });
+
+    passportSourceMenu.addEventListener("click", (e) => {
+      const optionBtn = e.target.closest(".action-dropdown-item");
+      if (!optionBtn) return;
+      const value = optionBtn.dataset.value;
+      if (!value) return;
+      setPassportSource(value, true);
+      setPassportSourceMenuState(false);
+    });
+
     downloadCompressedBtn.addEventListener("click", () => {
       const ok = downloadBlob(compressedBlob, "compressed-image.jpg");
       if (!ok) {
@@ -4550,9 +4843,9 @@
     initializeTheme();
     initializeAuthState();
     initializeSubscriptionState();
+    setPassportSource("compressed", false);
     setBillingMethod("stripe");
     restoreBillingPageState();
-    passportPreview.src = PASSPORT_PLACEHOLDER_SRC;
     renderFileQueue();
     renderNotifications();
     {
