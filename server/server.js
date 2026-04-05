@@ -30,6 +30,8 @@ app.get("/", (_req, res) => {
       "GET /api/health",
       "POST /api/signup",
       "POST /api/login",
+      "POST /api/forgot-password",
+      "POST /api/reset-password",
       "POST /api/remove-bg",
       "POST /api/process-passport",
       "POST /api/assets/compressed",

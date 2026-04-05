@@ -21,6 +21,14 @@ const userSchema = new mongoose.Schema(
     subscribed: {
       type: Boolean,
       default: false
+    },
+    passwordResetTokenHash: {
+      type: String,
+      default: ""
+    },
+    passwordResetExpiresAt: {
+      type: Date,
+      default: null
     }
   },
   {

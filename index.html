@@ -653,6 +653,57 @@
       border-color: rgba(96, 165, 250, 0.8);
     }
 
+    .auth-pass-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .auth-pass-wrap .auth-input {
+      padding-right: 44px;
+    }
+
+    .auth-pass-toggle {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: rgba(15, 23, 42, 0.72);
+      color: #cbd5e1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: border-color var(--transition), color var(--transition), background var(--transition);
+    }
+
+    .auth-pass-toggle:hover {
+      border-color: rgba(96, 165, 250, 0.7);
+      color: #dbeafe;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .auth-forgot {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: #93c5fd;
+      font-family: var(--font-secondary);
+      font-size: 0.79rem;
+      justify-self: end;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .auth-forgot:hover {
+      color: #bfdbfe;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
     .auth-actions {
       margin-top: 4px;
       display: grid;
@@ -2831,8 +2882,14 @@
         </div>
         <div class="auth-row">
           <label class="auth-label" for="authPassInput">Password</label>
-          <input id="authPassInput" class="auth-input" type="password" autocomplete="current-password" required />
+          <div class="auth-pass-wrap">
+            <input id="authPassInput" class="auth-input" type="password" autocomplete="current-password" required />
+            <button id="authPassToggleBtn" class="auth-pass-toggle" type="button" aria-label="Show password" aria-pressed="false">
+              <i id="authPassToggleIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
         </div>
+        <button id="forgotPasswordBtn" class="auth-forgot" type="button">Forgot password?</button>
         <div class="auth-actions">
           <button id="authSubmitBtn" class="auth-submit" type="submit">Continue to Account</button>
           <button id="authSwitchBtn" class="auth-switch" type="button">Need an account? Sign up</button>
@@ -2847,6 +2904,49 @@
     </div>
   </div>
 
+  <div id="resetPasswordPage" class="auth-page" aria-hidden="true">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="resetTitle" aria-describedby="resetSubtitle">
+      <div class="auth-head">
+        <div>
+          <h3 id="resetTitle" class="auth-title">Reset Password</h3>
+          <p id="resetSubtitle" class="auth-subtitle">Enter the token from your recovery email and set a new password.</p>
+        </div>
+        <button id="resetCloseBtn" class="auth-close" type="button" aria-label="Close reset password"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="resetForm" class="auth-form">
+        <div class="auth-row">
+          <label class="auth-label" for="resetEmailInput">Email</label>
+          <input id="resetEmailInput" class="auth-input" type="email" autocomplete="email" required />
+        </div>
+        <div class="auth-row">
+          <label class="auth-label" for="resetTokenInput">Recovery Token</label>
+          <input id="resetTokenInput" class="auth-input" type="text" autocomplete="one-time-code" required />
+        </div>
+        <div class="auth-row">
+          <label class="auth-label" for="resetPassInput">New Password</label>
+          <div class="auth-pass-wrap">
+            <input id="resetPassInput" class="auth-input" type="password" autocomplete="new-password" required />
+            <button id="resetPassToggleBtn" class="auth-pass-toggle" type="button" aria-label="Show new password" aria-pressed="false">
+              <i id="resetPassToggleIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="auth-row">
+          <label class="auth-label" for="resetPassConfirmInput">Confirm Password</label>
+          <div class="auth-pass-wrap">
+            <input id="resetPassConfirmInput" class="auth-input" type="password" autocomplete="new-password" required />
+            <button id="resetPassConfirmToggleBtn" class="auth-pass-toggle" type="button" aria-label="Show confirm password" aria-pressed="false">
+              <i id="resetPassConfirmToggleIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="auth-actions">
+          <button id="resetSubmitBtn" class="auth-submit" type="submit">Reset Password</button>
+          <button id="resetBackBtn" class="auth-switch" type="button">Back to Sign In</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <div id="billingPage" class="billing-page" aria-hidden="true">
     <div class="billing-card" role="dialog" aria-modal="true" aria-labelledby="billingTitle" aria-describedby="billingSubtitle">
       <div class="auth-head">
@@ -3158,8 +3258,23 @@
     const authNameInput = document.getElementById("authNameInput");
     const authEmailInput = document.getElementById("authEmailInput");
     const authPassInput = document.getElementById("authPassInput");
+    const authPassToggleBtn = document.getElementById("authPassToggleBtn");
+    const authPassToggleIcon = document.getElementById("authPassToggleIcon");
+    const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
     const authSubmitBtn = document.getElementById("authSubmitBtn");
     const authSwitchBtn = document.getElementById("authSwitchBtn");
+    const resetPasswordPage = document.getElementById("resetPasswordPage");
+    const resetCloseBtn = document.getElementById("resetCloseBtn");
+    const resetForm = document.getElementById("resetForm");
+    const resetEmailInput = document.getElementById("resetEmailInput");
+    const resetTokenInput = document.getElementById("resetTokenInput");
+    const resetPassInput = document.getElementById("resetPassInput");
+    const resetPassConfirmInput = document.getElementById("resetPassConfirmInput");
+    const resetPassToggleBtn = document.getElementById("resetPassToggleBtn");
+    const resetPassToggleIcon = document.getElementById("resetPassToggleIcon");
+    const resetPassConfirmToggleBtn = document.getElementById("resetPassConfirmToggleBtn");
+    const resetPassConfirmToggleIcon = document.getElementById("resetPassConfirmToggleIcon");
+    const resetBackBtn = document.getElementById("resetBackBtn");
     const oauthGoogleBtn = document.getElementById("oauthGoogleBtn");
     const oauthGithubBtn = document.getElementById("oauthGithubBtn");
     const oauthMicrosoftBtn = document.getElementById("oauthMicrosoftBtn");
@@ -3603,10 +3718,15 @@
         ? "Create your account to unlock premium upload and customer-ready workflow."
         : "Welcome back. Sign in to continue with your personalized workspace.";
       authNameRow.style.display = isSignUp ? "grid" : "none";
+      forgotPasswordBtn.style.display = isSignUp ? "none" : "inline-flex";
       authSubmitBtn.textContent = isSignUp ? "Create Account" : "Continue to Account";
       authSwitchBtn.textContent = isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up";
       authEmailInput.autocomplete = isSignUp ? "email" : "email";
       authPassInput.autocomplete = isSignUp ? "new-password" : "current-password";
+      authPassInput.type = "password";
+      authPassToggleBtn.setAttribute("aria-pressed", "false");
+      authPassToggleBtn.setAttribute("aria-label", "Show password");
+      authPassToggleIcon.className = "fa-regular fa-eye";
     }
 
     function setAuthPageState(open) {
@@ -3619,6 +3739,42 @@
       }
     }
 
+    function setResetPageState(open, prefillEmail = "") {
+      resetPasswordPage.classList.toggle("open", open);
+      resetPasswordPage.setAttribute("aria-hidden", String(!open));
+      if (open) {
+        if (prefillEmail) {
+          resetEmailInput.value = prefillEmail;
+        }
+      } else {
+        resetForm.reset();
+        resetPassInput.type = "password";
+        resetPassConfirmInput.type = "password";
+        resetPassToggleBtn.setAttribute("aria-pressed", "false");
+        resetPassToggleBtn.setAttribute("aria-label", "Show new password");
+        resetPassToggleIcon.className = "fa-regular fa-eye";
+        resetPassConfirmToggleBtn.setAttribute("aria-pressed", "false");
+        resetPassConfirmToggleBtn.setAttribute("aria-label", "Show confirm password");
+        resetPassConfirmToggleIcon.className = "fa-regular fa-eye";
+      }
+    }
+
+    function openResetFromLocationHash() {
+      const rawHash = String(window.location.hash || "");
+      if (!rawHash.startsWith("#reset")) return;
+
+      const query = rawHash.includes("?") ? rawHash.slice(rawHash.indexOf("?") + 1) : "";
+      const params = new URLSearchParams(query);
+      const email = normalizeEmail(params.get("email") || "");
+      const token = String(params.get("token") || "").trim();
+
+      setAuthPageState(false);
+      setResetPageState(true, email);
+      if (token) {
+        resetTokenInput.value = token;
+      }
+      setStatus("Use your recovery token and set a new password.");
+    }
     function openAuthPage(mode) {
       authMode = mode === "signup" ? "signup" : "signin";
       pendingBillingCheckout = false;
@@ -3631,6 +3787,7 @@
       if (isSettingsDrawerOpen) {
         setSettingsDrawerState(false);
       }
+      setResetPageState(false);
       setAuthPageState(true);
     }
 
@@ -3902,6 +4059,38 @@
       return data;
     }
 
+    async function requestForgotPassword(email) {
+      const response = await fetch(`${API_BASE_URL}/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || "Could not start password recovery.");
+      }
+      return data;
+    }
+
+    async function requestResetPassword(email, token, newPassword) {
+      const response = await fetch(`${API_BASE_URL}/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, token, newPassword })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || "Could not reset password.");
+      }
+      return data;
+    }
+
     function initializeSubscriptionState() {
       updatePricingState();
     }
@@ -3966,39 +4155,17 @@
       const email = normalizeEmail(authEmailInput.value);
       const password = authPassInput.value.trim();
       const name = authNameInput.value.trim();
-      const users = readUsers();
 
       if (!email || !password || (mode === "signup" && !name)) {
         setStatus("Please fill all required authentication fields.");
+        addNotification("Authentication Failed", "Please fill all required authentication fields.");
         return false;
       }
 
       if (mode === "signup") {
         if (!validatePassword(password)) {
           setStatus("Password must be at least 8 characters and include letters and numbers.");
-          return false;
-        }
-        if (users[email]) {
-          setStatus("Account already exists. Please sign in instead.");
-          return false;
-        }
-        const passwordHash = await hashPassword(password);
-        users[email] = {
-          name,
-          email,
-          passwordHash,
-          subscribed: false
-        };
-        writeUsers(users);
-      } else {
-        const user = users[email];
-        if (!user) {
-          setStatus("No account found for this email. Please sign up first.");
-          return false;
-        }
-        const incomingHash = await hashPassword(password);
-        if (user.passwordHash !== incomingHash) {
-          setStatus("Invalid credentials. Please try again.");
+          addNotification("Authentication Failed", "Password must be at least 8 characters and include letters and numbers.");
           return false;
         }
       }
@@ -4008,11 +4175,27 @@
         authResult = await requestBackendAuth(mode, email, password, name);
       } catch (error) {
         setStatus(error.message || "Could not authenticate with server.");
+        addNotification("Authentication Failed", error.message || "Could not authenticate with server.");
+        return false;
+      }
+
+      if (mode === "signup") {
+        authMode = "signin";
+        renderAuthMode();
+        authEmailInput.value = email;
+        authPassInput.value = password;
+        authNameInput.value = name;
+        if (pendingBillingCheckout) {
+          setStatus("Account created successfully. Please sign in to continue billing.");
+        } else {
+          setStatus("Account created successfully. Please sign in to continue.");
+        }
+        addNotification("Sign Up Successful", "Your account has been created successfully. Please sign in.");
         return false;
       }
 
       const serverName = String(authResult && authResult.user && authResult.user.name ? authResult.user.name : "").trim();
-      const resolvedName = serverName || (mode === "signup" ? name : (users[email] && users[email].name ? users[email].name : ""));
+      const resolvedName = serverName || name || "User";
 
       try {
         localStorage.setItem(CURRENT_USER_KEY, email);
@@ -4021,11 +4204,18 @@
       } catch (error) {
       }
 
-      const savedUsers = readUsers();
-      const currentUser = savedUsers[email];
+      const users = readUsers();
+      users[email] = {
+        ...(users[email] || {}),
+        name: resolvedName,
+        email,
+        subscribed: !!(authResult && authResult.user && authResult.user.subscribed)
+      };
+      writeUsers(users);
+
       signedInDisplayName = resolvedName || "";
       isSignedIn = true;
-      isSubscribed = !!((authResult && authResult.user && authResult.user.subscribed) || (currentUser && currentUser.subscribed));
+      isSubscribed = !!(authResult && authResult.user && authResult.user.subscribed);
       updateAuthUI();
       updatePricingState();
 
@@ -4040,12 +4230,75 @@
         return true;
       }
 
-      const message = mode === "signup" ? "Account created and signed in successfully." : "Signed in successfully.";
+      const message = "Signed in successfully.";
       setStatus(message);
-      addNotification(mode === "signup" ? "Sign Up Successful" : "Sign In Successful", message);
+      addNotification("Sign In Successful", message);
       return true;
     }
 
+    function togglePasswordField(inputEl, buttonEl, iconEl, showLabel, hideLabel) {
+      if (!inputEl || !buttonEl || !iconEl) return;
+      const isHidden = inputEl.type === "password";
+      inputEl.type = isHidden ? "text" : "password";
+      buttonEl.setAttribute("aria-pressed", String(isHidden));
+      buttonEl.setAttribute("aria-label", isHidden ? hideLabel : showLabel);
+      iconEl.className = isHidden ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+    }
+
+    async function handleForgotPassword() {
+      const email = normalizeEmail(authEmailInput.value);
+      if (!email) {
+        setStatus("Enter your email, then click Forgot password.");
+        authEmailInput.focus();
+        return;
+      }
+
+      try {
+        await requestForgotPassword(email);
+        setStatus("Recovery message sent. Check your email for the token.");
+        addNotification("Recovery Email Sent", "Check your inbox for password reset instructions.");
+        setAuthPageState(false);
+        setResetPageState(true, email);
+        resetTokenInput.focus();
+      } catch (error) {
+        setStatus(error.message || "Could not send recovery email.");
+      }
+    }
+
+    async function completeResetPassword() {
+      const email = normalizeEmail(resetEmailInput.value);
+      const token = String(resetTokenInput.value || "").trim();
+      const newPassword = String(resetPassInput.value || "").trim();
+      const confirmPassword = String(resetPassConfirmInput.value || "").trim();
+
+      if (!email || !token || !newPassword || !confirmPassword) {
+        setStatus("Please fill all reset fields.");
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        setStatus("New password and confirm password must match.");
+        return;
+      }
+
+      if (!validatePassword(newPassword)) {
+        setStatus("Password must be at least 8 characters and include letters and numbers.");
+        return;
+      }
+
+      try {
+        await requestResetPassword(email, token, newPassword);
+        setStatus("Password reset successful. Sign in with your new password.");
+        addNotification("Password Updated", "Your password has been reset successfully.");
+        setResetPageState(false);
+        authMode = "signin";
+        setAuthPageState(true);
+        authEmailInput.value = email;
+        authPassInput.value = "";
+      } catch (error) {
+        setStatus(error.message || "Could not reset password.");
+      }
+    }
     function getOAuthIdentity(provider) {
       const providerName = provider === "google"
         ? "Google"
@@ -5092,6 +5345,37 @@
       openAuthPage("signup");
     });
 
+    authPassToggleBtn.addEventListener("click", () => {
+      togglePasswordField(authPassInput, authPassToggleBtn, authPassToggleIcon, "Show password", "Hide password");
+    });
+
+    resetPassToggleBtn.addEventListener("click", () => {
+      togglePasswordField(resetPassInput, resetPassToggleBtn, resetPassToggleIcon, "Show new password", "Hide new password");
+    });
+
+    resetPassConfirmToggleBtn.addEventListener("click", () => {
+      togglePasswordField(resetPassConfirmInput, resetPassConfirmToggleBtn, resetPassConfirmToggleIcon, "Show confirm password", "Hide confirm password");
+    });
+
+    forgotPasswordBtn.addEventListener("click", () => {
+      handleForgotPassword();
+    });
+
+    resetCloseBtn.addEventListener("click", () => {
+      setResetPageState(false);
+      openAuthPage("signin");
+    });
+
+    resetBackBtn.addEventListener("click", () => {
+      setResetPageState(false);
+      openAuthPage("signin");
+    });
+
+    resetForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      completeResetPassword();
+    });
+
     authSwitchBtn.addEventListener("click", () => {
       authMode = authMode === "signup" ? "signin" : "signup";
       renderAuthMode();
@@ -5275,6 +5559,12 @@
         pendingBillingCheckout = false;
         setBillingPageState(false);
       }
+      if (
+        resetPasswordPage.classList.contains("open") &&
+        !e.target.closest("#resetPasswordPage .auth-card")
+      ) {
+        setResetPageState(false);
+      }
       if (logoutModal.classList.contains("open") && !e.target.closest(".modal-card") && !e.target.closest("#logoutBtn")) {
         setLogoutModalState(false);
       }
@@ -5307,6 +5597,10 @@
         if (billingPage.classList.contains("open")) {
           pendingBillingCheckout = false;
           setBillingPageState(false);
+          return;
+        }
+        if (resetPasswordPage.classList.contains("open")) {
+          setResetPageState(false);
           return;
         }
         if (upgradeModal.classList.contains("open")) {
@@ -5432,6 +5726,7 @@
       }
     }
     restoreAppState();
+    openResetFromLocationHash();
 
     window.addEventListener("beforeunload", () => {
       if (originalObjectUrl) URL.revokeObjectURL(originalObjectUrl);
@@ -5441,6 +5736,22 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
