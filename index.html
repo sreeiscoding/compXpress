@@ -737,6 +737,12 @@
       gap: 12px;
       max-height: calc(100vh - 32px);
       overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .billing-card::-webkit-scrollbar {
+      display: none;
     }
 
     .billing-grid {
