@@ -156,6 +156,34 @@
       gap: 8px;
     }
 
+    .signed-in-meta {
+      display: none;
+      align-items: baseline;
+      gap: 5px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.55);
+      white-space: nowrap;
+    }
+
+    .signed-in-label {
+      font-family: var(--font-secondary);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .signed-in-name {
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      color: #dbeafe;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .menu-toggle {
       appearance: none;
       padding: 0;
@@ -2409,6 +2437,10 @@
         display: grid;
       }
 
+      .signed-in-meta {
+        display: none !important;
+      }
+
       .preview-grid {
         grid-template-columns: 1fr;
       }
@@ -2678,6 +2710,10 @@
         <a id="privacyNavLink" href="#privacy" aria-controls="privacyDrawer" aria-expanded="false">Privacy Policy</a>
       </nav>
       <div class="nav-actions">
+        <div id="signedInMeta" class="signed-in-meta" aria-live="polite">
+          <span class="signed-in-label">Signed in as</span>
+          <span id="signedInName" class="signed-in-name">-</span>
+        </div>
         <button id="menuToggleBtn" class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">
           <span class="menu-icon" aria-hidden="true">
             <span class="line"></span>
@@ -3097,6 +3133,8 @@
     const settingsBtn = document.getElementById("settingsBtn");
     const settingsDrawer = document.getElementById("settingsDrawer");
     const settingsCloseBtn = document.getElementById("settingsCloseBtn");
+    const signedInMeta = document.getElementById("signedInMeta");
+    const signedInNameEl = document.getElementById("signedInName");
     const themeDarkBtn = document.getElementById("themeDarkBtn");
     const themeLightBtn = document.getElementById("themeLightBtn");
     const signinPrompt = document.getElementById("signinPrompt");
@@ -3202,6 +3240,7 @@
     let passportBgColor = "white";
     let selectedDownloadFormat = "png";
     let selectedBillingMethod = "stripe";
+    let signedInDisplayName = "";
     let authMode = "signin";
     let pendingBillingCheckout = false;
     const APP_STATE_KEY = "comxpress_session_state_v1";
@@ -3215,6 +3254,7 @@
     const THEME_KEY = "comxpress_theme_v1";
     const USERS_KEY = "comxpress_users_v1";
     const CURRENT_USER_KEY = "comxpress_current_user_v1";
+    const CURRENT_USER_NAME_KEY = "comxpress_current_user_name_v1";
     const AUTH_SESSION_KEY = "comxpress_auth_session_v1";
     const FREE_UPLOAD_LIMIT = 5;
     const PRO_UPLOAD_LIMIT = 50;
@@ -3767,14 +3807,83 @@
       }
     }
 
-    async function requestBackendAuth(mode, email, password) {
+    async function storeImageAssetToBackend(type, blob, options = {}) {
+      const authToken = getAuthToken();
+      if (!authToken || !blob) return;
+
+      const formData = new FormData();
+      const safeType = type === "passport" ? "passport" : "compressed";
+      const ext = options.ext || "png";
+      const filename = options.filename || `${safeType}-image.${ext}`;
+      formData.append("image", blob, filename);
+      formData.append("originalName", String(options.originalName || filename));
+      if (Number.isFinite(options.originalSize)) {
+        formData.append("originalSize", String(options.originalSize));
+      }
+      if (safeType === "passport") {
+        formData.append("sourceType", String(options.sourceType || "compressed"));
+        formData.append("bgColor", String(options.bgColor || "white"));
+      }
+
+      const endpoint = safeType === "passport" ? "/assets/passport" : "/assets/compressed";
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.details || data.error || `Failed to store ${safeType} asset.`);
+      }
+    }
+
+    async function storeBillingToBackend(billingData) {
+      const authToken = getAuthToken();
+      if (!authToken) {
+        throw new Error("Sign in required for billing.");
+      }
+
+      const payload = {
+        plan: "pro",
+        amount: 9,
+        currency: "USD",
+        method: billingData.method,
+        billingName: billingData.name,
+        billingEmail: billingData.email,
+        upiId: billingData.method === "upi" ? billingUpiInput.value.trim() : "",
+        razorpayPhone: billingData.method === "razorpay" ? billingRazorPhoneInput.value.trim() : ""
+      };
+
+      const response = await fetch(`${API_BASE_URL}/billing/subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.details || data.error || "Failed to complete billing.");
+      }
+      return data;
+    }
+
+    async function requestBackendAuth(mode, email, password, name = "") {
       const endpoint = mode === "signup" ? "/signup" : "/login";
+      const payload = mode === "signup"
+        ? { name: String(name || "").trim(), email, password }
+        : { email, password };
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json().catch(() => ({}));
@@ -3790,7 +3899,7 @@
       }
 
       setAuthToken(data.token);
-      return data.token;
+      return data;
     }
 
     function initializeSubscriptionState() {
@@ -3799,24 +3908,29 @@
 
     function initializeAuthState() {
       isSignedIn = false;
+      signedInDisplayName = "";
       try {
         const activeSession = sessionStorage.getItem(AUTH_SESSION_KEY);
         const token = getAuthToken();
         const email = normalizeEmail(localStorage.getItem(CURRENT_USER_KEY));
+        const storedName = String(localStorage.getItem(CURRENT_USER_NAME_KEY) || "").trim();
         const users = readUsers();
         const user = users[email];
         if (activeSession === "1" && token && user) {
           isSignedIn = true;
           isSubscribed = !!user.subscribed;
+          signedInDisplayName = storedName || user.name || "";
         } else {
           isSignedIn = false;
           isSubscribed = false;
+          signedInDisplayName = "";
           sessionStorage.removeItem(AUTH_SESSION_KEY);
           setAuthToken("");
         }
       } catch (error) {
         isSignedIn = false;
         isSubscribed = false;
+        signedInDisplayName = "";
       }
       updateAuthUI();
       updatePricingState();
@@ -3824,6 +3938,10 @@
 
     function updateAuthUI() {
       if (isSignedIn) {
+        if (signedInMeta && signedInNameEl) {
+          signedInNameEl.textContent = signedInDisplayName || "User";
+          signedInMeta.style.display = "inline-flex";
+        }
         signinPromptText.textContent = "Signed in. Enjoy your personalized experience.";
         signinPrompt.style.display = "none";
         authActions.style.display = "none";
@@ -3831,6 +3949,10 @@
         logoutBtn.hidden = false;
         logoutBtn.style.display = "inline-flex";
       } else {
+        if (signedInMeta && signedInNameEl) {
+          signedInNameEl.textContent = "-";
+          signedInMeta.style.display = "none";
+        }
         signinPromptText.textContent = "You're not signed in, signing for better experience.";
         signinPrompt.style.display = "flex";
         authActions.style.display = "grid";
@@ -3881,23 +4003,29 @@
         }
       }
 
+      let authResult = null;
       try {
-        await requestBackendAuth(mode, email, password);
+        authResult = await requestBackendAuth(mode, email, password, name);
       } catch (error) {
         setStatus(error.message || "Could not authenticate with server.");
         return false;
       }
 
+      const serverName = String(authResult && authResult.user && authResult.user.name ? authResult.user.name : "").trim();
+      const resolvedName = serverName || (mode === "signup" ? name : (users[email] && users[email].name ? users[email].name : ""));
+
       try {
         localStorage.setItem(CURRENT_USER_KEY, email);
+        localStorage.setItem(CURRENT_USER_NAME_KEY, resolvedName);
         sessionStorage.setItem(AUTH_SESSION_KEY, "1");
       } catch (error) {
       }
 
       const savedUsers = readUsers();
       const currentUser = savedUsers[email];
+      signedInDisplayName = resolvedName || "";
       isSignedIn = true;
-      isSubscribed = !!(currentUser && currentUser.subscribed);
+      isSubscribed = !!((authResult && authResult.user && authResult.user.subscribed) || (currentUser && currentUser.subscribed));
       updateAuthUI();
       updatePricingState();
 
@@ -3948,26 +4076,30 @@
       }
 
       writeUsers(users);
+      let authResult = null;
       try {
-        await requestBackendAuth("signup", email, oauthPassword);
+        authResult = await requestBackendAuth("signup", email, oauthPassword, identity.name);
       } catch (error) {
         try {
-          await requestBackendAuth("login", email, oauthPassword);
+          authResult = await requestBackendAuth("login", email, oauthPassword);
         } catch (loginError) {
           setStatus(loginError.message || "Could not authenticate OAuth account with server.");
           return;
         }
       }
+      const oauthName = String(authResult && authResult.user && authResult.user.name ? authResult.user.name : identity.name).trim();
       try {
         localStorage.setItem(CURRENT_USER_KEY, email);
+        localStorage.setItem(CURRENT_USER_NAME_KEY, oauthName);
         sessionStorage.setItem(AUTH_SESSION_KEY, "1");
       } catch (error) {
       }
 
       const refreshedUsers = readUsers();
       const currentUser = refreshedUsers[email];
+      signedInDisplayName = oauthName || identity.name;
       isSignedIn = true;
-      isSubscribed = !!(currentUser && currentUser.subscribed);
+      isSubscribed = !!((authResult && authResult.user && authResult.user.subscribed) || (currentUser && currentUser.subscribed));
       updateAuthUI();
       updatePricingState();
 
@@ -4065,7 +4197,7 @@
       return { name, email, method: selectedBillingMethod };
     }
 
-    function handleBillingSubscription() {
+    async function handleBillingSubscription() {
       const billingData = validateBillingFields();
       if (!billingData) return;
 
@@ -4078,11 +4210,18 @@
         return;
       }
 
+      try {
+        await storeBillingToBackend(billingData);
+      } catch (error) {
+        setStatus(error.message || "Could not complete billing. Please retry.");
+        return;
+      }
+
       const currentEmail = normalizeEmail(localStorage.getItem(CURRENT_USER_KEY));
       const targetEmail = currentEmail || billingData.email;
       const activated = activateSubscription(targetEmail);
       if (!activated) {
-        setStatus("Could not activate subscription. Please sign in again and retry.");
+        setStatus("Billing saved, but local subscription state could not be updated. Re-login and retry.");
         return;
       }
 
@@ -4621,6 +4760,21 @@
         const reduction = originalFile.size > 0
           ? Math.max(0, Math.round(((originalFile.size - compressedBlob.size) / originalFile.size) * 100))
           : 0;
+
+        const authToken = getAuthToken();
+        if (authToken) {
+          try {
+            await storeImageAssetToBackend("compressed", compressedBlob, {
+              filename: withDownloadExt(originalFile.name || "compressed-image", "png"),
+              originalName: originalFile.name || "compressed-image.png",
+              originalSize: Number(originalFile.size || 0),
+              ext: "png"
+            });
+          } catch (assetError) {
+            addNotification("Cloud Save Failed", "Compressed image generated, but database save failed.");
+          }
+        }
+
         setStatus(`Compression completed (${reduction}% smaller, resolution ${Math.round(result.scale * 100)}%).`);
         await addRecentCompressed(originalFile.name, compressedBlob, originalFile.size);
         addNotification("Compression Completed", `Compressed image is ready (${formatBytes(compressedBlob.size)}).`);
@@ -4713,6 +4867,18 @@
         } catch (error) {
         }
 
+        try {
+          await storeImageAssetToBackend("passport", passportBlob, {
+            filename: withDownloadExt("passport-photo", "png"),
+            originalName: "passport-photo.png",
+            sourceType,
+            bgColor: passportBgColor,
+            ext: "png"
+          });
+        } catch (assetError) {
+          addNotification("Cloud Save Failed", "Passport image generated, but database save failed.");
+        }
+
         setStatus(`Passport photo generated from ${sourceType} image with ${passportBgColor} background.`);
         addNotification("Passport Generated", `Passport PNG is ready from ${sourceType} source.`);
       } catch (error) {
@@ -4792,8 +4958,10 @@
       updatePricingState();
       try {
         localStorage.removeItem(CURRENT_USER_KEY);
+        localStorage.removeItem(CURRENT_USER_NAME_KEY);
       } catch (error) {
       }
+      signedInDisplayName = "";
       setAuthToken("");
       sessionStorage.removeItem(AUTH_SESSION_KEY);
       sessionStorage.removeItem(APP_STATE_KEY);
@@ -5273,6 +5441,10 @@
   </script>
 </body>
 </html>
+
+
+
+
 
 
 
