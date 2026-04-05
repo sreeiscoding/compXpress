@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Image Compressor + Passport Photo Generator</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233b82f6'/%3E%3Cpath d='M18 32h28M32 18v28' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <style>
     @font-face {
@@ -848,6 +849,15 @@
       margin-top: 4px;
       display: grid;
       gap: 8px;
+    }
+
+    .auth-feedback {
+      margin: 8px 2px 0;
+      min-height: 18px;
+      color: #93c5fd;
+      font-family: var(--font-secondary);
+      font-size: 0.78rem;
+      letter-spacing: 0.01em;
     }
 
     .auth-submit {
@@ -3114,6 +3124,7 @@
           <button id="authSubmitBtn" class="auth-submit" type="submit">Continue to Account</button>
           <button id="authSwitchBtn" class="auth-switch" type="button">Need an account? Sign up</button>
         </div>
+        <p id="authFeedback" class="auth-feedback" aria-live="polite"></p>
       </form>
       <p class="oauth-divider"><span>or continue with</span></p>
       <div class="oauth-actions">
@@ -3505,6 +3516,7 @@
     const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
     const authSubmitBtn = document.getElementById("authSubmitBtn");
     const authSwitchBtn = document.getElementById("authSwitchBtn");
+    const authFeedback = document.getElementById("authFeedback");
     const resetPasswordPage = document.getElementById("resetPasswordPage");
     const resetCloseBtn = document.getElementById("resetCloseBtn");
     const resetForm = document.getElementById("resetForm");
@@ -3607,6 +3619,8 @@
     let recentPreviewObjectUrl = "";
     let authMode = "signin";
     let pendingBillingCheckout = false;
+    let apiReachabilityChecked = false;
+    let isApiReachable = true;
     const APP_STATE_KEY = "comxpress_session_state_v1";
     const API_BASE_OVERRIDE_KEY = "comxpress_api_base_override_v1";
     const API_BASE_URL = resolveApiBaseUrl();
@@ -3626,7 +3640,8 @@
 
     function resolveApiBaseUrl() {
       try {
-        const queryValue = new URLSearchParams(window.location.search).get("api");
+        const params = new URLSearchParams(window.location.search);
+        const queryValue = params.get("api") || params.get("apiBase");
         if (queryValue) {
           const parsed = String(queryValue).trim().replace(/\/+$/, "");
           if (parsed) {
@@ -3647,6 +3662,15 @@
       }
 
       try {
+        const metaValue = String(document.querySelector('meta[name="comxpress-api-base"]')?.getAttribute("content") || "").trim();
+        if (metaValue) {
+          const parsed = metaValue.replace(/\/+$/, "");
+          return parsed.endsWith("/api") ? parsed : `${parsed}/api`;
+        }
+      } catch (error) {
+      }
+
+      try {
         const saved = String(localStorage.getItem(API_BASE_OVERRIDE_KEY) || "").trim();
         if (saved) {
           const parsed = saved.replace(/\/+$/, "");
@@ -3661,6 +3685,72 @@
         return `${window.location.protocol}//${window.location.hostname}:4000/api`;
       }
       return `${window.location.origin}/api`;
+    }
+
+    function isHostedStaticFrontend() {
+      const host = String(window.location.hostname || "").toLowerCase();
+      return host.endsWith("github.io") || host.endsWith("vercel.app");
+    }
+
+    function getApiFailureHint(rawMessage) {
+      const message = String(rawMessage || "");
+      const isNetworkIssue = /Failed to fetch|NetworkError|Load failed|fetch/i.test(message);
+      const isHttpsToHttp = window.location.protocol === "https:" && /^http:\/\//i.test(API_BASE_URL);
+      const host = String(window.location.hostname || "").toLowerCase();
+      const isGithubPages = host.endsWith("github.io");
+      const isVercel = host.endsWith("vercel.app");
+      const isSameOriginApi = API_BASE_URL === `${window.location.origin}/api`;
+      const isRoute404 = /\b404\b|not found|route not found/i.test(message);
+
+      if (isHttpsToHttp) {
+        return "Backend URL uses HTTP while this app is HTTPS. Use an HTTPS backend URL.";
+      }
+      if (isNetworkIssue && isGithubPages && isSameOriginApi) {
+        return "GitHub Pages only hosts frontend. Set your backend URL using ?api=https://your-backend-domain.";
+      }
+      if (isNetworkIssue && isVercel && isSameOriginApi) {
+        return "This Vercel frontend cannot find a matching backend API. Set your backend URL using ?api=https://your-backend-domain.";
+      }
+      if (isRoute404 && isSameOriginApi && isHostedStaticFrontend()) {
+        return "No backend API route exists on this frontend host. Use ?api=https://your-backend-domain.";
+      }
+      if (isNetworkIssue) {
+        return "Could not reach backend. Verify API URL and backend server status.";
+      }
+      return "";
+    }
+
+    function warnIfApiLikelyMisconfigured() {
+      const host = String(window.location.hostname || "").toLowerCase();
+      const isGithubPages = host.endsWith("github.io");
+      const isVercel = host.endsWith("vercel.app");
+      const isSameOriginApi = API_BASE_URL === `${window.location.origin}/api`;
+      if ((isGithubPages || isVercel) && isSameOriginApi) {
+        setStatus("Set backend URL with ?api=https://your-backend-domain to enable sign in/sign up.");
+      }
+    }
+
+    async function checkApiConnectivity() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/health`, { method: "GET" });
+        if (!response.ok) {
+          throw new Error(`Health check failed (${response.status}).`);
+        }
+        isApiReachable = true;
+        apiReachabilityChecked = true;
+      } catch (error) {
+        isApiReachable = false;
+        apiReachabilityChecked = true;
+        const hint = getApiFailureHint(error && error.message ? error.message : "");
+        if (hint) {
+          setStatus(hint);
+          setAuthFeedback(hint);
+        } else if (isHostedStaticFrontend() && API_BASE_URL === `${window.location.origin}/api`) {
+          const msg = "Backend API is not configured. Use ?api=https://your-backend-domain.";
+          setStatus(msg);
+          setAuthFeedback(msg);
+        }
+      }
     }
 
     function readNotifications() {
@@ -4195,6 +4285,7 @@
 
     function renderAuthMode() {
       const isSignUp = authMode === "signup";
+      setAuthFeedback("");
       authTitle.textContent = isSignUp ? "Sign Up" : "Sign In";
       authSubtitle.textContent = isSignUp
         ? "Create your account to unlock premium upload and customer-ready workflow."
@@ -4222,6 +4313,7 @@
       if (open) {
         renderAuthMode();
       } else {
+        setAuthFeedback("");
         authForm.reset();
       }
     }
@@ -4572,12 +4664,21 @@
         body: JSON.stringify(payload)
       });
 
-      const data = await response.json().catch(() => ({}));
+      const rawText = await response.text().catch(() => "");
+      let data = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch (error) {
+        data = {};
+      }
       if (!response.ok) {
         if (mode === "signup" && response.status === 409) {
           return requestBackendAuth("login", email, password);
         }
-        throw new Error(data.error || "Authentication failed.");
+        if (response.status === 404) {
+          throw new Error("Auth API route not found. Check backend deployment and API base URL.");
+        }
+        throw new Error(data.error || data.message || `Authentication failed (${response.status}).`);
       }
 
       if (!data.token) {
@@ -4690,6 +4791,14 @@
     }
 
     async function completeAuth(mode) {
+      if (apiReachabilityChecked && !isApiReachable) {
+        const msg = "Authentication is unavailable because backend API is unreachable. Add ?api=https://your-backend-domain.";
+        setStatus(msg);
+        setAuthFeedback(msg);
+        addNotification("Authentication Failed", msg);
+        return false;
+      }
+
       const email = normalizeEmail(authEmailInput.value);
       const password = authPassInput.value.trim();
       const confirmPassword = authPassConfirmInput.value.trim();
@@ -4697,6 +4806,7 @@
 
       if (!email || !password || (mode === "signup" && !name)) {
         setStatus("Please fill all required authentication fields.");
+        setAuthFeedback("Please fill all required authentication fields.");
         addNotification("Authentication Failed", "Please fill all required authentication fields.");
         return false;
       }
@@ -4704,16 +4814,19 @@
       if (mode === "signup") {
         if (!confirmPassword) {
           setStatus("Please confirm your password.");
+          setAuthFeedback("Please confirm your password.");
           addNotification("Authentication Failed", "Please confirm your password.");
           return false;
         }
         if (password !== confirmPassword) {
           setStatus("Password and confirm password must match.");
+          setAuthFeedback("Password and confirm password must match.");
           addNotification("Authentication Failed", "Password and confirm password must match.");
           return false;
         }
         if (!validatePassword(password)) {
           setStatus("Password must be at least 8 characters and include letters and numbers.");
+          setAuthFeedback("Password must be at least 8 characters and include letters and numbers.");
           addNotification("Authentication Failed", "Password must be at least 8 characters and include letters and numbers.");
           return false;
         }
@@ -4723,8 +4836,12 @@
       try {
         authResult = await requestBackendAuth(mode, email, password, name);
       } catch (error) {
-        setStatus(error.message || "Could not authenticate with server.");
-        addNotification("Authentication Failed", error.message || "Could not authenticate with server.");
+        const rawMessage = String(error && error.message ? error.message : "Could not authenticate with server.");
+        const hint = getApiFailureHint(rawMessage);
+        const displayMessage = hint || rawMessage;
+        setStatus(displayMessage);
+        setAuthFeedback(displayMessage);
+        addNotification("Authentication Failed", displayMessage);
         return false;
       }
 
@@ -4736,8 +4853,10 @@
         authNameInput.value = name;
         if (pendingBillingCheckout) {
           setStatus("Account created successfully. Please sign in to continue billing.");
+          setAuthFeedback("Account created. Please sign in to continue billing.");
         } else {
           setStatus("Account created successfully. Please sign in to continue.");
+          setAuthFeedback("Account created. Please sign in to continue.");
         }
         addNotification("Sign Up Successful", "Your account has been created successfully. Please sign in.");
         return false;
@@ -4771,6 +4890,7 @@
 
       if (pendingBillingCheckout) {
         setStatus("Authentication successful. Continue billing to activate Pro.");
+        setAuthFeedback("Signed in. Continue billing to activate Pro.");
         addNotification("Authentication Successful", "You're signed in. Complete billing to activate Pro.");
         setAuthPageState(false);
         setBillingPageState(true);
@@ -4782,6 +4902,7 @@
 
       const message = "Signed in successfully.";
       setStatus(message);
+      setAuthFeedback(message);
       addNotification("Sign In Successful", message);
       return true;
     }
@@ -4814,14 +4935,10 @@
         resetTokenInput.focus();
       } catch (error) {
         const rawMessage = String(error && error.message ? error.message : "Could not send recovery email.");
-        const isNetworkIssue = /Failed to fetch|NetworkError|Load failed|fetch/i.test(rawMessage);
-        const protocolHint = window.location.protocol === "https:" && /^http:\/\//i.test(API_BASE_URL);
-        if (isNetworkIssue || protocolHint) {
-          const deployHint = protocolHint
-            ? "Your app is HTTPS but backend is HTTP. Use an HTTPS backend URL."
-            : "Could not reach backend. Verify API URL and backend server status.";
-          setStatus(deployHint);
-          addNotification("Recovery Failed", deployHint);
+        const hint = getApiFailureHint(rawMessage);
+        if (hint) {
+          setStatus(hint);
+          addNotification("Recovery Failed", hint);
         } else {
           setStatus(rawMessage);
           addNotification("Recovery Failed", rawMessage);
@@ -5298,6 +5415,11 @@
 
     function setStatus(message) {
       statusEl.textContent = message || "";
+    }
+
+    function setAuthFeedback(message) {
+      if (!authFeedback) return;
+      authFeedback.textContent = String(message || "");
     }
 
     function setPassportSourceMenuState(open) {
@@ -5985,7 +6107,8 @@
 
     authForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      completeAuth(authMode).then((ok) => {
+      setAuthFeedback("Checking your account...");
+      checkApiConnectivity().finally(() => completeAuth(authMode).then((ok) => {
         if (!ok) return;
         if (!pendingBillingCheckout) {
           setAuthPageState(false);
@@ -5993,7 +6116,7 @@
         if (uploadedFiles.length) {
           setActiveUpload(activeFileId || uploadedFiles[uploadedFiles.length - 1].id);
         }
-      });
+      }));
     });
 
     billingCloseBtn.addEventListener("click", () => {
@@ -6426,6 +6549,8 @@
     fetchRecentCompressedFromBackend();
     restoreAppState();
     openResetFromLocationHash();
+    warnIfApiLikelyMisconfigured();
+    checkApiConnectivity();
 
     window.addEventListener("beforeunload", () => {
       if (originalObjectUrl) URL.revokeObjectURL(originalObjectUrl);
