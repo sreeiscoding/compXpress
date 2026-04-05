@@ -18,6 +18,11 @@ const imageAssetSchema = new mongoose.Schema(
       type: String,
       default: "image"
     },
+    workflowId: {
+      type: String,
+      default: "",
+      index: true
+    },
     mimeType: {
       type: String,
       required: true

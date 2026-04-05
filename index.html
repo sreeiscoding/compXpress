@@ -184,6 +184,17 @@
       text-overflow: ellipsis;
     }
 
+    .signed-in-meta-drawer {
+      display: none;
+      align-items: baseline;
+      gap: 5px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.55);
+      white-space: nowrap;
+    }
+
     .menu-toggle {
       appearance: none;
       padding: 0;
@@ -529,6 +540,135 @@
     .modal-overlay.open {
       opacity: 1;
       pointer-events: auto;
+    }
+
+    .action-loader {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.62);
+      backdrop-filter: blur(4px);
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+      z-index: 145;
+      padding: 16px;
+    }
+
+    .action-loader.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .action-loader-card {
+      min-width: 240px;
+      max-width: min(360px, 92vw);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background:
+        radial-gradient(280px 120px at 12% -20%, rgba(96, 165, 250, 0.22), transparent 60%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9));
+      box-shadow: 0 24px 60px rgba(2, 6, 23, 0.6);
+      padding: 16px 16px 14px;
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+    }
+
+    .action-loader-ring {
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      border: 3px solid rgba(148, 163, 184, 0.24);
+      border-top-color: #60a5fa;
+      border-right-color: #3b82f6;
+      animation: spinLoader 0.9s linear infinite;
+    }
+
+    .action-loader-bars {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 12px;
+    }
+
+    .action-loader-bars span {
+      width: 4px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #93c5fd, #3b82f6);
+      animation: pulseBars 0.9s ease-in-out infinite;
+    }
+
+    .action-loader-bars span:nth-child(1) {
+      height: 6px;
+      animation-delay: 0s;
+    }
+
+    .action-loader-bars span:nth-child(2) {
+      height: 10px;
+      animation-delay: 0.12s;
+    }
+
+    .action-loader-bars span:nth-child(3) {
+      height: 8px;
+      animation-delay: 0.24s;
+    }
+
+    .action-loader-text {
+      margin: 0;
+      color: #dbeafe;
+      font-family: var(--font-secondary);
+      font-size: 0.84rem;
+      text-align: center;
+    }
+
+    .preview-modal-card {
+      width: min(720px, 96vw);
+      max-height: min(88vh, 820px);
+      overflow: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .preview-modal-card::-webkit-scrollbar {
+      display: none;
+    }
+
+    .preview-modal-image-wrap {
+      margin-top: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 10px;
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+    }
+
+    .preview-modal-image {
+      max-width: 100%;
+      max-height: 62vh;
+      border-radius: 10px;
+      object-fit: contain;
+      background: #0f172a;
+    }
+
+    @keyframes spinLoader {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes pulseBars {
+      0%, 100% {
+        opacity: 0.45;
+        transform: scaleY(0.72);
+      }
+      50% {
+        opacity: 1;
+        transform: scaleY(1.08);
+      }
     }
 
     .auth-page {
@@ -2335,6 +2475,33 @@
       letter-spacing: 0.02em;
     }
 
+    .recent-sync {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .recent-reload-btn {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.62);
+      color: #dbeafe;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .recent-reload-btn:hover {
+      border-color: rgba(96, 165, 250, 0.7);
+      background: rgba(30, 64, 175, 0.28);
+      transform: translateY(-1px);
+    }
+
     .recent-list {
       list-style: none;
       margin: 0;
@@ -2490,6 +2657,10 @@
 
       .signed-in-meta {
         display: none !important;
+      }
+
+      .signed-in-meta-drawer.show {
+        display: inline-flex;
       }
 
       .preview-grid {
@@ -2814,6 +2985,10 @@
       <button id="settingsCloseBtn" class="drawer-close" type="button" aria-label="Close settings"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="settings-body">
+      <div id="signedInMetaDrawer" class="signed-in-meta-drawer" aria-live="polite">
+        <span class="signed-in-label">Signed in as</span>
+        <span id="signedInNameDrawer" class="signed-in-name">-</span>
+      </div>
       <div id="signinPrompt" class="signin-prompt" role="button" tabindex="0" aria-label="Sign in for better experience">
         <p id="signinPromptText" class="signin-prompt-text">You're not signed in, signing for better experience.</p>
         <i class="fa-solid fa-arrow-right signin-prompt-arrow" aria-hidden="true"></i>
@@ -2853,6 +3028,42 @@
       <div class="modal-actions">
         <button id="upgradeCancelBtn" class="modal-btn" type="button">Maybe Later</button>
         <button id="upgradeConfirmBtn" class="modal-btn danger" type="button">Open Subscription Billing</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="recentDeleteModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="recentDeleteTitle" aria-describedby="recentDeleteText">
+      <h3 id="recentDeleteTitle" class="modal-title">Delete File</h3>
+      <p id="recentDeleteText" class="modal-text">Are you sure you want to delete this compressed file from your account history?</p>
+      <div class="modal-actions">
+        <button id="recentDeleteCancelBtn" class="modal-btn" type="button">Cancel</button>
+        <button id="recentDeleteConfirmBtn" class="modal-btn danger" type="button">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="actionLoader" class="action-loader" aria-hidden="true">
+    <div class="action-loader-card" role="status" aria-live="polite">
+      <div class="action-loader-ring" aria-hidden="true"></div>
+      <div class="action-loader-bars" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <p id="actionLoaderText" class="action-loader-text">Processing...</p>
+    </div>
+  </div>
+
+  <div id="recentPreviewModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card preview-modal-card" role="dialog" aria-modal="true" aria-labelledby="recentPreviewTitle" aria-describedby="recentPreviewMeta">
+      <h3 id="recentPreviewTitle" class="modal-title">Generated File Preview</h3>
+      <p id="recentPreviewMeta" class="modal-text">Preview from your generated files.</p>
+      <div class="preview-modal-image-wrap">
+        <img id="recentPreviewImage" class="preview-modal-image" alt="Generated image preview" />
+      </div>
+      <div class="modal-actions">
+        <button id="recentPreviewCloseBtn" class="modal-btn" type="button">Close</button>
       </div>
     </div>
   </div>
@@ -3160,7 +3371,12 @@
             <div class="recent-wrap">
               <div class="recent-head">
                 <h4 class="recent-title">Recently Compressed Files</h4>
-                <p class="recent-warning"><i class="fa-solid fa-triangle-exclamation"></i> Auto-deletes after 4 days.</p>
+                <div class="recent-sync">
+                  <p class="recent-warning"><i class="fa-solid fa-database"></i> Synced from your account database.</p>
+                  <button id="recentReloadBtn" class="recent-reload-btn" type="button" aria-label="Reload recently compressed files">
+                    <i class="fa-solid fa-rotate"></i>
+                  </button>
+                </div>
               </div>
               <ul id="recentCompressedList" class="recent-list" aria-live="polite"></ul>
             </div>
@@ -3235,6 +3451,8 @@
     const settingsCloseBtn = document.getElementById("settingsCloseBtn");
     const signedInMeta = document.getElementById("signedInMeta");
     const signedInNameEl = document.getElementById("signedInName");
+    const signedInMetaDrawer = document.getElementById("signedInMetaDrawer");
+    const signedInNameDrawerEl = document.getElementById("signedInNameDrawer");
     const themeDarkBtn = document.getElementById("themeDarkBtn");
     const themeLightBtn = document.getElementById("themeLightBtn");
     const signinPrompt = document.getElementById("signinPrompt");
@@ -3249,6 +3467,17 @@
     const upgradeModal = document.getElementById("upgradeModal");
     const upgradeCancelBtn = document.getElementById("upgradeCancelBtn");
     const upgradeConfirmBtn = document.getElementById("upgradeConfirmBtn");
+    const recentDeleteModal = document.getElementById("recentDeleteModal");
+    const recentDeleteText = document.getElementById("recentDeleteText");
+    const recentDeleteCancelBtn = document.getElementById("recentDeleteCancelBtn");
+    const recentDeleteConfirmBtn = document.getElementById("recentDeleteConfirmBtn");
+    const actionLoader = document.getElementById("actionLoader");
+    const actionLoaderText = document.getElementById("actionLoaderText");
+    const recentPreviewModal = document.getElementById("recentPreviewModal");
+    const recentPreviewTitle = document.getElementById("recentPreviewTitle");
+    const recentPreviewMeta = document.getElementById("recentPreviewMeta");
+    const recentPreviewImage = document.getElementById("recentPreviewImage");
+    const recentPreviewCloseBtn = document.getElementById("recentPreviewCloseBtn");
     const authPage = document.getElementById("authPage");
     const authCloseBtn = document.getElementById("authCloseBtn");
     const authForm = document.getElementById("authForm");
@@ -3303,6 +3532,7 @@
     const planPill = document.getElementById("planPill");
     const pricingUpgradeBtn = document.getElementById("pricingUpgradeBtn");
     const recentCompressedList = document.getElementById("recentCompressedList");
+    const recentReloadBtn = document.getElementById("recentReloadBtn");
 
     const uploadPreviewWrap = document.getElementById("uploadPreviewWrap");
     const uploadPreviewGrid = document.getElementById("uploadPreviewGrid");
@@ -3356,6 +3586,12 @@
     let selectedDownloadFormat = "png";
     let selectedBillingMethod = "stripe";
     let signedInDisplayName = "";
+    let recentCompressedServerItems = [];
+    let expandedRecentWorkflows = [];
+    let pendingRecentDeleteId = "";
+    let pendingRecentDeleteMode = "file";
+    let activeLoaderCount = 0;
+    let recentPreviewObjectUrl = "";
     let authMode = "signin";
     let pendingBillingCheckout = false;
     const APP_STATE_KEY = "comxpress_session_state_v1";
@@ -3490,30 +3726,16 @@
     }
 
     function readRecentCompressed() {
-      try {
-        const raw = localStorage.getItem(RECENT_COMPRESSED_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (error) {
-        return [];
-      }
+      return Array.isArray(recentCompressedServerItems) ? recentCompressedServerItems : [];
     }
 
     function writeRecentCompressed(list) {
-      try {
-        localStorage.setItem(RECENT_COMPRESSED_KEY, JSON.stringify(list));
-      } catch (error) {
-      }
+      recentCompressedServerItems = Array.isArray(list) ? list : [];
     }
 
     function pruneRecentCompressed() {
-      const now = Date.now();
       const current = readRecentCompressed();
-      const keep = current.filter((item) => now - Number(item.createdAt || 0) < RECENT_COMPRESSED_TTL_MS);
-      if (keep.length !== current.length) {
-        writeRecentCompressed(keep);
-      }
-      return { keep, removedCount: current.length - keep.length };
+      return { keep: current, removedCount: 0 };
     }
 
     function formatDateTime(timestamp) {
@@ -3525,13 +3747,16 @@
     }
 
     function getCompressedExpiryText(createdAt) {
-      const expiresAt = Number(createdAt || 0) + RECENT_COMPRESSED_TTL_MS;
-      return formatDateTime(expiresAt);
+      return formatDateTime(createdAt);
     }
 
     function renderRecentCompressed() {
       const { keep } = pruneRecentCompressed();
-      const recent = keep.sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+      const recent = keep.sort((a, b) => {
+        const at = Number(new Date(a.latestCreatedAt || a.createdAt || 0).getTime());
+        const bt = Number(new Date(b.latestCreatedAt || b.createdAt || 0).getTime());
+        return bt - at;
+      });
       recentCompressedList.innerHTML = "";
 
       if (!recent.length) {
@@ -3542,21 +3767,26 @@
         return;
       }
 
-      for (const item of recent) {
+      for (const group of recent) {
+        const workflowId = String(group.workflowId || "");
+        const files = Array.isArray(group.files) ? group.files : [];
+        const totalFiles = Number(group.totalFiles || files.length || 0);
+        const isExpanded = expandedRecentWorkflows.includes(workflowId);
+
         const row = document.createElement("li");
         row.className = "recent-item";
-        row.dataset.id = item.id;
+        row.dataset.workflow = workflowId;
 
         const meta = document.createElement("div");
         meta.className = "recent-meta";
 
         const name = document.createElement("p");
         name.className = "recent-name";
-        name.textContent = item.name || "compressed-image.png";
+        name.textContent = `${group.name || "generated-file"} (${totalFiles})`;
 
         const info = document.createElement("p");
         info.className = "recent-info";
-        info.textContent = `${formatBytes(Number(item.size || 0))} from ${formatBytes(Number(item.originalSize || 0))} | Expires: ${getCompressedExpiryText(item.createdAt)}`;
+        info.textContent = `${totalFiles} file(s) | Latest: ${getCompressedExpiryText(group.latestCreatedAt)}`;
 
         meta.appendChild(name);
         meta.appendChild(info);
@@ -3564,26 +3794,96 @@
         const actions = document.createElement("div");
         actions.className = "recent-actions";
 
-        const downloadBtn = document.createElement("button");
-        downloadBtn.type = "button";
-        downloadBtn.className = "recent-btn";
-        downloadBtn.dataset.action = "download";
-        downloadBtn.dataset.id = item.id;
-        downloadBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download";
+        const toggleBtn = document.createElement("button");
+        toggleBtn.type = "button";
+        toggleBtn.className = "recent-btn";
+        toggleBtn.dataset.action = "toggle-group";
+        toggleBtn.dataset.workflow = workflowId;
+        toggleBtn.innerHTML = isExpanded
+          ? "<i class=\"fa-solid fa-chevron-up\"></i> Hide Files"
+          : "<i class=\"fa-solid fa-chevron-down\"></i> View Files";
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.type = "button";
-        deleteBtn.className = "recent-btn delete";
-        deleteBtn.dataset.action = "delete";
-        deleteBtn.dataset.id = item.id;
-        deleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i>";
-        deleteBtn.setAttribute("aria-label", "Delete compressed file record");
+        const downloadGroupBtn = document.createElement("button");
+        downloadGroupBtn.type = "button";
+        downloadGroupBtn.className = "recent-btn";
+        downloadGroupBtn.dataset.action = "download-group";
+        downloadGroupBtn.dataset.workflow = workflowId;
+        downloadGroupBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download All";
 
-        actions.appendChild(downloadBtn);
-        actions.appendChild(deleteBtn);
+        const deleteGroupBtn = document.createElement("button");
+        deleteGroupBtn.type = "button";
+        deleteGroupBtn.className = "recent-btn delete";
+        deleteGroupBtn.dataset.action = "delete-group";
+        deleteGroupBtn.dataset.workflow = workflowId;
+        deleteGroupBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i>";
+        deleteGroupBtn.setAttribute("aria-label", "Delete all files in this group");
+
+        actions.appendChild(toggleBtn);
+        actions.appendChild(downloadGroupBtn);
+        actions.appendChild(deleteGroupBtn);
         row.appendChild(meta);
         row.appendChild(actions);
         recentCompressedList.appendChild(row);
+
+        if (!isExpanded) {
+          continue;
+        }
+
+        for (const file of files) {
+          const child = document.createElement("li");
+          child.className = "recent-item";
+          child.style.marginLeft = "12px";
+          child.style.borderColor = "rgba(96, 165, 250, 0.28)";
+
+          const childMeta = document.createElement("div");
+          childMeta.className = "recent-meta";
+
+          const childName = document.createElement("p");
+          childName.className = "recent-name";
+          const variant = file.type === "passport"
+            ? `passport-${file.bgColor || "white"}`
+            : "compressed";
+          childName.textContent = `${file.name || "file"} [${variant}]`;
+
+          const childInfo = document.createElement("p");
+          childInfo.className = "recent-info";
+          childInfo.textContent = `${formatBytes(Number(file.size || 0))} | ${getCompressedExpiryText(file.createdAt)}`;
+
+          childMeta.appendChild(childName);
+          childMeta.appendChild(childInfo);
+
+          const childActions = document.createElement("div");
+          childActions.className = "recent-actions";
+
+          const childViewBtn = document.createElement("button");
+          childViewBtn.type = "button";
+          childViewBtn.className = "recent-btn";
+          childViewBtn.dataset.action = "view-file";
+          childViewBtn.dataset.fileId = String(file.id || "");
+          childViewBtn.innerHTML = "<i class=\"fa-regular fa-image\"></i> View";
+
+          const childDownloadBtn = document.createElement("button");
+          childDownloadBtn.type = "button";
+          childDownloadBtn.className = "recent-btn";
+          childDownloadBtn.dataset.action = "download-file";
+          childDownloadBtn.dataset.fileId = String(file.id || "");
+          childDownloadBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download";
+
+          const childDeleteBtn = document.createElement("button");
+          childDeleteBtn.type = "button";
+          childDeleteBtn.className = "recent-btn delete";
+          childDeleteBtn.dataset.action = "delete-file";
+          childDeleteBtn.dataset.fileId = String(file.id || "");
+          childDeleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i>";
+          childDeleteBtn.setAttribute("aria-label", "Delete file");
+
+          childActions.appendChild(childViewBtn);
+          childActions.appendChild(childDownloadBtn);
+          childActions.appendChild(childDeleteBtn);
+          child.appendChild(childMeta);
+          child.appendChild(childActions);
+          recentCompressedList.appendChild(child);
+        }
       }
     }
 
@@ -3593,43 +3893,172 @@
       return `${clean}-compressed.png`;
     }
 
-    async function addRecentCompressed(originalName, blob, originalSize) {
-      if (!blob) return;
-      try {
-        const dataUrl = await blobToDataUrl(blob);
-        const recent = pruneRecentCompressed().keep;
-        recent.unshift({
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          name: getCompressedDownloadName(originalName),
-          size: blob.size || 0,
-          originalSize: Number(originalSize || 0),
-          createdAt: Date.now(),
-          dataUrl
-        });
-        writeRecentCompressed(recent.slice(0, 20));
+    async function fetchRecentCompressedFromBackend() {
+      const authToken = getAuthToken();
+      if (!authToken || !isSignedIn) {
+        writeRecentCompressed([]);
         renderRecentCompressed();
-      } catch (error) {
+        return;
       }
-    }
 
-    function removeRecentCompressedById(id) {
-      const current = pruneRecentCompressed().keep;
-      const next = current.filter((item) => item.id !== id);
-      writeRecentCompressed(next);
+      try {
+        const response = await fetch(`${API_BASE_URL}/assets/recent/groups`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`
+          }
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.details || data.error || "Could not fetch recent compressed files.");
+        }
+        const groups = Array.isArray(data.groups) ? data.groups : [];
+        writeRecentCompressed(groups);
+        const existing = new Set(groups.map((g) => String(g.workflowId || "")));
+        expandedRecentWorkflows = expandedRecentWorkflows.filter((id) => existing.has(id));
+      } catch (error) {
+        writeRecentCompressed([]);
+        expandedRecentWorkflows = [];
+        setStatus(error.message || "Could not fetch recent compressed files.");
+      }
+
       renderRecentCompressed();
     }
 
-    async function downloadRecentCompressedById(id) {
-      const current = pruneRecentCompressed().keep;
-      const item = current.find((entry) => entry.id === id);
-      if (!item || !item.dataUrl) {
-        setStatus("Selected recent compressed file is unavailable.");
+    async function addRecentCompressed(originalName, blob, originalSize) {
+      await fetchRecentCompressedFromBackend();
+    }
+
+    async function removeRecentCompressedById(id) {
+      const authToken = getAuthToken();
+      if (!authToken || !isSignedIn || !id) {
+        setStatus("Sign in to manage recent compressed files.");
         return;
       }
-      const blob = dataUrlToBlob(item.dataUrl);
-      const outputBlob = await blobToDownloadFormat(blob, selectedDownloadFormat);
-      downloadBlob(outputBlob, withDownloadExt(item.name || "compressed-image", selectedDownloadFormat));
-      addNotification("Download Complete", "Recent compressed file downloaded successfully.");
+
+      const response = await fetch(`${API_BASE_URL}/assets/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        }
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.details || data.error || "Could not delete selected compressed file.");
+      }
+
+      await fetchRecentCompressedFromBackend();
+    }
+
+    async function downloadRecentCompressedById(id) {
+      const authToken = getAuthToken();
+      if (!authToken || !isSignedIn || !id) {
+        setStatus("Sign in to download recent compressed files.");
+        return;
+      }
+      startActionLoader("Preparing your download...");
+      try {
+        const current = readRecentCompressed();
+        const allFiles = current.flatMap((entry) => Array.isArray(entry.files) ? entry.files : []);
+        const item = allFiles.find((entry) => String(entry.id) === String(id));
+        const response = await fetch(`${API_BASE_URL}/assets/${encodeURIComponent(id)}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`
+          }
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.details || data.error || "Selected recent compressed file is unavailable.");
+        }
+        const blob = await response.blob();
+        const outputBlob = await blobToDownloadFormat(blob, selectedDownloadFormat);
+        downloadBlob(outputBlob, withDownloadExt(item.name || "compressed-image", selectedDownloadFormat));
+        addNotification("Download Complete", "Recent compressed file downloaded successfully.");
+      } finally {
+        stopActionLoader();
+      }
+    }
+
+    async function openRecentImagePreviewById(id) {
+      const authToken = getAuthToken();
+      if (!authToken || !isSignedIn || !id) {
+        setStatus("Sign in to preview generated files.");
+        return;
+      }
+
+      const groups = readRecentCompressed();
+      const files = groups.flatMap((entry) => Array.isArray(entry.files) ? entry.files : []);
+      const file = files.find((entry) => String(entry.id) === String(id));
+
+      startActionLoader("Loading image preview...");
+      try {
+        const response = await fetch(`${API_BASE_URL}/assets/${encodeURIComponent(id)}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`
+          }
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.details || data.error || "Could not load file preview.");
+        }
+
+        const blob = await response.blob();
+        if (recentPreviewObjectUrl) {
+          URL.revokeObjectURL(recentPreviewObjectUrl);
+        }
+        recentPreviewObjectUrl = URL.createObjectURL(blob);
+        recentPreviewImage.src = recentPreviewObjectUrl;
+        recentPreviewTitle.textContent = file && file.name ? file.name : "Generated File Preview";
+        recentPreviewMeta.textContent = file
+          ? `${file.type || "file"} | ${formatBytes(Number(file.size || 0))} | ${formatDateTime(file.createdAt)}`
+          : "Preview from your generated files.";
+        setRecentPreviewModalState(true);
+      } finally {
+        stopActionLoader();
+      }
+    }
+
+    async function downloadRecentGroupByWorkflow(workflowId) {
+      if (!workflowId) return;
+      const groups = readRecentCompressed();
+      const group = groups.find((entry) => String(entry.workflowId) === String(workflowId));
+      const files = group && Array.isArray(group.files) ? group.files : [];
+      if (!files.length) {
+        setStatus("No files found in this group.");
+        return;
+      }
+      startActionLoader("Preparing group download...");
+      try {
+        for (const file of files) {
+          await downloadRecentCompressedById(file.id);
+          await new Promise((resolve) => setTimeout(resolve, 130));
+        }
+        setStatus("Group download completed.");
+      } finally {
+        stopActionLoader();
+      }
+    }
+
+    async function removeRecentGroupByWorkflow(workflowId) {
+      const authToken = getAuthToken();
+      if (!authToken || !isSignedIn || !workflowId) {
+        setStatus("Sign in to manage recent compressed files.");
+        return;
+      }
+      const response = await fetch(`${API_BASE_URL}/assets/group/${encodeURIComponent(workflowId)}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        }
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.details || data.error || "Could not delete selected file group.");
+      }
+      expandedRecentWorkflows = expandedRecentWorkflows.filter((id) => id !== workflowId);
+      await fetchRecentCompressedFromBackend();
     }
 
     async function blobToDataUrl(blob) {
@@ -3824,6 +4253,45 @@
       upgradeModal.setAttribute("aria-hidden", String(!open));
     }
 
+    function setRecentDeleteModalState(open) {
+      recentDeleteModal.classList.toggle("open", open);
+      recentDeleteModal.setAttribute("aria-hidden", String(!open));
+      if (!open) {
+        pendingRecentDeleteId = "";
+        pendingRecentDeleteMode = "file";
+        if (recentDeleteText) {
+          recentDeleteText.textContent = "Are you sure you want to delete this compressed file from your account history?";
+        }
+      }
+    }
+
+    function setRecentPreviewModalState(open) {
+      recentPreviewModal.classList.toggle("open", open);
+      recentPreviewModal.setAttribute("aria-hidden", String(!open));
+      if (!open) {
+        if (recentPreviewObjectUrl) {
+          URL.revokeObjectURL(recentPreviewObjectUrl);
+          recentPreviewObjectUrl = "";
+        }
+        recentPreviewImage.removeAttribute("src");
+      }
+    }
+
+    function startActionLoader(message) {
+      activeLoaderCount += 1;
+      actionLoaderText.textContent = message || "Processing...";
+      actionLoader.classList.add("open");
+      actionLoader.setAttribute("aria-hidden", "false");
+    }
+
+    function stopActionLoader() {
+      activeLoaderCount = Math.max(0, activeLoaderCount - 1);
+      if (activeLoaderCount > 0) return;
+      actionLoader.classList.remove("open");
+      actionLoader.setAttribute("aria-hidden", "true");
+      actionLoaderText.textContent = "Processing...";
+    }
+
     function setBillingPageState(open) {
       isBillingPageOpen = open;
       billingPage.classList.toggle("open", open);
@@ -3974,6 +4442,9 @@
       const filename = options.filename || `${safeType}-image.${ext}`;
       formData.append("image", blob, filename);
       formData.append("originalName", String(options.originalName || filename));
+      if (options.workflowId) {
+        formData.append("workflowId", String(options.workflowId));
+      }
       if (Number.isFinite(options.originalSize)) {
         formData.append("originalSize", String(options.originalSize));
       }
@@ -4123,6 +4594,7 @@
       }
       updateAuthUI();
       updatePricingState();
+      fetchRecentCompressedFromBackend();
     }
 
     function updateAuthUI() {
@@ -4130,6 +4602,10 @@
         if (signedInMeta && signedInNameEl) {
           signedInNameEl.textContent = signedInDisplayName || "User";
           signedInMeta.style.display = "inline-flex";
+        }
+        if (signedInMetaDrawer && signedInNameDrawerEl) {
+          signedInNameDrawerEl.textContent = signedInDisplayName || "User";
+          signedInMetaDrawer.classList.add("show");
         }
         signinPromptText.textContent = "Signed in. Enjoy your personalized experience.";
         signinPrompt.style.display = "none";
@@ -4141,6 +4617,10 @@
         if (signedInMeta && signedInNameEl) {
           signedInNameEl.textContent = "-";
           signedInMeta.style.display = "none";
+        }
+        if (signedInMetaDrawer && signedInNameDrawerEl) {
+          signedInNameDrawerEl.textContent = "-";
+          signedInMetaDrawer.classList.remove("show");
         }
         signinPromptText.textContent = "You're not signed in, signing for better experience.";
         signinPrompt.style.display = "flex";
@@ -4218,6 +4698,7 @@
       isSubscribed = !!(authResult && authResult.user && authResult.user.subscribed);
       updateAuthUI();
       updatePricingState();
+      fetchRecentCompressedFromBackend();
 
       if (pendingBillingCheckout) {
         setStatus("Authentication successful. Continue billing to activate Pro.");
@@ -4355,6 +4836,7 @@
       isSubscribed = !!((authResult && authResult.user && authResult.user.subscribed) || (currentUser && currentUser.subscribed));
       updateAuthUI();
       updatePricingState();
+      fetchRecentCompressedFromBackend();
 
       if (pendingBillingCheckout) {
         setStatus(`${identity.providerName} authentication successful. Continue billing to activate Pro.`);
@@ -4979,6 +5461,7 @@
       if (!originalFile) return;
 
       try {
+        startActionLoader("Compressing image...");
         setStatus("Processing...");
         setProcessingState(true);
 
@@ -5021,6 +5504,7 @@
               filename: withDownloadExt(originalFile.name || "compressed-image", "png"),
               originalName: originalFile.name || "compressed-image.png",
               originalSize: Number(originalFile.size || 0),
+              workflowId: String(activeFileId || ""),
               ext: "png"
             });
           } catch (assetError) {
@@ -5041,6 +5525,7 @@
         addNotification("Compression Cancelled", "Compression was cancelled or could not be completed.");
       } finally {
         setProcessingState(false);
+        stopActionLoader();
       }
     }
 
@@ -5074,6 +5559,7 @@
       }
 
       try {
+        startActionLoader("Generating passport photo...");
         setStatus("Processing...");
         setProcessingState(true);
 
@@ -5126,6 +5612,7 @@
             originalName: "passport-photo.png",
             sourceType,
             bgColor: passportBgColor,
+            workflowId: String(activeFileId || ""),
             ext: "png"
           });
         } catch (assetError) {
@@ -5144,6 +5631,7 @@
         addNotification("Passport Generation Failed", "Could not generate passport photo. Please try again.");
       } finally {
         setProcessingState(false);
+        stopActionLoader();
       }
     }
 
@@ -5215,6 +5703,7 @@
       } catch (error) {
       }
       signedInDisplayName = "";
+      writeRecentCompressed([]);
       setAuthToken("");
       sessionStorage.removeItem(AUTH_SESSION_KEY);
       sessionStorage.removeItem(APP_STATE_KEY);
@@ -5225,6 +5714,7 @@
       setNotifDrawerState(false);
       setSettingsDrawerState(false);
       setLogoutModalState(false);
+      renderRecentCompressed();
       setStatus("You have been logged out.");
     }
 
@@ -5515,19 +6005,115 @@
       if (!actionBtn) return;
       e.preventDefault();
       e.stopPropagation();
-      const id = actionBtn.dataset.id;
       const action = actionBtn.dataset.action;
-      if (!id || !action) return;
-      if (action === "download") {
-        downloadRecentCompressedById(id).catch(() => {
+      if (!action) return;
+
+      if (action === "toggle-group") {
+        const workflowId = String(actionBtn.dataset.workflow || "");
+        if (!workflowId) return;
+        if (expandedRecentWorkflows.includes(workflowId)) {
+          expandedRecentWorkflows = expandedRecentWorkflows.filter((id) => id !== workflowId);
+        } else {
+          expandedRecentWorkflows = [...expandedRecentWorkflows, workflowId];
+        }
+        renderRecentCompressed();
+        return;
+      }
+
+      if (action === "download-group") {
+        const workflowId = String(actionBtn.dataset.workflow || "");
+        if (!workflowId) return;
+        downloadRecentGroupByWorkflow(workflowId).catch(() => {
+          setStatus("Could not download selected file group.");
+        });
+        return;
+      }
+
+      if (action === "download-file") {
+        const fileId = String(actionBtn.dataset.fileId || "");
+        if (!fileId) return;
+        downloadRecentCompressedById(fileId).catch(() => {
           setStatus("Could not download selected recent file.");
         });
         return;
       }
-      if (action === "delete") {
-        removeRecentCompressedById(id);
-        setStatus("Recent compressed file removed.");
+
+      if (action === "view-file") {
+        const fileId = String(actionBtn.dataset.fileId || "");
+        if (!fileId) return;
+        openRecentImagePreviewById(fileId).catch(() => {
+          setStatus("Could not open selected file preview.");
+        });
+        return;
       }
+
+      if (action === "delete-file") {
+        const fileId = String(actionBtn.dataset.fileId || "");
+        if (!fileId) return;
+        pendingRecentDeleteMode = "file";
+        pendingRecentDeleteId = fileId;
+        if (recentDeleteText) {
+          recentDeleteText.textContent = "Are you sure you want to delete this generated file from your account history?";
+        }
+        setRecentDeleteModalState(true);
+        return;
+      }
+
+      if (action === "delete-group") {
+        const workflowId = String(actionBtn.dataset.workflow || "");
+        if (!workflowId) return;
+        pendingRecentDeleteMode = "group";
+        pendingRecentDeleteId = workflowId;
+        if (recentDeleteText) {
+          recentDeleteText.textContent = "Are you sure you want to delete all files in this group from your account history?";
+        }
+        setRecentDeleteModalState(true);
+      }
+    });
+
+    recentDeleteCancelBtn.addEventListener("click", () => {
+      setRecentDeleteModalState(false);
+    });
+
+    recentPreviewCloseBtn.addEventListener("click", () => {
+      setRecentPreviewModalState(false);
+    });
+
+    recentDeleteConfirmBtn.addEventListener("click", () => {
+      const id = pendingRecentDeleteId;
+      if (!id) {
+        setRecentDeleteModalState(false);
+        return;
+      }
+      startActionLoader("Deleting file...");
+      const action = pendingRecentDeleteMode === "group"
+        ? removeRecentGroupByWorkflow(id)
+        : removeRecentCompressedById(id);
+      action
+        .then(() => {
+          setStatus(pendingRecentDeleteMode === "group"
+            ? "File group removed."
+            : "Recent compressed file removed.");
+        })
+        .catch(() => {
+          setStatus(pendingRecentDeleteMode === "group"
+            ? "Could not remove selected file group."
+            : "Could not remove selected recent file.");
+        })
+        .finally(() => {
+          stopActionLoader();
+          setRecentDeleteModalState(false);
+        });
+    });
+
+    recentReloadBtn.addEventListener("click", () => {
+      fetchRecentCompressedFromBackend()
+        .then(() => {
+          setStatus("Recently compressed files reloaded from database.");
+        })
+        .catch(() => {
+          setStatus("Could not reload recently compressed files.");
+        });
     });
 
     document.addEventListener("click", (e) => {
@@ -5539,6 +6125,12 @@
       }
       if (upgradeModal.classList.contains("open") && !e.target.closest("#upgradeModal .modal-card")) {
         setUpgradeModalState(false);
+      }
+      if (recentDeleteModal.classList.contains("open") && !e.target.closest("#recentDeleteModal .modal-card")) {
+        setRecentDeleteModalState(false);
+      }
+      if (recentPreviewModal.classList.contains("open") && !e.target.closest("#recentPreviewModal .modal-card")) {
+        setRecentPreviewModalState(false);
       }
       if (
         authPage.classList.contains("open") &&
@@ -5605,6 +6197,14 @@
         }
         if (upgradeModal.classList.contains("open")) {
           setUpgradeModalState(false);
+          return;
+        }
+        if (recentDeleteModal.classList.contains("open")) {
+          setRecentDeleteModalState(false);
+          return;
+        }
+        if (recentPreviewModal.classList.contains("open")) {
+          setRecentPreviewModalState(false);
           return;
         }
         if (logoutModal.classList.contains("open")) {
@@ -5689,23 +6289,33 @@
     });
 
     downloadCompressedBtn.addEventListener("click", async () => {
-      const outputBlob = compressedBlob ? await blobToDownloadFormat(compressedBlob, selectedDownloadFormat) : null;
-      const ok = downloadBlob(outputBlob, withDownloadExt("compressed-image", selectedDownloadFormat));
-      if (!ok) {
-        setStatus("No compressed image available to download.");
-        return;
+      startActionLoader("Preparing your download...");
+      try {
+        const outputBlob = compressedBlob ? await blobToDownloadFormat(compressedBlob, selectedDownloadFormat) : null;
+        const ok = downloadBlob(outputBlob, withDownloadExt("compressed-image", selectedDownloadFormat));
+        if (!ok) {
+          setStatus("No compressed image available to download.");
+          return;
+        }
+        addNotification("Download Complete", "Compressed image downloaded successfully.");
+      } finally {
+        stopActionLoader();
       }
-      addNotification("Download Complete", "Compressed image downloaded successfully.");
     });
 
     downloadPassportBtn.addEventListener("click", async () => {
-      const outputBlob = passportBlob ? await blobToDownloadFormat(passportBlob, selectedDownloadFormat) : null;
-      const ok = downloadBlob(outputBlob, withDownloadExt("passport-photo", selectedDownloadFormat));
-      if (!ok) {
-        setStatus("No passport photo available to download.");
-        return;
+      startActionLoader("Preparing your download...");
+      try {
+        const outputBlob = passportBlob ? await blobToDownloadFormat(passportBlob, selectedDownloadFormat) : null;
+        const ok = downloadBlob(outputBlob, withDownloadExt("passport-photo", selectedDownloadFormat));
+        if (!ok) {
+          setStatus("No passport photo available to download.");
+          return;
+        }
+        addNotification("Download Complete", "Passport photo downloaded successfully.");
+      } finally {
+        stopActionLoader();
       }
-      addNotification("Download Complete", "Passport photo downloaded successfully.");
     });
 
     initializeTheme();
@@ -5718,13 +6328,7 @@
     restoreBillingPageState();
     renderFileQueue();
     renderNotifications();
-    {
-      const pruned = pruneRecentCompressed();
-      renderRecentCompressed();
-      if (pruned.removedCount > 0) {
-        setStatus(`${pruned.removedCount} recent compressed file(s) were auto-deleted after 4 days.`);
-      }
-    }
+    fetchRecentCompressedFromBackend();
     restoreAppState();
     openResetFromLocationHash();
 
@@ -5732,10 +6336,12 @@
       if (originalObjectUrl) URL.revokeObjectURL(originalObjectUrl);
       if (compressedObjectUrl) URL.revokeObjectURL(compressedObjectUrl);
       if (passportObjectUrl) URL.revokeObjectURL(passportObjectUrl);
+      if (recentPreviewObjectUrl) URL.revokeObjectURL(recentPreviewObjectUrl);
     });
   </script>
 </body>
 </html>
+
 
 
 

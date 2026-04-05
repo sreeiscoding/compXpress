@@ -35,6 +35,31 @@ function inferFormatFromMime(mimeType) {
   return "unknown";
 }
 
+function resolveWorkflowId(req) {
+  const incoming = String(req.body.workflowId || "").trim();
+  if (incoming) return incoming;
+  return `wf_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function toGroupDisplayName(name) {
+  const source = String(name || "generated-file");
+  return source.replace(/\.[^./\\]+$/, "") || "generated-file";
+}
+
+function toAssetSummary(doc) {
+  return {
+    id: String(doc._id),
+    workflowId: String(doc.workflowId || doc._id),
+    name: doc.originalName,
+    type: doc.type,
+    size: doc.size,
+    originalSize: doc.originalSize || 0,
+    sourceType: doc.sourceType || "",
+    bgColor: doc.bgColor || "",
+    createdAt: doc.createdAt
+  };
+}
+
 router.post("/assets/compressed", authMiddleware, upload.single("image"), async (req, res) => {
   try {
     if (!req.file || !req.file.buffer) {
@@ -49,6 +74,7 @@ router.post("/assets/compressed", authMiddleware, upload.single("image"), async 
     const doc = await ImageAsset.create({
       userId: user._id,
       type: "compressed",
+      workflowId: resolveWorkflowId(req),
       originalName: String(req.body.originalName || req.file.originalname || "compressed-image"),
       mimeType: String(req.file.mimetype || "image/png"),
       size: Number(req.file.size || req.file.buffer.length || 0),
@@ -57,12 +83,7 @@ router.post("/assets/compressed", authMiddleware, upload.single("image"), async 
       data: req.file.buffer
     });
 
-    return res.status(201).json({
-      ok: true,
-      id: String(doc._id),
-      type: doc.type,
-      createdAt: doc.createdAt
-    });
+    return res.status(201).json({ ok: true, ...toAssetSummary(doc) });
   } catch (error) {
     return res.status(500).json({ error: "Failed to store compressed image.", details: error.message });
   }
@@ -85,6 +106,7 @@ router.post("/assets/passport", authMiddleware, upload.single("image"), async (r
     const doc = await ImageAsset.create({
       userId: user._id,
       type: "passport",
+      workflowId: resolveWorkflowId(req),
       originalName: String(req.body.originalName || req.file.originalname || "passport-photo"),
       mimeType: String(req.file.mimetype || "image/png"),
       size: Number(req.file.size || req.file.buffer.length || 0),
@@ -94,12 +116,7 @@ router.post("/assets/passport", authMiddleware, upload.single("image"), async (r
       data: req.file.buffer
     });
 
-    return res.status(201).json({
-      ok: true,
-      id: String(doc._id),
-      type: doc.type,
-      createdAt: doc.createdAt
-    });
+    return res.status(201).json({ ok: true, ...toAssetSummary(doc) });
   } catch (error) {
     return res.status(500).json({ error: "Failed to store passport image.", details: error.message });
   }
@@ -158,6 +175,53 @@ router.post("/billing/subscribe", authMiddleware, async (req, res) => {
   }
 });
 
+router.get("/assets/recent/groups", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const docs = await ImageAsset.find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const groupMap = new Map();
+    for (const doc of docs) {
+      const workflowId = String(doc.workflowId || doc._id);
+      const file = toAssetSummary(doc);
+
+      if (!groupMap.has(workflowId)) {
+        groupMap.set(workflowId, {
+          workflowId,
+          name: toGroupDisplayName(doc.originalName),
+          totalFiles: 0,
+          latestCreatedAt: doc.createdAt,
+          files: []
+        });
+      }
+
+      const group = groupMap.get(workflowId);
+      if (doc.type === "compressed" && doc.originalName) {
+        group.name = toGroupDisplayName(doc.originalName);
+      }
+      group.files.push(file);
+      group.totalFiles += 1;
+      if (new Date(doc.createdAt).getTime() > new Date(group.latestCreatedAt).getTime()) {
+        group.latestCreatedAt = doc.createdAt;
+      }
+    }
+
+    const groups = Array.from(groupMap.values()).sort(
+      (a, b) => new Date(b.latestCreatedAt).getTime() - new Date(a.latestCreatedAt).getTime()
+    );
+
+    return res.json({ ok: true, groups });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to fetch recent grouped assets.", details: error.message });
+  }
+});
+
 router.get("/assets/recent/compressed", authMiddleware, async (req, res) => {
   try {
     const user = await resolveUser(req);
@@ -165,14 +229,13 @@ router.get("/assets/recent/compressed", authMiddleware, async (req, res) => {
       return res.status(401).json({ error: "User not found for current token." });
     }
 
-    const limit = Math.min(20, Math.max(1, Number(req.query.limit || 4)));
     const docs = await ImageAsset.find({ userId: user._id, type: "compressed" })
       .sort({ createdAt: -1 })
-      .limit(limit)
       .lean();
 
     const items = docs.map((doc) => ({
       id: String(doc._id),
+      workflowId: String(doc.workflowId || doc._id),
       name: doc.originalName,
       size: doc.size,
       originalSize: doc.originalSize || 0,
@@ -182,6 +245,132 @@ router.get("/assets/recent/compressed", authMiddleware, async (req, res) => {
     return res.json({ ok: true, items });
   } catch (error) {
     return res.status(500).json({ error: "Failed to fetch recent compressed assets.", details: error.message });
+  }
+});
+
+router.delete("/assets/group/:workflowId", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const workflowId = String(req.params.workflowId || "").trim();
+    if (!workflowId) {
+      return res.status(400).json({ error: "Workflow id is required." });
+    }
+
+    const deleteQuery = {
+      userId: user._id,
+      $or: [{ workflowId }]
+    };
+
+    if (/^[a-f\d]{24}$/i.test(workflowId)) {
+      deleteQuery.$or.push({ _id: workflowId });
+    }
+
+    const result = await ImageAsset.deleteMany(deleteQuery);
+    if (!result.deletedCount) {
+      return res.status(404).json({ error: "No files found for this workflow." });
+    }
+
+    return res.json({ ok: true, deletedCount: result.deletedCount, message: "Workflow files deleted." });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to delete workflow files.", details: error.message });
+  }
+});
+
+router.get("/assets/:id", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const id = String(req.params.id || "").trim();
+    if (!id) {
+      return res.status(400).json({ error: "Asset id is required." });
+    }
+
+    const asset = await ImageAsset.findOne({ _id: id, userId: user._id });
+    if (!asset || !asset.data) {
+      return res.status(404).json({ error: "Asset not found." });
+    }
+
+    res.setHeader("Content-Type", asset.mimeType || "application/octet-stream");
+    return res.status(200).send(asset.data);
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to fetch asset.", details: error.message });
+  }
+});
+
+router.delete("/assets/:id", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const id = String(req.params.id || "").trim();
+    if (!id) {
+      return res.status(400).json({ error: "Asset id is required." });
+    }
+
+    const deleted = await ImageAsset.findOneAndDelete({ _id: id, userId: user._id });
+    if (!deleted) {
+      return res.status(404).json({ error: "Asset not found." });
+    }
+
+    return res.json({ ok: true, message: "Asset deleted." });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to delete asset.", details: error.message });
+  }
+});
+
+router.get("/assets/compressed/:id", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const id = String(req.params.id || "").trim();
+    if (!id) {
+      return res.status(400).json({ error: "Asset id is required." });
+    }
+
+    const asset = await ImageAsset.findOne({ _id: id, userId: user._id, type: "compressed" });
+    if (!asset || !asset.data) {
+      return res.status(404).json({ error: "Compressed asset not found." });
+    }
+
+    res.setHeader("Content-Type", asset.mimeType || "image/png");
+    return res.status(200).send(asset.data);
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to fetch compressed asset.", details: error.message });
+  }
+});
+
+router.delete("/assets/compressed/:id", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const id = String(req.params.id || "").trim();
+    if (!id) {
+      return res.status(400).json({ error: "Asset id is required." });
+    }
+
+    const deleted = await ImageAsset.findOneAndDelete({ _id: id, userId: user._id, type: "compressed" });
+    if (!deleted) {
+      return res.status(404).json({ error: "Compressed asset not found." });
+    }
+
+    return res.json({ ok: true, message: "Compressed asset deleted." });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to delete compressed asset.", details: error.message });
   }
 });
 
