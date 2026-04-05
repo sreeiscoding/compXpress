@@ -3595,7 +3595,8 @@
     let authMode = "signin";
     let pendingBillingCheckout = false;
     const APP_STATE_KEY = "comxpress_session_state_v1";
-    const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:4000/api`;
+    const API_BASE_OVERRIDE_KEY = "comxpress_api_base_override_v1";
+    const API_BASE_URL = resolveApiBaseUrl();
     const AUTH_TOKEN_KEY = "comxpress_auth_token_v1";
     const BILLING_OPEN_KEY = "comxpress_billing_open_v1";
     const RECENT_COMPRESSED_KEY = "comxpress_recent_compressed_v1";
@@ -3609,6 +3610,45 @@
     const AUTH_SESSION_KEY = "comxpress_auth_session_v1";
     const FREE_UPLOAD_LIMIT = 5;
     const PRO_UPLOAD_LIMIT = 50;
+
+    function resolveApiBaseUrl() {
+      try {
+        const queryValue = new URLSearchParams(window.location.search).get("api");
+        if (queryValue) {
+          const parsed = String(queryValue).trim().replace(/\/+$/, "");
+          if (parsed) {
+            localStorage.setItem(API_BASE_OVERRIDE_KEY, parsed);
+            return parsed.endsWith("/api") ? parsed : `${parsed}/api`;
+          }
+        }
+      } catch (error) {
+      }
+
+      try {
+        const globalValue = String(window.COMXPRESS_API_BASE_URL || window.__COMXPRESS_API_BASE_URL || "").trim();
+        if (globalValue) {
+          const parsed = globalValue.replace(/\/+$/, "");
+          return parsed.endsWith("/api") ? parsed : `${parsed}/api`;
+        }
+      } catch (error) {
+      }
+
+      try {
+        const saved = String(localStorage.getItem(API_BASE_OVERRIDE_KEY) || "").trim();
+        if (saved) {
+          const parsed = saved.replace(/\/+$/, "");
+          return parsed.endsWith("/api") ? parsed : `${parsed}/api`;
+        }
+      } catch (error) {
+      }
+
+      const host = String(window.location.hostname || "").toLowerCase();
+      const isLocal = host === "localhost" || host === "127.0.0.1";
+      if (isLocal) {
+        return `${window.location.protocol}//${window.location.hostname}:4000/api`;
+      }
+      return `${window.location.origin}/api`;
+    }
 
     function readNotifications() {
       try {
