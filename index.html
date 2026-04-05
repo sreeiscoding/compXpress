@@ -3676,12 +3676,14 @@
         authActions.style.display = "none";
         logoutBtn.disabled = false;
         logoutBtn.hidden = false;
+        logoutBtn.style.display = "inline-flex";
       } else {
         signinPromptText.textContent = "You're not signed in, signing for better experience.";
         signinPrompt.style.display = "flex";
         authActions.style.display = "grid";
         logoutBtn.disabled = true;
         logoutBtn.hidden = true;
+        logoutBtn.style.display = "none";
       }
     }
 
