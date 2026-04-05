@@ -108,6 +108,33 @@ API base resolution in frontend:
 3. Saved localStorage override
 4. Fallback: `http://localhost:4000/api`
 
+### 3) Vercel Deployment (Frontend + API Same Domain)
+
+This repo includes:
+- Root `package.json` for Vercel dependency install
+- `api/[...path].js` as Vercel serverless API entry
+- `server/app.js` as shared Express app for local and Vercel runtime
+
+Vercel setup:
+1. Import this repository.
+2. Keep project root as repository root.
+3. Add environment variables in Vercel Project Settings:
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+   - `REMOVE_BG_API_KEY`
+   - `SMTP_HOST`
+   - `SMTP_PORT`
+   - `SMTP_USER`
+   - `SMTP_PASS`
+   - `SMTP_FROM`
+   - `SMTP_SECURE`
+   - `APP_BASE_URL` (your deployed frontend URL)
+4. Redeploy.
+
+Verify:
+- `GET https://<your-app>.vercel.app/api/health`
+- `POST https://<your-app>.vercel.app/api/login`
+
 ## API Routes (Current)
 
 Auth:
