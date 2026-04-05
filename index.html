@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -2132,6 +2132,79 @@
       pointer-events: none;
     }
 
+    .bg-color-toggle {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.72);
+      border-radius: 10px;
+      padding: 5px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    .bg-color-btn {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(15, 23, 42, 0.76);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 9px;
+      font-family: var(--font-secondary);
+      font-size: 0.74rem;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .bg-color-btn.active {
+      border-color: rgba(96, 165, 250, 0.9);
+      background: rgba(30, 64, 175, 0.3);
+      color: #eff6ff;
+    }
+
+    .bg-color-btn i {
+      font-size: 0.72rem;
+      color: #bfdbfe;
+    }
+
+    .download-format-toggle {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.72);
+      border-radius: 10px;
+      padding: 5px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    .download-format-btn {
+      appearance: none;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(15, 23, 42, 0.76);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 9px;
+      font-family: var(--font-secondary);
+      font-size: 0.74rem;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .download-format-btn.active {
+      border-color: rgba(96, 165, 250, 0.9);
+      background: rgba(30, 64, 175, 0.3);
+      color: #eff6ff;
+    }
+
     .btn-reset {
       min-width: 48px;
       padding: 12px 0;
@@ -2824,7 +2897,7 @@
       <span class="label">ComXpress Utility</span>
       <h1>Compress Images & Create Passport Photos Instantly</h1>
       <p class="subtitle">
-        Compress images and generate passport-ready photos in secondsâ€”simple, fast, and built for real-world applications.
+        Compress images and generate passport-ready photos in seconds—simple, fast, and built for real-world applications.
       </p>
       <button id="getStartedBtn" class="btn btn-cta"><i class="fa-solid fa-arrow-right cta-icon"></i>Get Started</button>
     </section>
@@ -2926,6 +2999,14 @@
                   </li>
                 </ul>
               </div>
+              <div id="passportBgToggle" class="bg-color-toggle" role="group" aria-label="Passport background color">
+                <button id="passportBgWhiteBtn" class="bg-color-btn active" type="button" data-bg="white"><i class="fa-solid fa-circle"></i>White</button>
+                <button id="passportBgBlueBtn" class="bg-color-btn" type="button" data-bg="blue"><i class="fa-solid fa-circle"></i>Blue</button>
+              </div>
+              <div id="downloadFormatToggle" class="download-format-toggle" role="group" aria-label="Download format">
+                <button id="downloadFormatPngBtn" class="download-format-btn active" type="button" data-format="png"><i class="fa-regular fa-file-image"></i>PNG</button>
+                <button id="downloadFormatJpgBtn" class="download-format-btn" type="button" data-format="jpg"><i class="fa-regular fa-file-image"></i>JPG</button>
+              </div>
               <button id="downloadCompressedBtn" class="btn" disabled><i class="fa-solid fa-download"></i>Download Compressed</button>
               <button id="downloadPassportBtn" class="btn" disabled><i class="fa-solid fa-file-arrow-down"></i>Download Passport</button>
               <button id="resetRegenerateBtn" class="btn btn-reset" type="button" title="Reset and regenerate once" aria-label="Reset and regenerate once" disabled><i class="fa-solid fa-rotate-right"></i></button>
@@ -2986,7 +3067,7 @@
   </main>
 
   <footer>
-    Â© 2026 ComXpress. All rights reserved.
+    © 2026 ComXpress. All rights reserved.
   </footer>
 
   <script>
@@ -3080,6 +3161,12 @@
     const passportSourceToggle = document.getElementById("passportSourceToggle");
     const passportSourceLabel = document.getElementById("passportSourceLabel");
     const passportSourceMenu = document.getElementById("passportSourceMenu");
+    const passportBgToggle = document.getElementById("passportBgToggle");
+    const passportBgWhiteBtn = document.getElementById("passportBgWhiteBtn");
+    const passportBgBlueBtn = document.getElementById("passportBgBlueBtn");
+    const downloadFormatToggle = document.getElementById("downloadFormatToggle");
+    const downloadFormatPngBtn = document.getElementById("downloadFormatPngBtn");
+    const downloadFormatJpgBtn = document.getElementById("downloadFormatJpgBtn");
     const downloadCompressedBtn = document.getElementById("downloadCompressedBtn");
     const downloadPassportBtn = document.getElementById("downloadPassportBtn");
     const resetRegenerateBtn = document.getElementById("resetRegenerateBtn");
@@ -3104,10 +3191,14 @@
     let isMobileMenuOpen = false;
     let isPassportSourceMenuOpen = false;
     let passportSource = "compressed";
+    let passportBgColor = "white";
+    let selectedDownloadFormat = "png";
     let selectedBillingMethod = "stripe";
     let authMode = "signin";
     let pendingBillingCheckout = false;
     const APP_STATE_KEY = "comxpress_session_state_v1";
+    const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:4000/api`;
+    const AUTH_TOKEN_KEY = "comxpress_auth_token_v1";
     const BILLING_OPEN_KEY = "comxpress_billing_open_v1";
     const RECENT_COMPRESSED_KEY = "comxpress_recent_compressed_v1";
     const NOTIF_STATE_KEY = "comxpress_notifications_v1";
@@ -3298,7 +3389,7 @@
 
         const name = document.createElement("p");
         name.className = "recent-name";
-        name.textContent = item.name || "compressed-image.jpg";
+        name.textContent = item.name || "compressed-image.png";
 
         const info = document.createElement("p");
         info.className = "recent-info";
@@ -3336,7 +3427,7 @@
     function getCompressedDownloadName(originalName) {
       const source = String(originalName || "image");
       const clean = source.replace(/\.[^./\\]+$/, "");
-      return `${clean}-compressed.jpg`;
+      return `${clean}-compressed.png`;
     }
 
     async function addRecentCompressed(originalName, blob, originalSize) {
@@ -3365,7 +3456,7 @@
       renderRecentCompressed();
     }
 
-    function downloadRecentCompressedById(id) {
+    async function downloadRecentCompressedById(id) {
       const current = pruneRecentCompressed().keep;
       const item = current.find((entry) => entry.id === id);
       if (!item || !item.dataUrl) {
@@ -3373,7 +3464,8 @@
         return;
       }
       const blob = dataUrlToBlob(item.dataUrl);
-      downloadBlob(blob, item.name || "compressed-image.jpg");
+      const outputBlob = await blobToDownloadFormat(blob, selectedDownloadFormat);
+      downloadBlob(outputBlob, withDownloadExt(item.name || "compressed-image", selectedDownloadFormat));
       addNotification("Download Complete", "Recent compressed file downloaded successfully.");
     }
 
@@ -3648,6 +3740,51 @@
       return hasMinLength && hasLetter && hasNumber;
     }
 
+    function setAuthToken(token) {
+      try {
+        if (token) {
+          localStorage.setItem(AUTH_TOKEN_KEY, token);
+        } else {
+          localStorage.removeItem(AUTH_TOKEN_KEY);
+        }
+      } catch (error) {
+      }
+    }
+
+    function getAuthToken() {
+      try {
+        return localStorage.getItem(AUTH_TOKEN_KEY) || "";
+      } catch (error) {
+        return "";
+      }
+    }
+
+    async function requestBackendAuth(mode, email, password) {
+      const endpoint = mode === "signup" ? "/signup" : "/login";
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (mode === "signup" && response.status === 409) {
+          return requestBackendAuth("login", email, password);
+        }
+        throw new Error(data.error || "Authentication failed.");
+      }
+
+      if (!data.token) {
+        throw new Error("Authentication token was not returned.");
+      }
+
+      setAuthToken(data.token);
+      return data.token;
+    }
+
     function initializeSubscriptionState() {
       updatePricingState();
     }
@@ -3656,16 +3793,18 @@
       isSignedIn = false;
       try {
         const activeSession = sessionStorage.getItem(AUTH_SESSION_KEY);
+        const token = getAuthToken();
         const email = normalizeEmail(localStorage.getItem(CURRENT_USER_KEY));
         const users = readUsers();
         const user = users[email];
-        if (activeSession === "1" && user) {
+        if (activeSession === "1" && token && user) {
           isSignedIn = true;
           isSubscribed = !!user.subscribed;
         } else {
           isSignedIn = false;
           isSubscribed = false;
           sessionStorage.removeItem(AUTH_SESSION_KEY);
+          setAuthToken("");
         }
       } catch (error) {
         isSignedIn = false;
@@ -3735,6 +3874,13 @@
       }
 
       try {
+        await requestBackendAuth(mode, email, password);
+      } catch (error) {
+        setStatus(error.message || "Could not authenticate with server.");
+        return false;
+      }
+
+      try {
         localStorage.setItem(CURRENT_USER_KEY, email);
         sessionStorage.setItem(AUTH_SESSION_KEY, "1");
       } catch (error) {
@@ -3777,10 +3923,11 @@
       };
     }
 
-    function completeOAuth(provider) {
+    async function completeOAuth(provider) {
       const identity = getOAuthIdentity(provider);
       const users = readUsers();
       const email = normalizeEmail(identity.email);
+      const oauthPassword = `OAuth_${provider}_Pass_2026`;
 
       if (!users[email]) {
         users[email] = {
@@ -3793,6 +3940,16 @@
       }
 
       writeUsers(users);
+      try {
+        await requestBackendAuth("signup", email, oauthPassword);
+      } catch (error) {
+        try {
+          await requestBackendAuth("login", email, oauthPassword);
+        } catch (loginError) {
+          setStatus(loginError.message || "Could not authenticate OAuth account with server.");
+          return;
+        }
+      }
       try {
         localStorage.setItem(CURRENT_USER_KEY, email);
         sessionStorage.setItem(AUTH_SESSION_KEY, "1");
@@ -4210,6 +4367,37 @@
       }
     }
 
+    function setPassportBgColor(color, announce = true) {
+      passportBgColor = color === "blue" ? "blue" : "white";
+      passportBgWhiteBtn.classList.toggle("active", passportBgColor === "white");
+      passportBgBlueBtn.classList.toggle("active", passportBgColor === "blue");
+
+      if (passportBlob) {
+        passportBlob = null;
+        passportPreview.removeAttribute("src");
+        passportPreviewShell.classList.remove("has-image");
+      }
+
+      if (announce) {
+        setStatus(`Passport background set to ${passportBgColor}.`);
+      }
+    }
+
+    function setDownloadFormat(format, announce = true) {
+      selectedDownloadFormat = format === "jpg" ? "jpg" : "png";
+      downloadFormatPngBtn.classList.toggle("active", selectedDownloadFormat === "png");
+      downloadFormatJpgBtn.classList.toggle("active", selectedDownloadFormat === "jpg");
+      if (announce) {
+        setStatus(`Download format set to ${selectedDownloadFormat.toUpperCase()}.`);
+      }
+    }
+
+    function withDownloadExt(filename, format) {
+      const ext = format === "jpg" ? "jpg" : "png";
+      const clean = String(filename || "image").replace(/\.[^./\\]+$/, "");
+      return `${clean}.${ext}`;
+    }
+
     function setProcessingState(isProcessing) {
       const hasImage = !!getActiveUpload();
       const wantsCompressedSource = passportSource === "compressed";
@@ -4218,6 +4406,12 @@
       passportBtn.disabled = isProcessing || !hasPassportSource;
       passportSourceDropdown.classList.toggle("disabled", isProcessing || !hasImage);
       passportSourceToggle.disabled = isProcessing || !hasImage;
+      passportBgToggle.style.opacity = isProcessing || !hasImage ? "0.6" : "1";
+      passportBgWhiteBtn.disabled = isProcessing || !hasImage;
+      passportBgBlueBtn.disabled = isProcessing || !hasImage;
+      downloadFormatToggle.style.opacity = isProcessing ? "0.6" : "1";
+      downloadFormatPngBtn.disabled = isProcessing;
+      downloadFormatJpgBtn.disabled = isProcessing;
       downloadCompressedBtn.disabled = isProcessing || !compressedBlob;
       downloadPassportBtn.disabled = isProcessing || !passportBlob;
       resetRegenerateBtn.disabled = isProcessing || !compressedBlob || !hasImage;
@@ -4308,7 +4502,7 @@
       });
     }
 
-    function canvasToBlob(canvas, quality = 0.92) {
+    function canvasToBlob(canvas, type = "image/png", quality) {
       return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
           if (!blob) {
@@ -4316,8 +4510,22 @@
             return;
           }
           resolve(blob);
-        }, "image/jpeg", quality);
+        }, type, quality);
       });
+    }
+
+    async function blobToDownloadFormat(blob, format) {
+      const resolved = format === "jpg" ? "jpg" : "png";
+      if (resolved === "png") return blob;
+      const img = await blobToImage(blob);
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      return canvasToBlob(canvas, "image/jpeg", 0.92);
     }
 
     function handleFile(file) {
@@ -4325,46 +4533,46 @@
     }
 
     async function compressImageWithQualityBalance(image, originalSize) {
-      const canvas = document.createElement("canvas");
-      const width = image.naturalWidth || image.width;
-      const height = image.naturalHeight || image.height;
-      canvas.width = width;
-      canvas.height = height;
+      const sourceW = image.naturalWidth || image.width;
+      const sourceH = image.naturalHeight || image.height;
+      const scales = [1, 0.92, 0.86, 0.8, 0.74];
 
-      const ctx = canvas.getContext("2d");
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(image, 0, 0, width, height);
-
-      const qualityLevels = [0.86, 0.78, 0.7, 0.62, 0.56];
       let bestBlob = null;
-      let bestQuality = qualityLevels[0];
+      let bestScale = scales[0];
       let smallestBlob = null;
-      let smallestQuality = qualityLevels[0];
+      let smallestScale = scales[0];
 
-      for (const quality of qualityLevels) {
-        const blob = await canvasToBlob(canvas, quality);
+      for (const scale of scales) {
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(sourceW * scale));
+        canvas.height = Math.max(1, Math.round(sourceH * scale));
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        const blob = await canvasToBlob(canvas, "image/png");
         if (!smallestBlob || blob.size < smallestBlob.size) {
           smallestBlob = blob;
-          smallestQuality = quality;
+          smallestScale = scale;
         }
         if (blob.size <= originalSize * 0.9) {
           bestBlob = blob;
-          bestQuality = quality;
+          bestScale = scale;
           break;
         }
       }
 
       if (!bestBlob && smallestBlob) {
         bestBlob = smallestBlob;
-        bestQuality = smallestQuality;
+        bestScale = smallestScale;
       }
 
       if (!bestBlob) {
         throw new Error("Compression failed.");
       }
 
-      return { blob: bestBlob, quality: bestQuality };
+      return { blob: bestBlob, scale: bestScale };
     }
 
     async function compressImage() {
@@ -4405,7 +4613,7 @@
         const reduction = originalFile.size > 0
           ? Math.max(0, Math.round(((originalFile.size - compressedBlob.size) / originalFile.size) * 100))
           : 0;
-        setStatus(`Compression completed (${reduction}% smaller, quality ${Math.round(result.quality * 100)}%).`);
+        setStatus(`Compression completed (${reduction}% smaller, resolution ${Math.round(result.scale * 100)}%).`);
         await addRecentCompressed(originalFile.name, compressedBlob, originalFile.size);
         addNotification("Compression Completed", `Compressed image is ready (${formatBytes(compressedBlob.size)}).`);
       } catch (error) {
@@ -4443,6 +4651,12 @@
         setStatus("Compress the image first, or switch passport source to Original.");
         return;
       }
+      const authToken = getAuthToken();
+      if (!authToken) {
+        setStatus("Sign in first to generate passport with background removal.");
+        setAuthPageState(true);
+        return;
+      }
 
       try {
         setStatus("Processing...");
@@ -4454,31 +4668,25 @@
           writeAppState(state);
         }
 
-        const img = sourceType === "compressed"
-          ? await blobToImage(compressedBlob)
-          : await fileToImage(originalFile);
-        const canvas = document.createElement("canvas");
-        const targetW = 413;
-        const targetH = 531;
-        const paddingRatio = 0.08;
-        canvas.width = targetW;
-        canvas.height = targetH;
+        const sourceBlob = sourceType === "compressed" ? compressedBlob : originalFile;
+        const formData = new FormData();
+        formData.append("image", sourceBlob, sourceType === "compressed" ? "compressed-source.png" : (originalFile.name || "original-source.png"));
+        formData.append("bgColor", passportBgColor);
 
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, targetW, targetH);
+        const response = await fetch(`${API_BASE_URL}/process-passport`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`
+          },
+          body: formData
+        });
 
-        const innerW = targetW * (1 - paddingRatio * 2);
-        const innerH = targetH * (1 - paddingRatio * 2);
-        const scale = Math.min(innerW / img.width, innerH / img.height);
-        const drawW = img.width * scale;
-        const drawH = img.height * scale;
-        const x = (targetW - drawW) / 2;
-        const y = (targetH - drawH) / 2;
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.details || data.error || "Passport processing failed.");
+        }
 
-        ctx.drawImage(img, x, y, drawW, drawH);
-
-        passportBlob = await canvasToBlob(canvas, 0.95);
+        passportBlob = await response.blob();
 
         if (passportObjectUrl) URL.revokeObjectURL(passportObjectUrl);
         passportObjectUrl = URL.createObjectURL(passportBlob);
@@ -4497,15 +4705,15 @@
         } catch (error) {
         }
 
-        setStatus(`Passport photo generated from ${sourceType} image.`);
-        addNotification("Passport Generated", `Passport photo is ready from ${sourceType} source.`);
+        setStatus(`Passport photo generated from ${sourceType} image with ${passportBgColor} background.`);
+        addNotification("Passport Generated", `Passport PNG is ready from ${sourceType} source.`);
       } catch (error) {
         const state = readAppState();
         if (state) {
           state.pendingTask = null;
           writeAppState(state);
         }
-        setStatus("Passport generation failed. Please try another image.");
+        setStatus(error.message || "Passport generation failed. Please try another image.");
         addNotification("Passport Generation Failed", "Could not generate passport photo. Please try again.");
       } finally {
         setProcessingState(false);
@@ -4578,6 +4786,7 @@
         localStorage.removeItem(CURRENT_USER_KEY);
       } catch (error) {
       }
+      setAuthToken("");
       sessionStorage.removeItem(AUTH_SESSION_KEY);
       sessionStorage.removeItem(APP_STATE_KEY);
       resetImageState();
@@ -4850,7 +5059,9 @@
       const action = actionBtn.dataset.action;
       if (!id || !action) return;
       if (action === "download") {
-        downloadRecentCompressedById(id);
+        downloadRecentCompressedById(id).catch(() => {
+          setStatus("Could not download selected recent file.");
+        });
         return;
       }
       if (action === "delete") {
@@ -4993,8 +5204,23 @@
       setPassportSourceMenuState(false);
     });
 
-    downloadCompressedBtn.addEventListener("click", () => {
-      const ok = downloadBlob(compressedBlob, "compressed-image.jpg");
+    passportBgToggle.addEventListener("click", (e) => {
+      const bgBtn = e.target.closest(".bg-color-btn");
+      if (!bgBtn || bgBtn.disabled) return;
+      const value = bgBtn.dataset.bg;
+      setPassportBgColor(value, true);
+    });
+
+    downloadFormatToggle.addEventListener("click", (e) => {
+      const formatBtn = e.target.closest(".download-format-btn");
+      if (!formatBtn || formatBtn.disabled) return;
+      const format = formatBtn.dataset.format;
+      setDownloadFormat(format, true);
+    });
+
+    downloadCompressedBtn.addEventListener("click", async () => {
+      const outputBlob = compressedBlob ? await blobToDownloadFormat(compressedBlob, selectedDownloadFormat) : null;
+      const ok = downloadBlob(outputBlob, withDownloadExt("compressed-image", selectedDownloadFormat));
       if (!ok) {
         setStatus("No compressed image available to download.");
         return;
@@ -5002,8 +5228,9 @@
       addNotification("Download Complete", "Compressed image downloaded successfully.");
     });
 
-    downloadPassportBtn.addEventListener("click", () => {
-      const ok = downloadBlob(passportBlob, "passport-photo.jpg");
+    downloadPassportBtn.addEventListener("click", async () => {
+      const outputBlob = passportBlob ? await blobToDownloadFormat(passportBlob, selectedDownloadFormat) : null;
+      const ok = downloadBlob(outputBlob, withDownloadExt("passport-photo", selectedDownloadFormat));
       if (!ok) {
         setStatus("No passport photo available to download.");
         return;
@@ -5015,6 +5242,8 @@
     initializeAuthState();
     initializeSubscriptionState();
     setPassportSource("compressed", false);
+    setPassportBgColor("white", false);
+    setDownloadFormat("png", false);
     setBillingMethod("stripe");
     restoreBillingPageState();
     renderFileQueue();
@@ -5036,4 +5265,6 @@
   </script>
 </body>
 </html>
+
+
 
