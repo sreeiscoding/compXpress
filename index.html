@@ -4770,10 +4770,12 @@
       const email = normalizeEmail(authEmailInput.value);
       if (!email) {
         setStatus("Enter your email, then click Forgot password.");
+        addNotification("Recovery Email Needed", "Enter your email first, then tap Forgot password.");
         authEmailInput.focus();
         return;
       }
 
+      startActionLoader("Sending recovery message...");
       try {
         await requestForgotPassword(email);
         setStatus("Recovery message sent. Check your email for the token.");
@@ -4782,7 +4784,21 @@
         setResetPageState(true, email);
         resetTokenInput.focus();
       } catch (error) {
-        setStatus(error.message || "Could not send recovery email.");
+        const rawMessage = String(error && error.message ? error.message : "Could not send recovery email.");
+        const isNetworkIssue = /Failed to fetch|NetworkError|Load failed|fetch/i.test(rawMessage);
+        const protocolHint = window.location.protocol === "https:" && /^http:\/\//i.test(API_BASE_URL);
+        if (isNetworkIssue || protocolHint) {
+          const deployHint = protocolHint
+            ? "Your app is HTTPS but backend is HTTP. Use an HTTPS backend URL."
+            : "Could not reach backend. Verify API URL and backend server status.";
+          setStatus(deployHint);
+          addNotification("Recovery Failed", deployHint);
+        } else {
+          setStatus(rawMessage);
+          addNotification("Recovery Failed", rawMessage);
+        }
+      } finally {
+        stopActionLoader();
       }
     }
 
