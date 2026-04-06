@@ -4061,6 +4061,36 @@
       });
     }
 
+    function toAbsoluteApiPath(path) {
+      const clean = String(path || "").startsWith("/") ? String(path) : `/${String(path || "")}`;
+      return `${window.location.origin}${clean}`;
+    }
+
+    async function fetchWithAuthFallback(candidateUrls, authToken, init = {}) {
+      let lastError = null;
+      for (const url of candidateUrls) {
+        try {
+          const response = await fetch(url, {
+            ...init,
+            headers: {
+              ...(init.headers || {}),
+              Authorization: `Bearer ${authToken}`
+            }
+          });
+          if (response.ok) {
+            return { response, url };
+          }
+          if (response.status === 401 || response.status === 403) {
+            return { response, url };
+          }
+          lastError = new Error(`Request failed (${response.status}) for ${url}`);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error("Request failed for all fallback endpoints.");
+    }
+
     async function fetchRecentCompressedFromBackend() {
       const authToken = getAuthToken();
       if (!authToken) {
@@ -4070,21 +4100,21 @@
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/assets/recent/groups`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${authToken}`
-          }
-        });
+        const groupCandidates = [
+          `${API_BASE_URL}/assets/recent/groups`,
+          toAbsoluteApiPath("/api/assets/recent/groups"),
+          toAbsoluteApiPath("/assets/recent/groups")
+        ];
+        const { response } = await fetchWithAuthFallback(groupCandidates, authToken, { method: "GET" });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-          if (response.status === 404) {
-            const fallbackResponse = await fetch(`${API_BASE_URL}/assets/recent/compressed`, {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${authToken}`
-              }
-            });
+          if (response.status === 404 || response.status === 405) {
+            const compressedCandidates = [
+              `${API_BASE_URL}/assets/recent/compressed`,
+              toAbsoluteApiPath("/api/assets/recent/compressed"),
+              toAbsoluteApiPath("/assets/recent/compressed")
+            ];
+            const { response: fallbackResponse } = await fetchWithAuthFallback(compressedCandidates, authToken, { method: "GET" });
             const fallbackData = await fallbackResponse.json().catch(() => ({}));
             if (!fallbackResponse.ok) {
               throw new Error(fallbackData.details || fallbackData.error || "Could not fetch recent compressed files.");
@@ -4340,6 +4370,9 @@
     }
 
     function setLogoutModalState(open) {
+      if (!open && logoutModal.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       logoutModal.classList.toggle("open", open);
       logoutModal.setAttribute("aria-hidden", String(!open));
     }
@@ -4383,6 +4416,9 @@
     }
 
     function setResetPageState(open, prefillEmail = "") {
+      if (!open && resetPasswordPage.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       resetPasswordPage.classList.toggle("open", open);
       resetPasswordPage.setAttribute("aria-hidden", String(!open));
       if (open) {
@@ -4462,11 +4498,17 @@
     }
 
     function setUpgradeModalState(open) {
+      if (!open && upgradeModal.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       upgradeModal.classList.toggle("open", open);
       upgradeModal.setAttribute("aria-hidden", String(!open));
     }
 
     function setRecentDeleteModalState(open) {
+      if (!open && recentDeleteModal.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       recentDeleteModal.classList.toggle("open", open);
       recentDeleteModal.setAttribute("aria-hidden", String(!open));
       if (!open) {
@@ -4479,6 +4521,9 @@
     }
 
     function setRecentPreviewModalState(open) {
+      if (!open && recentPreviewModal.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       recentPreviewModal.classList.toggle("open", open);
       recentPreviewModal.setAttribute("aria-hidden", String(!open));
       if (!open) {
@@ -4506,6 +4551,9 @@
     }
 
     function setBillingPageState(open) {
+      if (!open && billingPage.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       isBillingPageOpen = open;
       billingPage.classList.toggle("open", open);
       billingPage.setAttribute("aria-hidden", String(!open));
@@ -4654,11 +4702,13 @@
       }
 
       const endpoint = safeType === "passport" ? "/assets/passport" : "/assets/compressed";
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const endpointCandidates = [
+        `${API_BASE_URL}${endpoint}`,
+        toAbsoluteApiPath(`/api${endpoint}`),
+        toAbsoluteApiPath(endpoint)
+      ];
+      const { response } = await fetchWithAuthFallback(endpointCandidates, authToken, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        },
         body: formData
       });
 
@@ -6662,7 +6712,6 @@
     restoreBillingPageState();
     renderFileQueue();
     renderNotifications();
-    fetchRecentCompressedFromBackend();
     restoreAppState();
     openResetFromLocationHash();
     warnIfApiLikelyMisconfigured();
