@@ -28,6 +28,7 @@ app.get("/", (_req, res) => {
       "GET /api/health",
       "POST /api/signup",
       "POST /api/login",
+      "GET /api/me",
       "POST /api/forgot-password",
       "POST /api/reset-password",
       "POST /api/remove-bg",

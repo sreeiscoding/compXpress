@@ -4038,7 +4038,7 @@
 
     async function fetchRecentCompressedFromBackend() {
       const authToken = getAuthToken();
-      if (!authToken || !isSignedIn) {
+      if (!authToken) {
         writeRecentCompressed([]);
         renderRecentCompressed();
         return;
@@ -4053,6 +4053,14 @@
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            setAuthToken("");
+            isSignedIn = false;
+            isSubscribed = false;
+            signedInDisplayName = "";
+            updateAuthUI();
+            updatePricingState();
+          }
           throw new Error(data.details || data.error || "Could not fetch recent compressed files.");
         }
         const groups = Array.isArray(data.groups) ? data.groups : [];
@@ -4074,7 +4082,7 @@
 
     async function removeRecentCompressedById(id) {
       const authToken = getAuthToken();
-      if (!authToken || !isSignedIn || !id) {
+      if (!authToken || !id) {
         setStatus("Sign in to manage recent compressed files.");
         return;
       }
@@ -4095,7 +4103,7 @@
 
     async function downloadRecentCompressedById(id) {
       const authToken = getAuthToken();
-      if (!authToken || !isSignedIn || !id) {
+      if (!authToken || !id) {
         setStatus("Sign in to download recent compressed files.");
         return;
       }
@@ -4125,7 +4133,7 @@
 
     async function openRecentImagePreviewById(id) {
       const authToken = getAuthToken();
-      if (!authToken || !isSignedIn || !id) {
+      if (!authToken || !id) {
         setStatus("Sign in to preview generated files.");
         return;
       }
@@ -4186,7 +4194,7 @@
 
     async function removeRecentGroupByWorkflow(workflowId) {
       const authToken = getAuthToken();
-      if (!authToken || !isSignedIn || !workflowId) {
+      if (!authToken || !workflowId) {
         setStatus("Sign in to manage recent compressed files.");
         return;
       }
@@ -4582,6 +4590,20 @@
       }
     }
 
+    function decodeJwtPayload(token) {
+      try {
+        const parts = String(token || "").split(".");
+        if (parts.length < 2) return null;
+        const normalized = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+        const json = atob(padded);
+        const payload = JSON.parse(json);
+        return payload && typeof payload === "object" ? payload : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
     async function storeImageAssetToBackend(type, blob, options = {}) {
       const authToken = getAuthToken();
       if (!authToken || !blob) return;
@@ -4614,6 +4636,9 @@
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
+        if (response.status === 401 || response.status === 403) {
+          setAuthToken("");
+        }
         throw new Error(data.details || data.error || `Failed to store ${safeType} asset.`);
       }
     }
@@ -4721,24 +4746,98 @@
       return data;
     }
 
+    async function requestCurrentUserProfile() {
+      const authToken = getAuthToken();
+      if (!authToken) {
+        throw new Error("Missing token.");
+      }
+      const response = await fetch(`${API_BASE_URL}/me`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        }
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch profile.");
+      }
+      return data && data.user ? data.user : null;
+    }
+
     function initializeSubscriptionState() {
       updatePricingState();
+    }
+
+    async function syncAuthFromBackend() {
+      const token = getAuthToken();
+      if (!token) {
+        isSignedIn = false;
+        isSubscribed = false;
+        signedInDisplayName = "";
+        updateAuthUI();
+        updatePricingState();
+        return false;
+      }
+      try {
+        const user = await requestCurrentUserProfile();
+        if (!user || !user.email) {
+          throw new Error("Invalid user profile.");
+        }
+        const email = normalizeEmail(user.email);
+        const name = String(user.name || "").trim() || "User";
+        isSignedIn = true;
+        isSubscribed = !!user.subscribed;
+        signedInDisplayName = name;
+        localStorage.setItem(CURRENT_USER_KEY, email);
+        localStorage.setItem(CURRENT_USER_NAME_KEY, name);
+        sessionStorage.setItem(AUTH_SESSION_KEY, "1");
+        const users = readUsers();
+        users[email] = {
+          ...(users[email] || {}),
+          name,
+          email,
+          subscribed: !!user.subscribed
+        };
+        writeUsers(users);
+        updateAuthUI();
+        updatePricingState();
+        return true;
+      } catch (error) {
+        setAuthToken("");
+        isSignedIn = false;
+        isSubscribed = false;
+        signedInDisplayName = "";
+        sessionStorage.removeItem(AUTH_SESSION_KEY);
+        updateAuthUI();
+        updatePricingState();
+        return false;
+      }
     }
 
     function initializeAuthState() {
       isSignedIn = false;
       signedInDisplayName = "";
       try {
-        const activeSession = sessionStorage.getItem(AUTH_SESSION_KEY);
         const token = getAuthToken();
-        const email = normalizeEmail(localStorage.getItem(CURRENT_USER_KEY));
-        const storedName = String(localStorage.getItem(CURRENT_USER_NAME_KEY) || "").trim();
+        const payload = decodeJwtPayload(token);
+        const tokenExpMs = payload && Number.isFinite(Number(payload.exp)) ? Number(payload.exp) * 1000 : 0;
+        const tokenExpired = tokenExpMs > 0 && Date.now() >= tokenExpMs;
+        const email = normalizeEmail((payload && payload.email) || localStorage.getItem(CURRENT_USER_KEY));
+        const storedName = String((payload && payload.name) || localStorage.getItem(CURRENT_USER_NAME_KEY) || "").trim();
         const users = readUsers();
-        const user = users[email];
-        if (activeSession === "1" && token && user) {
+        const user = users[email] || {};
+
+        if (token && payload && !tokenExpired) {
           isSignedIn = true;
-          isSubscribed = !!user.subscribed;
-          signedInDisplayName = storedName || user.name || "";
+          isSubscribed = !!(payload.subscribed || user.subscribed);
+          signedInDisplayName = storedName || user.name || "User";
+          if (email) {
+            localStorage.setItem(CURRENT_USER_KEY, email);
+          }
+          if (signedInDisplayName) {
+            localStorage.setItem(CURRENT_USER_NAME_KEY, signedInDisplayName);
+          }
+          sessionStorage.setItem(AUTH_SESSION_KEY, "1");
         } else {
           isSignedIn = false;
           isSubscribed = false;
@@ -4754,6 +4853,11 @@
       updateAuthUI();
       updatePricingState();
       fetchRecentCompressedFromBackend();
+      if (getAuthToken()) {
+        syncAuthFromBackend().then(() => {
+          fetchRecentCompressedFromBackend();
+        });
+      }
     }
 
     function updateAuthUI() {
@@ -4886,6 +4990,7 @@
       isSubscribed = !!(authResult && authResult.user && authResult.user.subscribed);
       updateAuthUI();
       updatePricingState();
+      await syncAuthFromBackend().catch(() => {});
       fetchRecentCompressedFromBackend();
 
       if (pendingBillingCheckout) {
@@ -5038,6 +5143,7 @@
       isSubscribed = !!((authResult && authResult.user && authResult.user.subscribed) || (currentUser && currentUser.subscribed));
       updateAuthUI();
       updatePricingState();
+      await syncAuthFromBackend().catch(() => {});
       fetchRecentCompressedFromBackend();
 
       if (pendingBillingCheckout) {
@@ -5061,13 +5167,18 @@
 
     function activateSubscription(email) {
       const normalizedEmail = normalizeEmail(email);
-      if (!normalizedEmail) return false;
-      const users = readUsers();
-      if (!users[normalizedEmail]) {
-        return false;
+      if (normalizedEmail) {
+        const users = readUsers();
+        users[normalizedEmail] = {
+          ...(users[normalizedEmail] || {}),
+          email: normalizedEmail,
+          name: users[normalizedEmail] && users[normalizedEmail].name
+            ? users[normalizedEmail].name
+            : (signedInDisplayName || "User"),
+          subscribed: true
+        };
+        writeUsers(users);
       }
-      users[normalizedEmail].subscribed = true;
-      writeUsers(users);
       isSubscribed = true;
       updatePricingState();
       return true;
@@ -5161,6 +5272,7 @@
         setStatus("Billing saved, but local subscription state could not be updated. Re-login and retry.");
         return;
       }
+      syncAuthFromBackend().catch(() => {});
 
       pendingBillingCheckout = false;
       setBillingPageState(false);
@@ -5715,7 +5827,9 @@
               ext: "png"
             });
           } catch (assetError) {
-            addNotification("Cloud Save Failed", "Compressed image generated, but database save failed.");
+            const saveMsg = String(assetError && assetError.message ? assetError.message : "Compressed image generated, but database save failed.");
+            addNotification("Cloud Save Failed", saveMsg);
+            setStatus(saveMsg);
           }
         }
 
@@ -5823,7 +5937,9 @@
             ext: "png"
           });
         } catch (assetError) {
-          addNotification("Cloud Save Failed", "Passport image generated, but database save failed.");
+          const saveMsg = String(assetError && assetError.message ? assetError.message : "Passport image generated, but database save failed.");
+          addNotification("Cloud Save Failed", saveMsg);
+          setStatus(saveMsg);
         }
 
         setStatus(`Passport photo generated from ${sourceType} image with ${passportBgColor} background.`);

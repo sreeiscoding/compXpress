@@ -140,6 +140,7 @@ Verify:
 Auth:
 - `POST /api/signup`
 - `POST /api/login`
+- `GET /api/me`
 - `POST /api/forgot-password`
 - `POST /api/reset-password`
 

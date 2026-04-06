@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/User");
+const authMiddleware = require("../middleware/authMiddleware");
 const { sendPasswordRecoveryEmail } = require("../utils/mailer");
 
 const router = express.Router();
@@ -108,6 +109,36 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ error: "Failed to login." });
+  }
+});
+
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const tokenUserId = String(req.user && req.user.userId ? req.user.userId : "").trim();
+    const tokenEmail = String(req.user && req.user.email ? req.user.email : "").trim().toLowerCase();
+
+    let user = null;
+    if (tokenUserId) {
+      user = await User.findById(tokenUserId);
+    }
+    if (!user && tokenEmail) {
+      user = await User.findOne({ email: tokenEmail });
+    }
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.json({
+      ok: true,
+      user: {
+        id: String(user._id),
+        name: user.name,
+        email: user.email,
+        subscribed: !!user.subscribed
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to fetch profile." });
   }
 });
 
