@@ -82,7 +82,7 @@
     .brand {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 0;
       font-family: var(--font-heading);
       font-weight: 650;
       letter-spacing: 0.1px;
@@ -90,16 +90,16 @@
     }
 
     .logo {
-      width: 28px;
-      height: 28px;
+      width: 84px;
+      height: 84px;
       border-radius: 8px;
       display: block;
       object-fit: contain;
       object-position: center;
-      background: rgba(15, 23, 42, 0.55);
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      padding: 3px;
-      box-shadow: 0 8px 22px rgba(2, 6, 23, 0.32);
+      background: transparent;
+      border: 0;
+      padding: 0;
+      box-shadow: none;
     }
 
     .nav-links {
@@ -2834,13 +2834,13 @@
 
       .brand {
         font-size: 0.94rem;
-        gap: 8px;
+        gap: 0;
       }
 
       .logo {
-        width: 22px;
-        height: 22px;
-        padding: 2px;
+        width: 68px;
+        height: 68px;
+        padding: 0;
       }
 
       .nav-actions {
@@ -3144,8 +3144,7 @@
   <header class="navbar">
     <div class="container nav-wrap">
       <a href="#home" class="brand">
-        <img class="logo" src="assets/image/compass_logo.png" alt="ComXpress logo" />
-        <span>ComXpress</span>
+        <img class="logo" src="assets/fonts/image/compass_logo.png" alt="Com/pass logo" />
       </a>
       <nav id="mobileNav" class="nav-links">
         <a href="#home">Home</a>
@@ -3178,7 +3177,7 @@
       <button id="privacyCloseBtn" class="drawer-close" type="button" aria-label="Close privacy policy"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="privacy-body">
-      <p class="privacy-text">ComXpress processes your images fully in your browser. No image files are uploaded to any server by default.</p>
+      <p class="privacy-text">Com/pass processes your images fully in your browser. No image files are uploaded to any server by default.</p>
       <p class="privacy-text">Generated previews and outputs are stored locally only for your active session to support refresh recovery and user convenience.</p>
       <p class="privacy-text">Notification history and theme preferences are saved on your device and can be cleared by browser storage cleanup or logout actions.</p>
       <p class="privacy-text">By using this tool, you confirm you have rights to process uploaded photos and comply with any applicable local privacy regulations.</p>
@@ -3395,7 +3394,7 @@
     <div class="billing-card" role="dialog" aria-modal="true" aria-labelledby="billingTitle" aria-describedby="billingSubtitle">
       <div class="auth-head">
         <div>
-          <h3 id="billingTitle" class="billing-title">ComXpress Pro Billing</h3>
+          <h3 id="billingTitle" class="billing-title">Com/pass Pro Billing</h3>
           <p id="billingSubtitle" class="billing-subtitle">Upgrade to Pro for high-volume uploads and priority processing workflow.</p>
         </div>
         <button id="billingCloseBtn" class="auth-close" type="button" aria-label="Close billing"><i class="fa-solid fa-xmark"></i></button>
@@ -3482,7 +3481,7 @@
 
   <main id="home">
     <section class="hero container">
-      <span class="label">ComXpress Utility</span>
+      <span class="label">Com/pass Utility</span>
       <h1>Compress Images & Create Passport Photos Instantly</h1>
       <p class="subtitle">
         Compress images and generate passport-ready photos in seconds—simple, fast, and built for real-world applications.
@@ -3660,7 +3659,7 @@
   </main>
 
   <footer>
-    © 2026 ComXpress. All rights reserved.
+    © 2026 Com/pass. All rights reserved.
   </footer>
 
   <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="false"></div>
@@ -4967,10 +4966,10 @@
 
     function buildUpiPaymentUrl() {
       const payeeVpa = "comxpress@upi";
-      const payeeName = "ComXpress Pro";
+      const payeeName = "Com/pass Pro";
       const amount = "9.00";
       const currency = "INR";
-      const note = "ComXpress Pro Monthly Subscription";
+      const note = "Com/pass Pro Monthly Subscription";
       const txnRef = `COMX-${Date.now()}`;
       const params = new URLSearchParams({
         pa: payeeVpa,
@@ -5658,7 +5657,7 @@
       setBillingPageState(false);
       setUpgradeModalState(false);
       const methodName = getBillingMethodLabel(billingData.method);
-      setStatus(`Subscription activated via ${methodName}. ComXpress Pro is now active.`);
+      setStatus(`Subscription activated via ${methodName}. Com/pass Pro is now active.`);
       addNotification("Subscription Active", `Your Pro billing is active via ${methodName}. Upload limits are upgraded.`);
     }
 
