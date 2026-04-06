@@ -5,24 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Image Compressor + Passport Photo Generator</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233b82f6'/%3E%3Cpath d='M18 32h28M32 18v28' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&family=Sora:wght@100..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   <style>
-    @font-face {
-      font-family: "Sora";
-      src: url("./assets/fonts/Sora-Variable.ttf") format("truetype");
-      font-weight: 100 800;
-      font-style: normal;
-      font-display: swap;
-    }
-
-    @font-face {
-      font-family: "Inconsolata";
-      src: url("./assets/fonts/Inconsolata-Variable.ttf") format("truetype");
-      font-weight: 200 900;
-      font-style: normal;
-      font-display: swap;
-    }
-
     :root {
       --font-base: "Inconsolata", "Inconsolas", "Courier New", monospace;
       --font-heading: "Sora", "Segoe UI", "SF Pro Display", Arial, sans-serif;
@@ -4235,22 +4222,55 @@
 
         const downloadGroupBtn = document.createElement("button");
         downloadGroupBtn.type = "button";
-        downloadGroupBtn.className = "recent-btn";
+        downloadGroupBtn.className = "recent-btn recent-desktop-actions";
         downloadGroupBtn.dataset.action = "download-group";
         downloadGroupBtn.dataset.workflow = workflowId;
         downloadGroupBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download All";
 
         const deleteGroupBtn = document.createElement("button");
         deleteGroupBtn.type = "button";
-        deleteGroupBtn.className = "recent-btn delete";
+        deleteGroupBtn.className = "recent-btn delete recent-desktop-actions";
         deleteGroupBtn.dataset.action = "delete-group";
         deleteGroupBtn.dataset.workflow = workflowId;
         deleteGroupBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i>";
         deleteGroupBtn.setAttribute("aria-label", "Delete all files in this group");
 
+        const groupMobileMenu = document.createElement("div");
+        groupMobileMenu.className = "recent-mobile-menu";
+
+        const groupMobileToggle = document.createElement("button");
+        groupMobileToggle.type = "button";
+        groupMobileToggle.className = "recent-btn recent-mobile-toggle";
+        groupMobileToggle.dataset.action = "toggle-file-menu";
+        groupMobileToggle.innerHTML = "<i class=\"fa-solid fa-ellipsis-vertical\"></i>";
+        groupMobileToggle.setAttribute("aria-label", "Open group actions");
+
+        const groupMobilePanel = document.createElement("div");
+        groupMobilePanel.className = "recent-mobile-panel";
+
+        const groupMobileDownloadBtn = document.createElement("button");
+        groupMobileDownloadBtn.type = "button";
+        groupMobileDownloadBtn.className = "recent-btn recent-mobile-item";
+        groupMobileDownloadBtn.dataset.action = "download-group";
+        groupMobileDownloadBtn.dataset.workflow = workflowId;
+        groupMobileDownloadBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download";
+
+        const groupMobileDeleteBtn = document.createElement("button");
+        groupMobileDeleteBtn.type = "button";
+        groupMobileDeleteBtn.className = "recent-btn delete recent-mobile-item";
+        groupMobileDeleteBtn.dataset.action = "delete-group";
+        groupMobileDeleteBtn.dataset.workflow = workflowId;
+        groupMobileDeleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i> Delete";
+
+        groupMobilePanel.appendChild(groupMobileDownloadBtn);
+        groupMobilePanel.appendChild(groupMobileDeleteBtn);
+        groupMobileMenu.appendChild(groupMobileToggle);
+        groupMobileMenu.appendChild(groupMobilePanel);
+
         actions.appendChild(toggleBtn);
         actions.appendChild(downloadGroupBtn);
         actions.appendChild(deleteGroupBtn);
+        actions.appendChild(groupMobileMenu);
         row.appendChild(meta);
         row.appendChild(actions);
         recentCompressedList.appendChild(row);
