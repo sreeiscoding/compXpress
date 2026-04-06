@@ -3720,18 +3720,30 @@
     function warnIfApiLikelyMisconfigured() {
       const host = String(window.location.hostname || "").toLowerCase();
       const isGithubPages = host.endsWith("github.io");
-      const isVercel = host.endsWith("vercel.app");
       const isSameOriginApi = API_BASE_URL === `${window.location.origin}/api`;
-      if ((isGithubPages || isVercel) && isSameOriginApi) {
+      if (isGithubPages && isSameOriginApi) {
         setStatus("Set backend URL with ?api=https://your-backend-domain to enable sign in/sign up.");
       }
     }
 
     async function checkApiConnectivity() {
       try {
-        const response = await fetch(`${API_BASE_URL}/health`, { method: "GET" });
-        if (!response.ok) {
-          throw new Error(`Health check failed (${response.status}).`);
+        const candidates = buildEndpointCandidates("/health");
+        let healthy = false;
+        let lastStatus = 0;
+        for (const url of candidates) {
+          try {
+            const response = await fetch(url, { method: "GET" });
+            lastStatus = response.status;
+            if (response.ok) {
+              healthy = true;
+              break;
+            }
+          } catch (error) {
+          }
+        }
+        if (!healthy) {
+          throw new Error(`Health check failed (${lastStatus || "NO_RESPONSE"}).`);
         }
         isApiReachable = true;
         apiReachabilityChecked = true;
@@ -4066,6 +4078,15 @@
       return `${window.location.origin}${clean}`;
     }
 
+    function buildEndpointCandidates(path) {
+      const clean = String(path || "").startsWith("/") ? String(path) : `/${String(path || "")}`;
+      const candidates = [
+        `${API_BASE_URL}${clean}`,
+        toAbsoluteApiPath(`/api${clean}`)
+      ];
+      return Array.from(new Set(candidates));
+    }
+
     async function fetchWithAuthFallback(candidateUrls, authToken, init = {}) {
       let lastError = null;
       for (const url of candidateUrls) {
@@ -4088,7 +4109,25 @@
           lastError = error;
         }
       }
-      throw lastError || new Error("Request failed for all fallback endpoints.");
+      throw lastError || new Error("Request failed for all backend endpoints.");
+    }
+
+    async function fetchJsonWithFallback(candidateUrls, init = {}) {
+      let lastError = null;
+      for (const url of candidateUrls) {
+        try {
+          const response = await fetch(url, init);
+          if (response.ok || response.status === 401 || response.status === 403) {
+            const data = await response.json().catch(() => ({}));
+            return { response, data, url };
+          }
+          const data = await response.json().catch(() => ({}));
+          lastError = new Error(data.details || data.error || `Request failed (${response.status}).`);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error("Request failed for all backend endpoints.");
     }
 
     async function fetchRecentCompressedFromBackend() {
@@ -4100,20 +4139,12 @@
       }
 
       try {
-        const groupCandidates = [
-          `${API_BASE_URL}/assets/recent/groups`,
-          toAbsoluteApiPath("/api/assets/recent/groups"),
-          toAbsoluteApiPath("/assets/recent/groups")
-        ];
+        const groupCandidates = buildEndpointCandidates("/assets/recent/groups");
         const { response } = await fetchWithAuthFallback(groupCandidates, authToken, { method: "GET" });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
           if (response.status === 404 || response.status === 405) {
-            const compressedCandidates = [
-              `${API_BASE_URL}/assets/recent/compressed`,
-              toAbsoluteApiPath("/api/assets/recent/compressed"),
-              toAbsoluteApiPath("/assets/recent/compressed")
-            ];
+            const compressedCandidates = buildEndpointCandidates("/assets/recent/compressed");
             const { response: fallbackResponse } = await fetchWithAuthFallback(compressedCandidates, authToken, { method: "GET" });
             const fallbackData = await fallbackResponse.json().catch(() => ({}));
             if (!fallbackResponse.ok) {
@@ -4161,12 +4192,11 @@
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/assets/${encodeURIComponent(id)}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      });
+      const { response } = await fetchWithAuthFallback(
+        buildEndpointCandidates(`/assets/${encodeURIComponent(id)}`),
+        authToken,
+        { method: "DELETE" }
+      );
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.details || data.error || "Could not delete selected compressed file.");
@@ -4186,12 +4216,11 @@
         const current = readRecentCompressed();
         const allFiles = current.flatMap((entry) => Array.isArray(entry.files) ? entry.files : []);
         const item = allFiles.find((entry) => String(entry.id) === String(id));
-        const response = await fetch(`${API_BASE_URL}/assets/${encodeURIComponent(id)}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${authToken}`
-          }
-        });
+        const { response } = await fetchWithAuthFallback(
+          buildEndpointCandidates(`/assets/${encodeURIComponent(id)}`),
+          authToken,
+          { method: "GET" }
+        );
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
           throw new Error(data.details || data.error || "Selected recent compressed file is unavailable.");
@@ -4218,12 +4247,11 @@
 
       startActionLoader("Loading image preview...");
       try {
-        const response = await fetch(`${API_BASE_URL}/assets/${encodeURIComponent(id)}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${authToken}`
-          }
-        });
+        const { response } = await fetchWithAuthFallback(
+          buildEndpointCandidates(`/assets/${encodeURIComponent(id)}`),
+          authToken,
+          { method: "GET" }
+        );
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
           throw new Error(data.details || data.error || "Could not load file preview.");
@@ -4272,12 +4300,11 @@
         setStatus("Sign in to manage recent compressed files.");
         return;
       }
-      const response = await fetch(`${API_BASE_URL}/assets/group/${encodeURIComponent(workflowId)}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      });
+      const { response } = await fetchWithAuthFallback(
+        buildEndpointCandidates(`/assets/group/${encodeURIComponent(workflowId)}`),
+        authToken,
+        { method: "DELETE" }
+      );
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.details || data.error || "Could not delete selected file group.");
@@ -4702,11 +4729,7 @@
       }
 
       const endpoint = safeType === "passport" ? "/assets/passport" : "/assets/compressed";
-      const endpointCandidates = [
-        `${API_BASE_URL}${endpoint}`,
-        toAbsoluteApiPath(`/api${endpoint}`),
-        toAbsoluteApiPath(endpoint)
-      ];
+      const endpointCandidates = buildEndpointCandidates(endpoint);
       const { response } = await fetchWithAuthFallback(endpointCandidates, authToken, {
         method: "POST",
         body: formData
@@ -4738,7 +4761,7 @@
         razorpayPhone: billingData.method === "razorpay" ? billingRazorPhoneInput.value.trim() : ""
       };
 
-      const response = await fetch(`${API_BASE_URL}/billing/subscribe`, {
+      const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates("/billing/subscribe"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -4746,8 +4769,6 @@
         },
         body: JSON.stringify(payload)
       });
-
-      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.details || data.error || "Failed to complete billing.");
       }
@@ -4759,21 +4780,13 @@
       const payload = mode === "signup"
         ? { name: String(name || "").trim(), email, password }
         : { email, password };
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates(endpoint), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       });
-
-      const rawText = await response.text().catch(() => "");
-      let data = {};
-      try {
-        data = rawText ? JSON.parse(rawText) : {};
-      } catch (error) {
-        data = {};
-      }
       if (!response.ok) {
         if (mode === "signup" && response.status === 409) {
           return requestBackendAuth("login", email, password);
@@ -4793,15 +4806,13 @@
     }
 
     async function requestForgotPassword(email) {
-      const response = await fetch(`${API_BASE_URL}/forgot-password`, {
+      const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates("/forgot-password"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ email })
       });
-
-      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.error || "Could not start password recovery.");
       }
@@ -4809,15 +4820,13 @@
     }
 
     async function requestResetPassword(email, token, newPassword) {
-      const response = await fetch(`${API_BASE_URL}/reset-password`, {
+      const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates("/reset-password"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ email, token, newPassword })
       });
-
-      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.error || "Could not reset password.");
       }
@@ -4829,13 +4838,12 @@
       if (!authToken) {
         throw new Error("Missing token.");
       }
-      const response = await fetch(`${API_BASE_URL}/me`, {
+      const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates("/me"), {
         method: "GET",
         headers: {
           Authorization: `Bearer ${authToken}`
         }
       });
-      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.error || "Failed to fetch profile.");
       }
@@ -5950,11 +5958,8 @@
         formData.append("image", sourceBlob, sourceType === "compressed" ? "compressed-source.png" : (originalFile.name || "original-source.png"));
         formData.append("bgColor", passportBgColor);
 
-        const response = await fetch(`${API_BASE_URL}/process-passport`, {
+        const { response } = await fetchWithAuthFallback(buildEndpointCandidates("/process-passport"), authToken, {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${authToken}`
-          },
           body: formData
         });
 
