@@ -2999,6 +2999,85 @@
         font-size: 0.8rem;
       }
     }
+
+    @media (max-width: 430px) {
+      body {
+        overflow-x: hidden;
+      }
+
+      .hero {
+        padding-top: 112px;
+      }
+
+      .card {
+        padding: 14px;
+      }
+
+      .app-copy {
+        font-size: 0.84rem;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      #passportSourceDropdown,
+      .bg-color-toggle,
+      .download-format-toggle {
+        width: 100%;
+      }
+
+      .action-dropdown-toggle,
+      .bg-color-btn,
+      .download-format-btn {
+        min-height: 40px;
+        font-size: 0.78rem;
+      }
+
+      .upload-preview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .recent-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .recent-actions {
+        justify-content: stretch;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .recent-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .nav-links {
+        width: min(300px, 92vw);
+        right: 2.5vw;
+      }
+
+      .notif-drawer,
+      .settings-drawer,
+      .privacy-drawer {
+        width: min(360px, 94vw);
+        right: 3vw;
+      }
+
+      .toast-stack {
+        right: 10px;
+        left: 10px;
+        bottom: 10px;
+        width: auto;
+      }
+
+      .billing-card {
+        max-height: calc(100vh - 16px);
+        overflow-y: auto;
+      }
+    }
   </style>
 </head>
 <body>
