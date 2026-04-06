@@ -3631,9 +3631,6 @@
     const NOTIF_TTL_MS = 2 * 24 * 60 * 60 * 1000;
     const RECENT_COMPRESSED_TTL_MS = 4 * 24 * 60 * 60 * 1000;
     const THEME_KEY = "comxpress_theme_v1";
-    const USERS_KEY = "comxpress_users_v1";
-    const CURRENT_USER_KEY = "comxpress_current_user_v1";
-    const CURRENT_USER_NAME_KEY = "comxpress_current_user_name_v1";
     const AUTH_SESSION_KEY = "comxpress_auth_session_v1";
     const FREE_UPLOAD_LIMIT = 5;
     const PRO_UPLOAD_LIMIT = 50;
@@ -4036,6 +4033,34 @@
       return `${clean}-compressed.png`;
     }
 
+    function normalizeRecentGroupsFromCompressedItems(items) {
+      const list = Array.isArray(items) ? items : [];
+      return list.map((item) => {
+        const id = String(item && item.id ? item.id : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+        const name = String(item && item.name ? item.name : "compressed-image");
+        const createdAt = item && item.createdAt ? item.createdAt : new Date().toISOString();
+        return {
+          workflowId: String(item && item.workflowId ? item.workflowId : id),
+          name: name.replace(/\.[^./\\]+$/, "") || "generated-file",
+          totalFiles: 1,
+          latestCreatedAt: createdAt,
+          files: [
+            {
+              id,
+              workflowId: String(item && item.workflowId ? item.workflowId : id),
+              name,
+              type: "compressed",
+              size: Number(item && item.size ? item.size : 0),
+              originalSize: Number(item && item.originalSize ? item.originalSize : 0),
+              sourceType: "",
+              bgColor: "",
+              createdAt
+            }
+          ]
+        };
+      });
+    }
+
     async function fetchRecentCompressedFromBackend() {
       const authToken = getAuthToken();
       if (!authToken) {
@@ -4053,6 +4078,25 @@
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
+          if (response.status === 404) {
+            const fallbackResponse = await fetch(`${API_BASE_URL}/assets/recent/compressed`, {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${authToken}`
+              }
+            });
+            const fallbackData = await fallbackResponse.json().catch(() => ({}));
+            if (!fallbackResponse.ok) {
+              throw new Error(fallbackData.details || fallbackData.error || "Could not fetch recent compressed files.");
+            }
+            const fallbackItems = Array.isArray(fallbackData.items) ? fallbackData.items : [];
+            const groupsFromFlat = normalizeRecentGroupsFromCompressedItems(fallbackItems);
+            writeRecentCompressed(groupsFromFlat);
+            const existingFallback = new Set(groupsFromFlat.map((g) => String(g.workflowId || "")));
+            expandedRecentWorkflows = expandedRecentWorkflows.filter((id) => existingFallback.has(id));
+            renderRecentCompressed();
+            return;
+          }
           if (response.status === 401 || response.status === 403) {
             setAuthToken("");
             isSignedIn = false;
@@ -4391,14 +4435,13 @@
       setUpgradeModalState(false);
       setAuthPageState(false);
       setBillingPageState(true);
-      const currentEmail = normalizeEmail(localStorage.getItem(CURRENT_USER_KEY));
-      const users = readUsers();
-      const user = users[currentEmail];
+      const payload = decodeJwtPayload(getAuthToken());
+      const currentEmail = normalizeEmail(payload && payload.email ? payload.email : "");
       if (!billingEmailInput.value) {
-        billingEmailInput.value = user && user.email ? user.email : currentEmail;
+        billingEmailInput.value = currentEmail;
       }
-      if (!billingNameInput.value && user && user.name) {
-        billingNameInput.value = user.name;
+      if (!billingNameInput.value) {
+        billingNameInput.value = signedInDisplayName || (payload && payload.name ? payload.name : "");
       }
       if (!billingRazorEmailInput.value) {
         billingRazorEmailInput.value = billingEmailInput.value;
@@ -4535,33 +4578,6 @@
 
     function getSelectionLimit() {
       return isSubscribed ? PRO_UPLOAD_LIMIT : FREE_UPLOAD_LIMIT;
-    }
-
-    function readUsers() {
-      try {
-        const raw = localStorage.getItem(USERS_KEY);
-        const parsed = raw ? JSON.parse(raw) : {};
-        return parsed && typeof parsed === "object" ? parsed : {};
-      } catch (error) {
-        return {};
-      }
-    }
-
-    function writeUsers(users) {
-      try {
-        localStorage.setItem(USERS_KEY, JSON.stringify(users));
-      } catch (error) {
-      }
-    }
-
-    async function hashPassword(password) {
-      if (window.crypto && window.crypto.subtle && window.TextEncoder) {
-        const buffer = new TextEncoder().encode(password);
-        const digest = await window.crypto.subtle.digest("SHA-256", buffer);
-        const bytes = Array.from(new Uint8Array(digest));
-        return bytes.map((b) => b.toString(16).padStart(2, "0")).join("");
-      }
-      return btoa(password);
     }
 
     function validatePassword(password) {
@@ -4788,17 +4804,7 @@
         isSignedIn = true;
         isSubscribed = !!user.subscribed;
         signedInDisplayName = name;
-        localStorage.setItem(CURRENT_USER_KEY, email);
-        localStorage.setItem(CURRENT_USER_NAME_KEY, name);
         sessionStorage.setItem(AUTH_SESSION_KEY, "1");
-        const users = readUsers();
-        users[email] = {
-          ...(users[email] || {}),
-          name,
-          email,
-          subscribed: !!user.subscribed
-        };
-        writeUsers(users);
         updateAuthUI();
         updatePricingState();
         return true;
@@ -4822,21 +4828,12 @@
         const payload = decodeJwtPayload(token);
         const tokenExpMs = payload && Number.isFinite(Number(payload.exp)) ? Number(payload.exp) * 1000 : 0;
         const tokenExpired = tokenExpMs > 0 && Date.now() >= tokenExpMs;
-        const email = normalizeEmail((payload && payload.email) || localStorage.getItem(CURRENT_USER_KEY));
-        const storedName = String((payload && payload.name) || localStorage.getItem(CURRENT_USER_NAME_KEY) || "").trim();
-        const users = readUsers();
-        const user = users[email] || {};
+        const storedName = String((payload && payload.name) || "").trim();
 
         if (token && payload && !tokenExpired) {
           isSignedIn = true;
-          isSubscribed = !!(payload.subscribed || user.subscribed);
-          signedInDisplayName = storedName || user.name || "User";
-          if (email) {
-            localStorage.setItem(CURRENT_USER_KEY, email);
-          }
-          if (signedInDisplayName) {
-            localStorage.setItem(CURRENT_USER_NAME_KEY, signedInDisplayName);
-          }
+          isSubscribed = !!payload.subscribed;
+          signedInDisplayName = storedName || "User";
           sessionStorage.setItem(AUTH_SESSION_KEY, "1");
         } else {
           isSignedIn = false;
@@ -4969,21 +4966,7 @@
       const serverName = String(authResult && authResult.user && authResult.user.name ? authResult.user.name : "").trim();
       const resolvedName = serverName || name || "User";
 
-      try {
-        localStorage.setItem(CURRENT_USER_KEY, email);
-        localStorage.setItem(CURRENT_USER_NAME_KEY, resolvedName);
-        sessionStorage.setItem(AUTH_SESSION_KEY, "1");
-      } catch (error) {
-      }
-
-      const users = readUsers();
-      users[email] = {
-        ...(users[email] || {}),
-        name: resolvedName,
-        email,
-        subscribed: !!(authResult && authResult.user && authResult.user.subscribed)
-      };
-      writeUsers(users);
+      sessionStorage.setItem(AUTH_SESSION_KEY, "1");
 
       signedInDisplayName = resolvedName || "";
       isSignedIn = true;
@@ -5102,21 +5085,8 @@
 
     async function completeOAuth(provider) {
       const identity = getOAuthIdentity(provider);
-      const users = readUsers();
       const email = normalizeEmail(identity.email);
       const oauthPassword = `OAuth_${provider}_Pass_2026`;
-
-      if (!users[email]) {
-        users[email] = {
-          name: identity.name,
-          email,
-          passwordHash: null,
-          oauthProvider: provider,
-          subscribed: false
-        };
-      }
-
-      writeUsers(users);
       let authResult = null;
       try {
         authResult = await requestBackendAuth("signup", email, oauthPassword, identity.name);
@@ -5130,17 +5100,13 @@
       }
       const oauthName = String(authResult && authResult.user && authResult.user.name ? authResult.user.name : identity.name).trim();
       try {
-        localStorage.setItem(CURRENT_USER_KEY, email);
-        localStorage.setItem(CURRENT_USER_NAME_KEY, oauthName);
         sessionStorage.setItem(AUTH_SESSION_KEY, "1");
       } catch (error) {
       }
 
-      const refreshedUsers = readUsers();
-      const currentUser = refreshedUsers[email];
       signedInDisplayName = oauthName || identity.name;
       isSignedIn = true;
-      isSubscribed = !!((authResult && authResult.user && authResult.user.subscribed) || (currentUser && currentUser.subscribed));
+      isSubscribed = !!(authResult && authResult.user && authResult.user.subscribed);
       updateAuthUI();
       updatePricingState();
       await syncAuthFromBackend().catch(() => {});
@@ -5166,19 +5132,6 @@
     }
 
     function activateSubscription(email) {
-      const normalizedEmail = normalizeEmail(email);
-      if (normalizedEmail) {
-        const users = readUsers();
-        users[normalizedEmail] = {
-          ...(users[normalizedEmail] || {}),
-          email: normalizedEmail,
-          name: users[normalizedEmail] && users[normalizedEmail].name
-            ? users[normalizedEmail].name
-            : (signedInDisplayName || "User"),
-          subscribed: true
-        };
-        writeUsers(users);
-      }
       isSubscribed = true;
       updatePricingState();
       return true;
@@ -5265,14 +5218,12 @@
         return;
       }
 
-      const currentEmail = normalizeEmail(localStorage.getItem(CURRENT_USER_KEY));
-      const targetEmail = currentEmail || billingData.email;
-      const activated = activateSubscription(targetEmail);
+      const activated = activateSubscription("");
       if (!activated) {
         setStatus("Billing saved, but local subscription state could not be updated. Re-login and retry.");
         return;
       }
-      syncAuthFromBackend().catch(() => {});
+      await syncAuthFromBackend().catch(() => {});
 
       pendingBillingCheckout = false;
       setBillingPageState(false);
@@ -6062,11 +6013,6 @@
       isSubscribed = false;
       updateAuthUI();
       updatePricingState();
-      try {
-        localStorage.removeItem(CURRENT_USER_KEY);
-        localStorage.removeItem(CURRENT_USER_NAME_KEY);
-      } catch (error) {
-      }
       signedInDisplayName = "";
       writeRecentCompressed([]);
       setAuthToken("");
