@@ -2670,7 +2670,7 @@
 
     .recent-mobile-panel {
       position: absolute;
-      right: 0;
+      right: 12px;
       top: calc(100% + 6px);
       z-index: 6;
       min-width: 152px;
@@ -2735,8 +2735,8 @@
       .nav-links {
         position: fixed;
         top: 78px;
-        right: 4%;
-        width: min(280px, 90vw);
+        right: 16px;
+        width: min(280px, calc(100vw - 32px));
         display: grid;
         grid-auto-rows: min-content;
         justify-items: stretch;
@@ -3092,8 +3092,8 @@
       }
 
       .nav-links {
-        width: min(300px, 92vw);
-        right: 2.5vw;
+        width: min(300px, calc(100vw - 24px));
+        right: 12px;
       }
 
       .notif-drawer,
