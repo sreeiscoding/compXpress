@@ -2670,6 +2670,48 @@
       color: #fecaca;
     }
 
+    .recent-mobile-menu {
+      position: relative;
+      display: none;
+    }
+
+    .recent-mobile-toggle {
+      min-width: 38px;
+      min-height: 32px;
+      padding: 6px 10px;
+    }
+
+    .recent-mobile-panel {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      z-index: 6;
+      min-width: 152px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.96);
+      box-shadow: 0 14px 32px rgba(2, 6, 23, 0.45);
+      padding: 6px;
+      display: grid;
+      gap: 6px;
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .recent-mobile-menu.open .recent-mobile-panel {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .recent-mobile-item {
+      width: 100%;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
     .recent-empty {
       margin: 0;
       border: 1px dashed rgba(148, 163, 184, 0.26);
@@ -2916,6 +2958,14 @@
         white-space: normal;
         text-align: center;
         width: calc(100% - 22px);
+      }
+
+      .recent-desktop-actions {
+        display: none;
+      }
+
+      .recent-mobile-menu {
+        display: inline-flex;
       }
     }
 
@@ -4244,27 +4294,65 @@
 
           const childDownloadBtn = document.createElement("button");
           childDownloadBtn.type = "button";
-          childDownloadBtn.className = "recent-btn";
+          childDownloadBtn.className = "recent-btn recent-desktop-actions";
           childDownloadBtn.dataset.action = "download-file";
           childDownloadBtn.dataset.fileId = String(file.id || "");
           childDownloadBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download";
 
           const childDeleteBtn = document.createElement("button");
           childDeleteBtn.type = "button";
-          childDeleteBtn.className = "recent-btn delete";
+          childDeleteBtn.className = "recent-btn delete recent-desktop-actions";
           childDeleteBtn.dataset.action = "delete-file";
           childDeleteBtn.dataset.fileId = String(file.id || "");
           childDeleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i>";
           childDeleteBtn.setAttribute("aria-label", "Delete file");
 
+          const mobileMenu = document.createElement("div");
+          mobileMenu.className = "recent-mobile-menu";
+
+          const mobileToggle = document.createElement("button");
+          mobileToggle.type = "button";
+          mobileToggle.className = "recent-btn recent-mobile-toggle";
+          mobileToggle.dataset.action = "toggle-file-menu";
+          mobileToggle.innerHTML = "<i class=\"fa-solid fa-ellipsis-vertical\"></i>";
+          mobileToggle.setAttribute("aria-label", "Open file actions");
+
+          const mobilePanel = document.createElement("div");
+          mobilePanel.className = "recent-mobile-panel";
+
+          const mobileDownloadBtn = document.createElement("button");
+          mobileDownloadBtn.type = "button";
+          mobileDownloadBtn.className = "recent-btn recent-mobile-item";
+          mobileDownloadBtn.dataset.action = "download-file";
+          mobileDownloadBtn.dataset.fileId = String(file.id || "");
+          mobileDownloadBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download";
+
+          const mobileDeleteBtn = document.createElement("button");
+          mobileDeleteBtn.type = "button";
+          mobileDeleteBtn.className = "recent-btn delete recent-mobile-item";
+          mobileDeleteBtn.dataset.action = "delete-file";
+          mobileDeleteBtn.dataset.fileId = String(file.id || "");
+          mobileDeleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i> Delete";
+
+          mobilePanel.appendChild(mobileDownloadBtn);
+          mobilePanel.appendChild(mobileDeleteBtn);
+          mobileMenu.appendChild(mobileToggle);
+          mobileMenu.appendChild(mobilePanel);
+
           childActions.appendChild(childViewBtn);
           childActions.appendChild(childDownloadBtn);
           childActions.appendChild(childDeleteBtn);
+          childActions.appendChild(mobileMenu);
           child.appendChild(childMeta);
           child.appendChild(childActions);
           recentCompressedList.appendChild(child);
         }
       }
+    }
+
+    function closeRecentMobileMenus() {
+      const menus = recentCompressedList.querySelectorAll(".recent-mobile-menu.open");
+      menus.forEach((menu) => menu.classList.remove("open"));
     }
 
     function getCompressedDownloadName(originalName) {
@@ -6625,7 +6713,19 @@
       const action = actionBtn.dataset.action;
       if (!action) return;
 
+      if (action === "toggle-file-menu") {
+        const menu = actionBtn.closest(".recent-mobile-menu");
+        if (!menu) return;
+        const shouldOpen = !menu.classList.contains("open");
+        closeRecentMobileMenus();
+        if (shouldOpen) {
+          menu.classList.add("open");
+        }
+        return;
+      }
+
       if (action === "toggle-group") {
+        closeRecentMobileMenus();
         const workflowId = String(actionBtn.dataset.workflow || "");
         if (!workflowId) return;
         if (expandedRecentWorkflows.includes(workflowId)) {
@@ -6638,6 +6738,7 @@
       }
 
       if (action === "download-group") {
+        closeRecentMobileMenus();
         const workflowId = String(actionBtn.dataset.workflow || "");
         if (!workflowId) return;
         downloadRecentGroupByWorkflow(workflowId).catch(() => {
@@ -6647,6 +6748,7 @@
       }
 
       if (action === "download-file") {
+        closeRecentMobileMenus();
         const fileId = String(actionBtn.dataset.fileId || "");
         if (!fileId) return;
         downloadRecentCompressedById(fileId).catch(() => {
@@ -6656,6 +6758,7 @@
       }
 
       if (action === "view-file") {
+        closeRecentMobileMenus();
         const fileId = String(actionBtn.dataset.fileId || "");
         if (!fileId) return;
         openRecentImagePreviewById(fileId).catch(() => {
@@ -6665,6 +6768,7 @@
       }
 
       if (action === "delete-file") {
+        closeRecentMobileMenus();
         const fileId = String(actionBtn.dataset.fileId || "");
         if (!fileId) return;
         pendingRecentDeleteMode = "file";
@@ -6677,6 +6781,7 @@
       }
 
       if (action === "delete-group") {
+        closeRecentMobileMenus();
         const workflowId = String(actionBtn.dataset.workflow || "");
         if (!workflowId) return;
         pendingRecentDeleteMode = "group";
@@ -6734,6 +6839,9 @@
     });
 
     document.addEventListener("click", (e) => {
+      if (!e.target.closest(".recent-mobile-menu")) {
+        closeRecentMobileMenus();
+      }
       if (isMobileMenuOpen && !navLinks.contains(e.target) && !menuToggleBtn.contains(e.target)) {
         setMobileMenuState(false);
       }
