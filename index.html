@@ -3088,13 +3088,26 @@
       }
 
       .recent-actions {
-        justify-content: stretch;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        display: flex;
+        width: 100%;
+        justify-content: flex-end;
+        align-items: center;
       }
 
-      .recent-btn {
-        width: 100%;
-        justify-content: center;
+      .recent-mobile-menu {
+        display: inline-flex;
+        margin-left: auto;
+        margin-right: 10px;
+      }
+
+      .recent-mobile-toggle {
+        width: auto !important;
+        min-width: 38px;
+      }
+
+      .recent-mobile-menu .recent-mobile-panel {
+        right: 0;
+        left: auto;
       }
 
       .nav-links {
