@@ -4278,6 +4278,9 @@
     }
 
     function setNotifDrawerState(open) {
+      if (!open && notifDrawer.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       renderNotifications();
       isNotifDrawerOpen = open;
       notifDrawer.classList.toggle("open", open);
@@ -4286,6 +4289,9 @@
     }
 
     function setPrivacyDrawerState(open) {
+      if (!open && privacyDrawer.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       isPrivacyDrawerOpen = open;
       privacyDrawer.classList.toggle("open", open);
       privacyDrawer.setAttribute("aria-hidden", String(!open));
@@ -4293,6 +4299,9 @@
     }
 
     function setSettingsDrawerState(open) {
+      if (!open && settingsDrawer.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       isSettingsDrawerOpen = open;
       settingsDrawer.classList.toggle("open", open);
       settingsDrawer.setAttribute("aria-hidden", String(!open));
@@ -4360,6 +4369,9 @@
     }
 
     function setAuthPageState(open) {
+      if (!open && authPage.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       authPage.classList.toggle("open", open);
       authPage.setAttribute("aria-hidden", String(!open));
       if (open) {
