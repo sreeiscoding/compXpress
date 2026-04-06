@@ -5733,15 +5733,38 @@
       handleIncomingFiles(file ? [file] : []);
     }
 
+    function getTargetCompressionRatio(bytes) {
+      const size = Number(bytes || 0);
+      if (size <= 80 * 1024) return 0.2;
+      if (size <= 400 * 1024) return 0.24;
+      if (size <= 1024 * 1024) return 0.28;
+      if (size <= 10 * 1024 * 1024) return 0.25;
+      if (size <= 100 * 1024 * 1024) return 0.22;
+      return 0.2;
+    }
+
+    function mimeToExtension(mimeType) {
+      const type = String(mimeType || "").toLowerCase();
+      if (type.includes("jpeg") || type.includes("jpg")) return "jpg";
+      if (type.includes("png")) return "png";
+      if (type.includes("webp")) return "webp";
+      return "png";
+    }
+
     async function compressImageWithQualityBalance(image, originalSize) {
       const sourceW = image.naturalWidth || image.width;
       const sourceH = image.naturalHeight || image.height;
-      const scales = [1, 0.92, 0.86, 0.8, 0.74];
+      const scales = originalSize <= 350 * 1024
+        ? [1, 0.95, 0.9, 0.85, 0.8]
+        : [1, 0.94, 0.88, 0.82, 0.76, 0.7, 0.64, 0.58, 0.52, 0.46];
+      const qualities = [0.92, 0.86, 0.8, 0.74, 0.68, 0.62, 0.56, 0.5, 0.46, 0.42];
+      const outputMimeType = "image/jpeg";
+      const targetRatio = getTargetCompressionRatio(originalSize);
+      const targetSize = Math.max(6 * 1024, Math.round(originalSize * targetRatio));
 
-      let bestBlob = null;
-      let bestScale = scales[0];
+      let bestUnderTarget = null;
       let smallestBlob = null;
-      let smallestScale = scales[0];
+      let smallestBlobMeta = null;
 
       for (const scale of scales) {
         const canvas = document.createElement("canvas");
@@ -5750,30 +5773,49 @@
         const ctx = canvas.getContext("2d");
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = "high";
+        // White underlay avoids dark artifacts when source has transparency and output is JPEG.
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-        const blob = await canvasToBlob(canvas, "image/png");
-        if (!smallestBlob || blob.size < smallestBlob.size) {
-          smallestBlob = blob;
-          smallestScale = scale;
-        }
-        if (blob.size <= originalSize * 0.9) {
-          bestBlob = blob;
-          bestScale = scale;
-          break;
+        for (const quality of qualities) {
+          const blob = await canvasToBlob(canvas, outputMimeType, quality);
+          if (!smallestBlob || blob.size < smallestBlob.size) {
+            smallestBlob = blob;
+            smallestBlobMeta = { scale, quality };
+          }
+
+          if (blob.size <= targetSize) {
+            // Prefer the largest file under target size to keep the best visual quality.
+            if (!bestUnderTarget || blob.size > bestUnderTarget.blob.size) {
+              bestUnderTarget = { blob, scale, quality };
+            }
+            break;
+          }
         }
       }
 
-      if (!bestBlob && smallestBlob) {
-        bestBlob = smallestBlob;
-        bestScale = smallestScale;
+      if (bestUnderTarget) {
+        return {
+          blob: bestUnderTarget.blob,
+          scale: bestUnderTarget.scale,
+          quality: bestUnderTarget.quality,
+          mimeType: outputMimeType,
+          targetRatio
+        };
       }
 
-      if (!bestBlob) {
+      if (!smallestBlob) {
         throw new Error("Compression failed.");
       }
 
-      return { blob: bestBlob, scale: bestScale };
+      return {
+        blob: smallestBlob,
+        scale: smallestBlobMeta ? smallestBlobMeta.scale : scales[scales.length - 1],
+        quality: smallestBlobMeta ? smallestBlobMeta.quality : qualities[qualities.length - 1],
+        mimeType: outputMimeType,
+        targetRatio
+      };
     }
 
     async function compressImage() {
@@ -5820,11 +5862,11 @@
         if (authToken) {
           try {
             await storeImageAssetToBackend("compressed", compressedBlob, {
-              filename: withDownloadExt(originalFile.name || "compressed-image", "png"),
-              originalName: originalFile.name || "compressed-image.png",
+              filename: withDownloadExt(originalFile.name || "compressed-image", mimeToExtension(result.mimeType)),
+              originalName: withDownloadExt(originalFile.name || "compressed-image", mimeToExtension(result.mimeType)),
               originalSize: Number(originalFile.size || 0),
               workflowId: String(activeFileId || ""),
-              ext: "png"
+              ext: mimeToExtension(result.mimeType)
             });
           } catch (assetError) {
             const saveMsg = String(assetError && assetError.message ? assetError.message : "Compressed image generated, but database save failed.");
@@ -5833,7 +5875,7 @@
           }
         }
 
-        setStatus(`Compression completed (${reduction}% smaller, resolution ${Math.round(result.scale * 100)}%).`);
+        setStatus(`Compression completed (${reduction}% smaller, resolution ${Math.round(result.scale * 100)}%, quality ${Math.round((result.quality || 0.8) * 100)}%).`);
         await addRecentCompressed(originalFile.name, compressedBlob, originalFile.size);
         addNotification("Compression Completed", `Compressed image is ready (${formatBytes(compressedBlob.size)}).`);
       } catch (error) {
