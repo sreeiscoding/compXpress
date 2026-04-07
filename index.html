@@ -4248,6 +4248,7 @@
     let pendingRecentRenameId = "";
     let pendingRecentRenameValue = "";
     let activeLoaderCount = 0;
+    let actionLoaderForceTimer = null;
     let recentPreviewObjectUrl = "";
     let authMode = "signin";
     let selectedRecentFileIds = [];
@@ -5746,6 +5747,16 @@
       actionLoaderText.textContent = message || "Processing...";
       actionLoader.classList.add("open");
       actionLoader.setAttribute("aria-hidden", "false");
+      if (actionLoaderForceTimer) {
+        clearTimeout(actionLoaderForceTimer);
+      }
+      actionLoaderForceTimer = setTimeout(() => {
+        activeLoaderCount = 0;
+        actionLoader.classList.remove("open");
+        actionLoader.setAttribute("aria-hidden", "true");
+        actionLoaderText.textContent = "Processing...";
+        actionLoaderForceTimer = null;
+      }, 5000);
     }
 
     function stopActionLoader() {
@@ -5754,6 +5765,10 @@
       actionLoader.classList.remove("open");
       actionLoader.setAttribute("aria-hidden", "true");
       actionLoaderText.textContent = "Processing...";
+      if (actionLoaderForceTimer) {
+        clearTimeout(actionLoaderForceTimer);
+        actionLoaderForceTimer = null;
+      }
     }
 
     function setBillingPageState(open) {
