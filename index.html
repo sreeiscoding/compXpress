@@ -3484,7 +3484,7 @@
       <span class="label">Com/pass Utility</span>
       <h1>Compress Images & Create Passport Photos Instantly</h1>
       <p class="subtitle">
-        Compress images and generate passport-ready photos in seconds—simple, fast, and built for real-world applications.
+        Compress images and generate passport-ready photos in secondsâ€”simple, fast, and built for real-world applications.
       </p>
       <button id="getStartedBtn" class="btn btn-cta"><i class="fa-solid fa-arrow-right cta-icon"></i>Get Started</button>
     </section>
@@ -3513,7 +3513,7 @@
                   <p id="fileNameText" class="file-name">No file selected</p>
                   <button id="clearFileBtn" class="file-clear" type="button" disabled>Clear</button>
                 </div>
-                <p class="file-limit-note">Free plan: up to 5 images without login.</p>
+                <p class="file-limit-note">Free plan: up to 5 images. Pro batch workflow: 5-75 images at once.</p>
                 <div id="fileQueue" class="file-queue" aria-live="polite"></div>
               </div>
               <div id="uploadPreviewWrap" class="upload-preview-wrap">
@@ -3597,6 +3597,7 @@
               <button id="downloadCompressedBtn" class="btn" disabled><i class="fa-solid fa-download"></i>Download Compressed</button>
               <button id="downloadPassportBtn" class="btn" disabled><i class="fa-solid fa-file-arrow-down"></i>Download Passport</button>
               <button id="resetRegenerateBtn" class="btn btn-reset" type="button" title="Reset and regenerate once" aria-label="Reset and regenerate once" disabled><i class="fa-solid fa-rotate-right"></i></button>
+              <button id="batchProcessBtn" class="btn" type="button" disabled><i class="fa-solid fa-layer-group"></i>Batch Process + ZIP (Pro)</button>
             </div>
 
             <div id="status" aria-live="polite"></div>
@@ -3659,7 +3660,7 @@
   </main>
 
   <footer>
-    © 2026 Com/pass. All rights reserved.
+    Â© 2026 Com/pass. All rights reserved.
   </footer>
 
   <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="false"></div>
@@ -3801,6 +3802,7 @@
     const downloadCompressedBtn = document.getElementById("downloadCompressedBtn");
     const downloadPassportBtn = document.getElementById("downloadPassportBtn");
     const resetRegenerateBtn = document.getElementById("resetRegenerateBtn");
+    const batchProcessBtn = document.getElementById("batchProcessBtn");
 
     const statusEl = document.getElementById("status");
 
@@ -3849,7 +3851,8 @@
     const THEME_KEY = "comxpress_theme_v1";
     const AUTH_SESSION_KEY = "comxpress_auth_session_v1";
     const FREE_UPLOAD_LIMIT = 5;
-    const PRO_UPLOAD_LIMIT = 50;
+    const PRO_UPLOAD_LIMIT = 75;
+    const PRO_BATCH_MIN = 5;
 
     function resolveApiBaseUrl() {
       try {
@@ -4669,6 +4672,94 @@
       }
       expandedRecentWorkflows = expandedRecentWorkflows.filter((id) => id !== workflowId);
       await fetchRecentCompressedFromBackend();
+    }
+
+    function getDownloadFilenameFromHeaders(response, fallbackName) {
+      const fallback = String(fallbackName || "download.zip");
+      const contentDisposition = String(response && response.headers ? (response.headers.get("content-disposition") || "") : "");
+      if (!contentDisposition) return fallback;
+      const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+      if (utf8Match && utf8Match[1]) {
+        try {
+          return decodeURIComponent(utf8Match[1]).replace(/[/\\?%*:|"<>]/g, "-");
+        } catch (error) {
+        }
+      }
+      const asciiMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+      if (asciiMatch && asciiMatch[1]) {
+        return asciiMatch[1].trim().replace(/[/\\?%*:|"<>]/g, "-");
+      }
+      return fallback;
+    }
+
+    async function processBatchAndDownloadZip() {
+      const authToken = getAuthToken();
+      if (!authToken || !isSignedIn) {
+        setStatus("Sign in to use batch processing.");
+        setAuthPageState(true);
+        return;
+      }
+      if (!isSubscribed) {
+        setStatus("Batch processing is available on Pro. Upgrade to continue.");
+        setUpgradeModalState(true);
+        return;
+      }
+      if (uploadedFiles.length < PRO_BATCH_MIN) {
+        setStatus(`Select at least ${PRO_BATCH_MIN} images for batch processing.`);
+        return;
+      }
+
+      try {
+        setProcessingState(true);
+        startActionLoader("Batch processing images...");
+        setStatus(`Processing ${uploadedFiles.length} images in batch. Please wait...`);
+
+        const formData = new FormData();
+        for (const item of uploadedFiles) {
+          if (item && item.file) {
+            formData.append("images", item.file, item.file.name || "image");
+          }
+        }
+        formData.append("sourceType", passportSource === "original" ? "original" : "compressed");
+        formData.append("bgColor", passportBgColor === "blue" ? "blue" : "white");
+        formData.append("outputFormat", selectedDownloadFormat === "jpg" ? "jpg" : "png");
+
+        const { response } = await fetchWithAuthFallback(
+          buildEndpointCandidates("/batch/process-zip"),
+          authToken,
+          {
+            method: "POST",
+            body: formData
+          }
+        );
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          if (response.status === 403) {
+            setUpgradeModalState(true);
+          }
+          throw new Error(data.details || data.error || "Batch processing failed.");
+        }
+
+        const zipBlob = await response.blob();
+        const filename = getDownloadFilenameFromHeaders(response, `com-pass-batch-${Date.now()}.zip`);
+        const ok = downloadBlob(zipBlob, filename);
+        if (!ok) {
+          throw new Error("Could not download ZIP file.");
+        }
+
+        const successCount = Number(response.headers.get("x-batch-success-count") || 0);
+        const failedCount = Number(response.headers.get("x-batch-failed-count") || 0);
+        setStatus(`Batch completed: ${successCount || uploadedFiles.length} success, ${failedCount || 0} failed.`);
+        addNotification("Batch Completed", `ZIP downloaded with ${successCount || uploadedFiles.length} processed image set(s).`);
+        await fetchRecentCompressedFromBackend();
+      } catch (error) {
+        setStatus(error.message || "Batch processing failed.");
+        addNotification("Batch Failed", "Batch processing could not be completed.");
+      } finally {
+        stopActionLoader();
+        setProcessingState(false);
+      }
     }
 
     async function blobToDataUrl(blob) {
@@ -5694,6 +5785,7 @@
         pricingUpgradeBtn.textContent = "Upgrade to Pro";
         pricingUpgradeBtn.disabled = false;
       }
+      setProcessingState(false);
     }
 
     function getActiveUpload() {
@@ -5995,6 +6087,8 @@
       downloadCompressedBtn.disabled = isProcessing || !compressedBlob;
       downloadPassportBtn.disabled = isProcessing || !passportBlob;
       resetRegenerateBtn.disabled = isProcessing || !compressedBlob || !hasImage;
+      const canRunBatch = isSubscribed && uploadedFiles.length >= PRO_BATCH_MIN;
+      batchProcessBtn.disabled = isProcessing || !canRunBatch;
       clearFileBtn.disabled = isProcessing || uploadedFiles.length === 0;
       fileInput.disabled = isProcessing;
       dropZone.classList.toggle("is-busy", isProcessing);
@@ -7025,6 +7119,7 @@
     compressBtn.addEventListener("click", compressImage);
     passportBtn.addEventListener("click", generatePassport);
     resetRegenerateBtn.addEventListener("click", resetAndRegenerateCompression);
+    batchProcessBtn.addEventListener("click", processBatchAndDownloadZip);
 
     passportSourceToggle.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -7113,6 +7208,14 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 

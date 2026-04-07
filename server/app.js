@@ -1,4 +1,4 @@
-﻿require("dotenv").config();
+require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
@@ -38,6 +38,7 @@ app.get("/", (_req, res) => {
       "POST /api/process-passport",
       "POST /api/assets/compressed",
       "POST /api/assets/passport",
+      "POST /api/batch/process-zip",
       "POST /api/billing/subscribe",
       "GET /api/assets/recent/compressed"
     ]
@@ -171,3 +172,4 @@ app.use((error, _req, res, _next) => {
 });
 
 module.exports = app;
+

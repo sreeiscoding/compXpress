@@ -1,6 +1,6 @@
-﻿# ComXpress
+# ComXpress
 
-ComXpress is a SaaS-style image utility app with a single-page frontend and a Node.js backend.
+Com/pass is a SaaS-style image utility app with a single-page frontend and a Node.js backend.
 
 Core capabilities:
 - Image compression (quality-balanced canvas pipeline)
@@ -8,6 +8,7 @@ Core capabilities:
 - Authentication (signup/signin/JWT + forgot/reset password)
 - Subscription billing flow (UPI, Razorpay, Stripe UI flow)
 - User-scoped asset history in MongoDB with grouped workflow records
+- Pro batch upload and processing (5-75 images) with single ZIP download
 
 ## Current Stack
 
@@ -147,6 +148,7 @@ Auth:
 Image processing:
 - `POST /api/remove-bg` (protected)
 - `POST /api/process-passport` (protected)
+- `POST /api/batch/process-zip` (protected, Pro only)
 
 Asset persistence:
 - `POST /api/assets/compressed` (protected)
@@ -171,7 +173,7 @@ Authorization: Bearer <jwt_token>
 ## Current User Workflow
 
 1. User opens app (`index.html`) and can use free flow up to 5 uploads in a batch.
-2. User uploads images (drag/drop or picker, multi-select max 5 for free flow).
+2. User uploads images (drag/drop or picker, multi-select max 5 for free flow, up to 75 for Pro).
 3. User compresses image(s):
 - Compression runs in browser.
 - Compressed file preview and size update are shown.
@@ -181,6 +183,7 @@ Authorization: Bearer <jwt_token>
 - Background option: white (default) or blue.
 - Backend `process-passport` calls remove.bg, composites result to passport frame, returns PNG.
 5. Generated assets are stored in MongoDB under logged-in user:
+- Batch processing (Pro only): for 5-75 files, backend compresses each file, runs remove.bg, builds passport outputs, stores all generated assets, and returns one ZIP.
 - `compressed`
 - `passport`
 - grouped by `workflowId`
@@ -199,7 +202,8 @@ Authorization: Bearer <jwt_token>
 
 ## Auth Workflow (Current)
 
-- Signup requires: `name`, `email`, `password`
+- Signup requires: 
+ame`, `email`, `password`
 - Signup UI includes `confirm password`
 - On successful signup, frontend can transition into signin flow with prefilled values
 - Signin returns JWT and user profile
@@ -214,7 +218,8 @@ Note: The frontend includes OAuth-style provider buttons, but they currently use
 ## Data Models
 
 `User`:
-- `name`, `email`, `passwordHash`, `subscribed`
+- 
+ame`, `email`, `passwordHash`, `subscribed`
 - `passwordResetTokenHash`, `passwordResetExpiresAt`
 
 `ImageAsset`:

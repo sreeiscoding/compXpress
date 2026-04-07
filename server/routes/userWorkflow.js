@@ -1,15 +1,26 @@
 const express = require("express");
 const multer = require("multer");
+const sharp = require("sharp");
+const JSZip = require("jszip");
+const path = require("path");
 const authMiddleware = require("../middleware/authMiddleware");
 const User = require("../models/User");
 const ImageAsset = require("../models/ImageAsset");
 const BillingRecord = require("../models/BillingRecord");
+const { removeBackgroundBuffer } = require("../utils/removeBgClient");
 
 const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 20 * 1024 * 1024
+  }
+});
+const batchUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 20 * 1024 * 1024,
+    files: 75
   }
 });
 
@@ -58,6 +69,104 @@ function toAssetSummary(doc) {
     bgColor: doc.bgColor || "",
     createdAt: doc.createdAt
   };
+}
+
+function sanitizeBaseName(name, index) {
+  const raw = String(name || `image-${index + 1}`);
+  const withoutExt = raw.replace(/\.[^./\\]+$/, "");
+  const safe = withoutExt.replace(/[^a-zA-Z0-9_-]+/g, "_").replace(/^_+|_+$/g, "");
+  return safe || `image-${index + 1}`;
+}
+
+function parseSourceType(value) {
+  return String(value || "").toLowerCase() === "original" ? "original" : "compressed";
+}
+
+function parseBgColor(value) {
+  return String(value || "").toLowerCase() === "blue" ? "blue" : "white";
+}
+
+function parseOutputFormat(value) {
+  return String(value || "").toLowerCase() === "jpg" ? "jpg" : "png";
+}
+
+function toMimeFromFormat(format) {
+  return format === "jpg" ? "image/jpeg" : "image/png";
+}
+
+function getCompressionSettings(size) {
+  const bytes = Number(size || 0);
+  if (bytes <= 150 * 1024) return { quality: 76, maxDim: 2200 };
+  if (bytes <= 700 * 1024) return { quality: 72, maxDim: 2200 };
+  if (bytes <= 2 * 1024 * 1024) return { quality: 68, maxDim: 2000 };
+  if (bytes <= 8 * 1024 * 1024) return { quality: 64, maxDim: 1800 };
+  return { quality: 60, maxDim: 1600 };
+}
+
+async function compressInputBuffer(fileBuffer, sourceSize, outputFormat) {
+  const settings = getCompressionSettings(sourceSize);
+  const base = sharp(fileBuffer, { failOnError: false }).rotate().resize({
+    width: settings.maxDim,
+    height: settings.maxDim,
+    fit: "inside",
+    withoutEnlargement: true
+  });
+
+  if (outputFormat === "jpg") {
+    return base
+      .jpeg({ quality: settings.quality, mozjpeg: true, progressive: true })
+      .toBuffer();
+  }
+
+  return base
+    .png({ compressionLevel: 9, adaptiveFiltering: true, palette: true, quality: settings.quality })
+    .toBuffer();
+}
+
+async function buildPassportBuffer(removedBuffer, bgColor, outputFormat) {
+  const targetW = 413;
+  const targetH = 531;
+  const margin = 24;
+  const innerW = targetW - margin * 2;
+  const innerH = targetH - margin * 2;
+  const innerBackground = bgColor === "blue" ? "#2563eb" : "#eef1f4";
+
+  const innerBg = await sharp({
+    create: {
+      width: innerW,
+      height: innerH,
+      channels: 4,
+      background: innerBackground
+    }
+  })
+    .png()
+    .toBuffer();
+
+  const foreground = await sharp(removedBuffer)
+    .resize(innerW, innerH, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
+    })
+    .png()
+    .toBuffer();
+
+  const composed = sharp({
+    create: {
+      width: targetW,
+      height: targetH,
+      channels: 4,
+      background: "#ffffff"
+    }
+  }).composite([
+    { input: innerBg, left: margin, top: margin },
+    { input: foreground, left: margin, top: margin }
+  ]);
+
+  if (outputFormat === "jpg") {
+    return composed.jpeg({ quality: 92, mozjpeg: true, progressive: true }).toBuffer();
+  }
+
+  return composed.png().toBuffer();
 }
 
 router.post("/assets/compressed", authMiddleware, upload.single("image"), async (req, res) => {
@@ -119,6 +228,119 @@ router.post("/assets/passport", authMiddleware, upload.single("image"), async (r
     return res.status(201).json({ ok: true, ...toAssetSummary(doc) });
   } catch (error) {
     return res.status(500).json({ error: "Failed to store passport image.", details: error.message });
+  }
+});
+
+router.post("/batch/process-zip", authMiddleware, batchUpload.array("images", 75), async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    if (!user.subscribed) {
+      return res.status(403).json({ error: "Batch processing is available for Pro users only." });
+    }
+
+    const files = Array.isArray(req.files)
+      ? req.files.filter((entry) => entry && entry.buffer && String(entry.mimetype || "").startsWith("image/"))
+      : [];
+
+    if (files.length < 5) {
+      return res.status(400).json({ error: "Batch workflow requires at least 5 images." });
+    }
+    if (files.length > 75) {
+      return res.status(400).json({ error: "Batch workflow supports up to 75 images per request." });
+    }
+
+    const sourceType = parseSourceType(req.body.sourceType);
+    const bgColor = parseBgColor(req.body.bgColor);
+    const outputFormat = parseOutputFormat(req.body.outputFormat);
+    const outputMime = toMimeFromFormat(outputFormat);
+    const batchId = `batch_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const zip = new JSZip();
+    const docsToInsert = [];
+    const failures = [];
+    let successCount = 0;
+
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      const baseName = sanitizeBaseName(file.originalname, index);
+      const workflowId = `${batchId}_${index + 1}`;
+
+      try {
+        const compressedBuffer = await compressInputBuffer(file.buffer, Number(file.size || file.buffer.length || 0), outputFormat);
+        const passportSourceBuffer = sourceType === "compressed" ? compressedBuffer : file.buffer;
+        const passportSourceMime = sourceType === "compressed" ? outputMime : String(file.mimetype || "image/png");
+        const removedBuffer = await removeBackgroundBuffer({
+          buffer: passportSourceBuffer,
+          filename: `${baseName}-source.${outputFormat}`,
+          mimeType: passportSourceMime
+        });
+        const passportBuffer = await buildPassportBuffer(removedBuffer, bgColor, outputFormat);
+
+        zip.file(`${baseName}/${baseName}-compressed.${outputFormat}`, compressedBuffer);
+        zip.file(`${baseName}/${baseName}-passport.${outputFormat}`, passportBuffer);
+
+        docsToInsert.push({
+          userId: user._id,
+          type: "compressed",
+          workflowId,
+          originalName: `${baseName}-compressed.${outputFormat}`,
+          mimeType: outputMime,
+          size: compressedBuffer.length,
+          format: outputFormat === "jpg" ? "jpg" : "png",
+          originalSize: Number(file.size || file.buffer.length || 0),
+          data: compressedBuffer
+        });
+        docsToInsert.push({
+          userId: user._id,
+          type: "passport",
+          workflowId,
+          originalName: `${baseName}-passport.${outputFormat}`,
+          mimeType: outputMime,
+          size: passportBuffer.length,
+          format: outputFormat === "jpg" ? "jpg" : "png",
+          sourceType,
+          bgColor,
+          originalSize: Number(file.size || file.buffer.length || 0),
+          data: passportBuffer
+        });
+
+        successCount += 1;
+      } catch (itemError) {
+        failures.push(`${path.basename(file.originalname || `image-${index + 1}`)}: ${itemError.message}`);
+      }
+    }
+
+    if (!successCount) {
+      return res.status(502).json({
+        error: "Batch processing failed for all images.",
+        details: failures.slice(0, 10).join(" | ")
+      });
+    }
+
+    if (failures.length) {
+      zip.file("batch-errors.txt", failures.join("\n"));
+    }
+
+    if (docsToInsert.length) {
+      await ImageAsset.insertMany(docsToInsert, { ordered: false });
+    }
+
+    const zipBuffer = await zip.generateAsync({
+      type: "nodebuffer",
+      compression: "DEFLATE",
+      compressionOptions: { level: 9 }
+    });
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename="com-pass-batch-${Date.now()}.zip"`);
+    res.setHeader("X-Batch-Success-Count", String(successCount));
+    res.setHeader("X-Batch-Failed-Count", String(failures.length));
+    return res.status(200).send(zipBuffer);
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to process batch request.", details: error.message });
   }
 });
 
