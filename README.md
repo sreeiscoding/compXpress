@@ -160,6 +160,7 @@ Asset persistence:
 - `GET /api/assets/recent/compressed` (protected)
 - `GET /api/assets/:id` (protected)
 - `DELETE /api/assets/:id` (protected)
+- `PATCH /api/assets/:id/rename` (protected)
 - `DELETE /api/assets/group/:workflowId` (protected)
 - `GET /api/assets/compressed/:id` (protected)
 - `DELETE /api/assets/compressed/:id` (protected)
@@ -194,8 +195,10 @@ Authorization: Bearer <jwt_token>
 6. Recently compressed section:
 - Fetches groups from DB
 - Shows file count per group
-- Expand group to list each generated file
-- Per-file and per-group actions: view, download, delete
+- Search and filter by type / remove.bg usage
+- Select individual/all files for bulk delete
+- Expand group to list each generated file with thumbnail + metadata
+- Per-file and per-group actions: view, download, delete, rename, re-process
 7. Billing:
 - Pricing section and upgrade actions open billing modal/page
 - Payment method UI: UPI / Razorpay / Stripe

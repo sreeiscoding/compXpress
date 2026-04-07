@@ -1270,6 +1270,38 @@
       border-color: rgba(248, 113, 113, 0.85);
     }
 
+    .modal-field {
+      margin-top: 12px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .modal-label {
+      font-family: var(--font-secondary);
+      font-size: 0.72rem;
+      color: #bfdbfe;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .modal-input {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      padding: 10px 12px;
+      font-family: var(--font-secondary);
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .modal-input:focus {
+      border-color: rgba(96, 165, 250, 0.85);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
+    }
+
     body[data-theme="light"] {
       --bg: #f1f5f9;
       --bg-soft: #eff6ff;
@@ -2352,7 +2384,37 @@
       padding: 3px 8px;
       line-height: 1.2;
     }
-    .actions {
+
+    .passport-workflow-note {
+      margin: 0 0 8px;
+      font-family: var(--font-secondary);
+      font-size: 0.72rem;
+      color: #9fb1cf;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.35;
+    }
+
+    .passport-workflow-note i {
+      color: #93c5fd;
+      font-size: 0.72rem;
+    }
+
+    .flow-note-ai {
+      margin: 6px 0 0;
+      font-family: var(--font-secondary);
+      font-size: 0.73rem;
+      color: #a8b8d3;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .flow-note-ai i {
+      color: #bfdbfe;
+      font-size: 0.72rem;
+    }    .actions {
       margin-top: 20px;
       display: grid;
       grid-template-columns: repeat(3, minmax(140px, 1fr));
@@ -2578,6 +2640,144 @@
       gap: 10px;
     }
 
+    .recent-tools {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.9fr) minmax(180px, 0.8fr) repeat(3, auto);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .recent-search-wrap {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px;
+      align-items: center;
+      max-width: 280px;
+      width: 100%;
+    }
+
+    .recent-search {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--text);
+      padding: 8px 10px;
+      font-family: var(--font-secondary);
+      font-size: 0.78rem;
+      outline: none;
+    }
+
+    .recent-search-btn {
+      min-height: 36px;
+      min-width: 36px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.72);
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+    }
+
+    .recent-search-btn:hover {
+      border-color: rgba(96, 165, 250, 0.75);
+      background: rgba(30, 64, 175, 0.24);
+      transform: translateY(-1px);
+    }
+
+    .recent-search:focus,
+    .recent-search-btn:focus {
+      border-color: rgba(96, 165, 250, 0.8);
+      outline: none;
+    }
+
+    .recent-filter-dropdown .action-dropdown-toggle {
+      min-height: 36px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      font-size: 0.76rem;
+    }
+    .recent-file-layout {
+      display: grid;
+      grid-template-columns: auto 64px 1fr;
+      gap: 14px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .recent-file-select-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .recent-file-select-label {
+      font-family: var(--font-secondary);
+      font-size: 0.72rem;
+      color: #9fb1cf;
+      user-select: none;
+    }
+
+    .recent-file-select {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      margin: 0;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      border-radius: 4px;
+      background: rgba(15, 23, 42, 0.72);
+      display: inline-grid;
+      place-items: center;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+
+    .recent-file-select:hover {
+      border-color: rgba(96, 165, 250, 0.8);
+    }
+
+    .recent-file-select:checked {
+      border-color: rgba(96, 165, 250, 0.95);
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M6.5 11.2 3.3 8l1.1-1.1 2.1 2.1 5.1-5.1L12.7 5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 12px 12px;
+    }
+
+    .recent-file-select:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.9), 0 0 0 4px rgba(96, 165, 250, 0.45);
+    }
+
+    .recent-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      background: rgba(15, 23, 42, 0.8);
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .recent-thumb.placeholder {
+      display: grid;
+      place-items: center;
+      color: #94a3b8;
+      font-size: 0.86rem;
+    }
+
+    .recent-meta-lines {
+      margin: 0;
+      font-family: var(--font-secondary);
+      font-size: 0.69rem;
+      color: #9fb1cf;
+      line-height: 1.3;
+    }
     .recent-head {
       display: flex;
       align-items: center;
@@ -2683,8 +2883,9 @@
     .recent-actions {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       flex-shrink: 0;
+      flex-wrap: wrap;
     }
 
     .recent-btn {
@@ -2693,11 +2894,67 @@
       border-radius: 8px;
       background: rgba(15, 23, 42, 0.66);
       color: #cbd5e1;
-      padding: 6px 8px;
+      padding: 7px 10px;
       cursor: pointer;
       font-family: var(--font-secondary);
       font-size: 0.72rem;
+      line-height: 1;
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      white-space: nowrap;
       transition: border-color var(--transition), background var(--transition), color var(--transition);
+    }
+
+    .recent-check-control {
+      user-select: none;
+    }
+
+    .recent-btn-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      cursor: pointer;
+      flex-shrink: 0;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      border-radius: 4px;
+      background: rgba(15, 23, 42, 0.72);
+      display: inline-grid;
+      place-items: center;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+
+    .recent-btn-checkbox:hover {
+      border-color: rgba(96, 165, 250, 0.8);
+    }
+
+    .recent-btn-checkbox:checked {
+      border-color: rgba(96, 165, 250, 0.95);
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M6.5 11.2 3.3 8l1.1-1.1 2.1 2.1 5.1-5.1L12.7 5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 11px 11px;
+    }
+
+    .recent-btn-checkbox:indeterminate {
+      border-color: rgba(96, 165, 250, 0.95);
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+      background-image: linear-gradient(white, white);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 8px 2px;
+    }
+
+    .recent-btn-checkbox:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.9), 0 0 0 4px rgba(96, 165, 250, 0.45);
     }
 
     .recent-btn:hover {
@@ -3007,6 +3264,10 @@
         display: none;
       }
 
+      .recent-tools {
+        grid-template-columns: 1fr;
+      }
+
       .recent-mobile-menu {
         display: inline-flex;
         margin-left: auto;
@@ -3143,6 +3404,10 @@
       .recent-item {
         grid-template-columns: 1fr;
         gap: 10px;
+      }
+
+      .recent-file-layout {
+        grid-template-columns: auto 52px 1fr;
       }
 
       .recent-actions {
@@ -3315,6 +3580,21 @@
       <div class="modal-actions">
         <button id="recentDeleteCancelBtn" class="modal-btn" type="button">Cancel</button>
         <button id="recentDeleteConfirmBtn" class="modal-btn danger" type="button">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="recentRenameModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="recentRenameTitle" aria-describedby="recentRenameText">
+      <h3 id="recentRenameTitle" class="modal-title">Rename File</h3>
+      <p id="recentRenameText" class="modal-text">Update the file name. Changes are saved to your account database.</p>
+      <div class="modal-field">
+        <label class="modal-label" for="recentRenameInput">File Name</label>
+        <input id="recentRenameInput" class="modal-input" type="text" autocomplete="off" maxlength="120" />
+      </div>
+      <div class="modal-actions">
+        <button id="recentRenameCancelBtn" class="modal-btn" type="button">Cancel</button>
+        <button id="recentRenameConfirmBtn" class="modal-btn" type="button">Save Name</button>
       </div>
     </div>
   </div>
@@ -3608,6 +3888,7 @@
               </div>
               <div class="preview-card">
                 <h4>Passport Photo</h4>
+                <p class="passport-workflow-note"><i class="fa-solid fa-wand-magic-sparkles"></i>Background removed via industry-leading AI + face positioning guide overlay.</p>
                 <div id="passportPreviewShell" class="preview-shell passport">
                   <img id="passportPreview" class="preview-media" alt="Passport Photo Preview" />
                   <div id="passportGuideOverlay" class="passport-guide-overlay" aria-hidden="true">
@@ -3626,6 +3907,7 @@
             <div class="flow-head">
               <p class="flow-step"><i class="fa-solid fa-3"></i>Step 3 - Generate and Deliver</p>
               <p class="flow-note">Create outputs and download instantly</p>
+              <p class="flow-note-ai"><i class="fa-solid fa-shield-check"></i>Background removed via industry-leading AI. Use guide band for head placement.</p>
             </div>
             <div class="actions">
               <button id="compressBtn" class="btn" disabled><i class="fa-solid fa-compress"></i>Compress Image</button>
@@ -3686,6 +3968,35 @@
                   </button>
                 </div>
               </div>
+              <div class="recent-tools">
+                <div class="recent-search-wrap">
+                  <input id="recentSearchInput" class="recent-search" type="search" placeholder="Search files or workflow" />
+                  <button id="recentSearchBtn" class="recent-search-btn" type="button" aria-label="Search history">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                  </button>
+                </div>
+                <div id="recentFilterDropdown" class="action-dropdown recent-filter-dropdown">
+                  <button id="recentFilterToggle" class="action-dropdown-toggle" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="recentFilterMenu">
+                    <span id="recentFilterLabel">Filter: All Types</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </button>
+                  <ul id="recentFilterMenu" class="action-dropdown-menu" role="listbox" aria-label="Filter recent files">
+                    <li><button class="action-dropdown-item active" type="button" role="option" data-filter="all" aria-selected="true"><span>All Types</span><i class="fa-solid fa-check check"></i></button></li>
+                    <li><button class="action-dropdown-item" type="button" role="option" data-filter="compressed" aria-selected="false"><span>Compressed</span><i class="fa-solid fa-check check"></i></button></li>
+                    <li><button class="action-dropdown-item" type="button" role="option" data-filter="passport" aria-selected="false"><span>Passport</span><i class="fa-solid fa-check check"></i></button></li>
+                    <li><button class="action-dropdown-item" type="button" role="option" data-filter="removebg" aria-selected="false"><span>Bg removal AI used</span><i class="fa-solid fa-check check"></i></button></li>
+                  </ul>
+                </div>
+                <div id="recentSelectAllBtn" class="recent-btn recent-check-control" role="button" tabindex="0" aria-label="Select all recent files">
+                  <input id="recentSelectAllCheckbox" class="recent-btn-checkbox" type="checkbox" aria-label="Select all recent files" />
+                  <span>Select All</span>
+                </div>
+                <div id="recentClearSelectionBtn" class="recent-btn recent-check-control" role="button" tabindex="0" aria-label="Clear selected recent files">
+                  <input id="recentClearSelectionCheckbox" class="recent-btn-checkbox" type="checkbox" aria-label="Clear selected recent files" />
+                  <span>Clear</span>
+                </div>
+                <button id="recentDeleteSelectedBtn" class="recent-btn delete" type="button"><i class="fa-regular fa-trash-can"></i>Delete Selected</button>
+              </div>
               <ul id="recentCompressedList" class="recent-list" aria-live="polite"></ul>
             </div>
           </div>
@@ -3710,7 +4021,7 @@
               <li>Upload up to 5 images at once (Free)</li>
               <li id="freeTierUsagePricing">Free monthly usage: 0/10 images used this month (includes remove.bg calls)</li>
               <li>Image compression and passport generation</li>
-              <li>Local processing in browser</li>
+              <li>Secure server-side processing via industry-level AI for precise background removal</li>
             </ul>
           </article>
           <article class="pricing-card featured">
@@ -3730,7 +4041,7 @@
     </section>
 
     <section id="about" class="about container">
-      Fast, private, and fully offline image utility for compression and passport-ready output.
+      Fast, private, server-side processing. Your images are securly uploaded, processed, and stored only in your account.
     </section>
 
   </main>
@@ -3783,6 +4094,10 @@
     const recentDeleteText = document.getElementById("recentDeleteText");
     const recentDeleteCancelBtn = document.getElementById("recentDeleteCancelBtn");
     const recentDeleteConfirmBtn = document.getElementById("recentDeleteConfirmBtn");
+    const recentRenameModal = document.getElementById("recentRenameModal");
+    const recentRenameInput = document.getElementById("recentRenameInput");
+    const recentRenameCancelBtn = document.getElementById("recentRenameCancelBtn");
+    const recentRenameConfirmBtn = document.getElementById("recentRenameConfirmBtn");
     const actionLoader = document.getElementById("actionLoader");
     const actionLoaderText = document.getElementById("actionLoaderText");
     const recentPreviewModal = document.getElementById("recentPreviewModal");
@@ -3850,6 +4165,17 @@
     const pricingUpgradeBtn = document.getElementById("pricingUpgradeBtn");
     const recentCompressedList = document.getElementById("recentCompressedList");
     const recentReloadBtn = document.getElementById("recentReloadBtn");
+    const recentSearchInput = document.getElementById("recentSearchInput");
+    const recentSearchBtn = document.getElementById("recentSearchBtn");
+    const recentFilterDropdown = document.getElementById("recentFilterDropdown");
+    const recentFilterToggle = document.getElementById("recentFilterToggle");
+    const recentFilterLabel = document.getElementById("recentFilterLabel");
+    const recentFilterMenu = document.getElementById("recentFilterMenu");
+    const recentSelectAllBtn = document.getElementById("recentSelectAllBtn");
+    const recentSelectAllCheckbox = document.getElementById("recentSelectAllCheckbox");
+    const recentClearSelectionBtn = document.getElementById("recentClearSelectionBtn");
+    const recentClearSelectionCheckbox = document.getElementById("recentClearSelectionCheckbox");
+    const recentDeleteSelectedBtn = document.getElementById("recentDeleteSelectedBtn");
     const freeTierUsageUploadEl = document.getElementById("freeTierUsageUpload");
     const freeTierUsagePricingEl = document.getElementById("freeTierUsagePricing");
 
@@ -3919,9 +4245,16 @@
     let expandedRecentWorkflows = [];
     let pendingRecentDeleteId = "";
     let pendingRecentDeleteMode = "file";
+    let pendingRecentRenameId = "";
+    let pendingRecentRenameValue = "";
     let activeLoaderCount = 0;
     let recentPreviewObjectUrl = "";
     let authMode = "signin";
+    let selectedRecentFileIds = [];
+    let recentSearchQuery = "";
+    let recentTypeFilterValue = "all";
+    let isRecentFilterMenuOpen = false;
+    const recentThumbnailMap = new Map();
     let pendingBillingCheckout = false;
     let apiReachabilityChecked = false;
     let freeTierUsageState = { monthKey: "", used: 0, limit: 10, remaining: 10, includes: "remove.bg calls" };
@@ -4299,20 +4632,179 @@
       return formatDateTime(createdAt);
     }
 
-    function renderRecentCompressed() {
-      const { keep } = pruneRecentCompressed();
-      const recent = keep.sort((a, b) => {
+    function isRemoveBgUsed(file) {
+      return String(file && file.type ? file.type : "") === "passport";
+    }
+
+    function getRecentFileSavings(file) {
+      const original = Number(file && file.originalSize ? file.originalSize : 0);
+      const compressed = Number(file && file.size ? file.size : 0);
+      if (original <= 0 || compressed <= 0 || compressed >= original) {
+        return { bytes: 0, pct: 0 };
+      }
+      const bytes = original - compressed;
+      const pct = Math.max(0, Math.round((bytes / original) * 100));
+      return { bytes, pct };
+    }
+
+    function formatRecentMetadata(file) {
+      const original = Number(file && file.originalSize ? file.originalSize : 0);
+      const compressed = Number(file && file.size ? file.size : 0);
+      const savings = getRecentFileSavings(file);
+      const date = getCompressedExpiryText(file && file.createdAt ? file.createdAt : "");
+      const removeBg = isRemoveBgUsed(file) ? "Yes" : "No";
+      return `Date: ${date} | Original: ${original > 0 ? formatBytes(original) : "-"} | Compressed: ${compressed > 0 ? formatBytes(compressed) : "-"} | Savings: ${savings.bytes > 0 ? `${formatBytes(savings.bytes)} (${savings.pct}%)` : "-"} | remove.bg used: ${removeBg}`;
+    }
+
+    function setRecentFilterMenuState(open) {
+      isRecentFilterMenuOpen = !!open;
+      recentFilterDropdown.classList.toggle("open", isRecentFilterMenuOpen);
+      recentFilterToggle.setAttribute("aria-expanded", String(isRecentFilterMenuOpen));
+    }
+
+    function getRecentFilterLabel(value) {
+      const key = String(value || "all");
+      if (key === "compressed") return "Filter: Compressed";
+      if (key === "passport") return "Filter: Passport";
+      if (key === "removebg") return "Filter: Bg removal AI used";
+      return "Filter: All Types";
+    }
+
+    function setRecentTypeFilter(value, announce = false) {
+      const next = ["all", "compressed", "passport", "removebg"].includes(String(value || ""))
+        ? String(value)
+        : "all";
+      recentTypeFilterValue = next;
+      recentFilterLabel.textContent = getRecentFilterLabel(next);
+      const options = recentFilterMenu.querySelectorAll(".action-dropdown-item");
+      options.forEach((option) => {
+        const isActive = String(option.dataset.filter || "") === next;
+        option.classList.toggle("active", isActive);
+        option.setAttribute("aria-selected", String(isActive));
+      });
+      renderRecentCompressed();
+      if (announce) {
+        setStatus(`History filter set to ${next === "all" ? "all types" : next}.`);
+      }
+    }
+
+    function getRecentFilteredGroups() {
+      const query = String(recentSearchQuery || "").trim().toLowerCase();
+      const typeFilter = String(recentTypeFilterValue || "all");
+      const source = pruneRecentCompressed().keep.sort((a, b) => {
         const at = Number(new Date(a.latestCreatedAt || a.createdAt || 0).getTime());
         const bt = Number(new Date(b.latestCreatedAt || b.createdAt || 0).getTime());
         return bt - at;
       });
+
+      return source.map((group) => {
+        const files = Array.isArray(group.files) ? group.files : [];
+        const filteredFiles = files.filter((file) => {
+          const fileType = String(file && file.type ? file.type : "").toLowerCase();
+          const passesType = typeFilter === "all"
+            || (typeFilter === "removebg" ? isRemoveBgUsed(file) : fileType === typeFilter);
+
+          if (!passesType) return false;
+
+          if (!query) return true;
+          const haystack = [
+            String(group.name || ""),
+            String(file && file.name ? file.name : ""),
+            String(fileType),
+            String(file && file.bgColor ? file.bgColor : "")
+          ].join(" ").toLowerCase();
+          return haystack.includes(query);
+        });
+
+        return {
+          ...group,
+          files: filteredFiles,
+          totalFiles: filteredFiles.length
+        };
+      }).filter((group) => group.totalFiles > 0 || (String(group.name || "").toLowerCase().includes(query) && typeFilter === "all"));
+    }
+
+    function isRecentFileSelected(fileId) {
+      return selectedRecentFileIds.includes(String(fileId || ""));
+    }
+
+    function setRecentFileSelection(fileId, selected) {
+      const id = String(fileId || "");
+      if (!id) return;
+      const has = selectedRecentFileIds.includes(id);
+      if (selected && !has) {
+        selectedRecentFileIds = [...selectedRecentFileIds, id];
+      }
+      if (!selected && has) {
+        selectedRecentFileIds = selectedRecentFileIds.filter((x) => x !== id);
+      }
+    }
+
+    function pruneRecentSelection() {
+      const groups = readRecentCompressed();
+      const allIds = new Set(groups.flatMap((g) => Array.isArray(g.files) ? g.files.map((f) => String(f.id || "")) : []));
+      selectedRecentFileIds = selectedRecentFileIds.filter((id) => allIds.has(id));
+    }
+
+    function getVisibleRecentFileIds() {
+      const groups = getRecentFilteredGroups();
+      return groups
+        .flatMap((g) => (Array.isArray(g.files) ? g.files.map((f) => String(f.id || "")) : []))
+        .filter(Boolean);
+    }
+
+    function syncRecentToolsCheckboxes() {
+      const visibleIds = getVisibleRecentFileIds();
+      const totalVisible = visibleIds.length;
+      const selectedVisible = visibleIds.filter((id) => isRecentFileSelected(id)).length;
+      const allSelected = totalVisible > 0 && selectedVisible === totalVisible;
+      const partiallySelected = selectedVisible > 0 && selectedVisible < totalVisible;
+      const noneSelected = selectedVisible === 0;
+
+      recentSelectAllCheckbox.checked = allSelected;
+      recentSelectAllCheckbox.indeterminate = partiallySelected;
+      recentSelectAllCheckbox.disabled = totalVisible === 0;
+
+      recentClearSelectionCheckbox.checked = noneSelected;
+      recentClearSelectionCheckbox.indeterminate = partiallySelected;
+      recentClearSelectionCheckbox.disabled = totalVisible === 0;
+    }
+
+    async function ensureRecentThumbnail(fileId, imageEl) {
+      const id = String(fileId || "");
+      if (!id || !imageEl) return;
+      const cached = recentThumbnailMap.get(id);
+      if (cached) {
+        imageEl.src = cached;
+        imageEl.classList.remove("placeholder");
+        return;
+      }
+
+      const authToken = getAuthToken();
+      if (!authToken) return;
+      try {
+        const { response } = await fetchWithAuthFallback(buildEndpointCandidates(`/assets/${encodeURIComponent(id)}`), authToken, { method: "GET" });
+        if (!response.ok) return;
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        recentThumbnailMap.set(id, url);
+        imageEl.src = url;
+        imageEl.classList.remove("placeholder");
+      } catch (error) {
+      }
+    }
+
+    function renderRecentCompressed() {
+      pruneRecentSelection();
+      const recent = getRecentFilteredGroups();
       recentCompressedList.innerHTML = "";
 
       if (!recent.length) {
         const empty = document.createElement("p");
         empty.className = "recent-empty";
-        empty.textContent = "No compressed files yet.";
+        empty.textContent = "No files match your current history filters.";
         recentCompressedList.appendChild(empty);
+        syncRecentToolsCheckboxes();
         return;
       }
 
@@ -4352,6 +4844,13 @@
           ? "<i class=\"fa-solid fa-chevron-up\"></i> Hide Files"
           : "<i class=\"fa-solid fa-chevron-down\"></i> View Files";
 
+        const selectGroupBtn = document.createElement("button");
+        selectGroupBtn.type = "button";
+        selectGroupBtn.className = "recent-btn";
+        selectGroupBtn.dataset.action = "select-group";
+        selectGroupBtn.dataset.workflow = workflowId;
+        selectGroupBtn.innerHTML = "<i class=\"fa-regular fa-square-check\"></i> Select Group";
+
         const downloadGroupBtn = document.createElement("button");
         downloadGroupBtn.type = "button";
         downloadGroupBtn.className = "recent-btn recent-desktop-actions";
@@ -4364,52 +4863,18 @@
         deleteGroupBtn.className = "recent-btn delete recent-desktop-actions";
         deleteGroupBtn.dataset.action = "delete-group";
         deleteGroupBtn.dataset.workflow = workflowId;
-        deleteGroupBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i>";
+        deleteGroupBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i> Delete";
         deleteGroupBtn.setAttribute("aria-label", "Delete all files in this group");
 
-        const groupMobileMenu = document.createElement("div");
-        groupMobileMenu.className = "recent-mobile-menu";
-
-        const groupMobileToggle = document.createElement("button");
-        groupMobileToggle.type = "button";
-        groupMobileToggle.className = "recent-btn recent-mobile-toggle";
-        groupMobileToggle.dataset.action = "toggle-file-menu";
-        groupMobileToggle.innerHTML = "<i class=\"fa-solid fa-ellipsis-vertical\"></i>";
-        groupMobileToggle.setAttribute("aria-label", "Open group actions");
-
-        const groupMobilePanel = document.createElement("div");
-        groupMobilePanel.className = "recent-mobile-panel";
-
-        const groupMobileDownloadBtn = document.createElement("button");
-        groupMobileDownloadBtn.type = "button";
-        groupMobileDownloadBtn.className = "recent-btn recent-mobile-item";
-        groupMobileDownloadBtn.dataset.action = "download-group";
-        groupMobileDownloadBtn.dataset.workflow = workflowId;
-        groupMobileDownloadBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download";
-
-        const groupMobileDeleteBtn = document.createElement("button");
-        groupMobileDeleteBtn.type = "button";
-        groupMobileDeleteBtn.className = "recent-btn delete recent-mobile-item";
-        groupMobileDeleteBtn.dataset.action = "delete-group";
-        groupMobileDeleteBtn.dataset.workflow = workflowId;
-        groupMobileDeleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i> Delete";
-
-        groupMobilePanel.appendChild(groupMobileDownloadBtn);
-        groupMobilePanel.appendChild(groupMobileDeleteBtn);
-        groupMobileMenu.appendChild(groupMobileToggle);
-        groupMobileMenu.appendChild(groupMobilePanel);
-
         actions.appendChild(toggleBtn);
+        actions.appendChild(selectGroupBtn);
         actions.appendChild(downloadGroupBtn);
         actions.appendChild(deleteGroupBtn);
-        actions.appendChild(groupMobileMenu);
         row.appendChild(meta);
         row.appendChild(actions);
         recentCompressedList.appendChild(row);
 
-        if (!isExpanded) {
-          continue;
-        }
+        if (!isExpanded) continue;
 
         for (const file of files) {
           const child = document.createElement("li");
@@ -4417,22 +4882,45 @@
           child.style.marginLeft = "12px";
           child.style.borderColor = "rgba(96, 165, 250, 0.28)";
 
+          const childMetaWrap = document.createElement("div");
+          childMetaWrap.className = "recent-file-layout";
+
+          const selectWrap = document.createElement("label");
+          selectWrap.className = "recent-file-select-wrap";
+          const select = document.createElement("input");
+          select.type = "checkbox";
+          select.className = "recent-file-select";
+          select.checked = isRecentFileSelected(file.id);
+          select.dataset.action = "select-file";
+          select.dataset.fileId = String(file.id || "");
+          const selectText = document.createElement("span");
+          selectText.className = "recent-file-select-label";
+          selectText.textContent = "Select";
+          selectWrap.appendChild(select);
+          selectWrap.appendChild(selectText);
+
+          const thumb = document.createElement("img");
+          thumb.className = "recent-thumb";
+          thumb.alt = "File thumbnail";
+          ensureRecentThumbnail(file.id, thumb);
+
           const childMeta = document.createElement("div");
           childMeta.className = "recent-meta";
 
           const childName = document.createElement("p");
           childName.className = "recent-name";
-          const variant = file.type === "passport"
-            ? `passport-${file.bgColor || "white"}`
-            : "compressed";
+          const variant = file.type === "passport" ? `passport-${file.bgColor || "white"}` : "compressed";
           childName.textContent = `${file.name || "file"} [${variant}]`;
 
           const childInfo = document.createElement("p");
-          childInfo.className = "recent-info";
-          childInfo.textContent = `${formatBytes(Number(file.size || 0))} | ${getCompressedExpiryText(file.createdAt)}`;
+          childInfo.className = "recent-meta-lines";
+          childInfo.textContent = formatRecentMetadata(file);
 
           childMeta.appendChild(childName);
           childMeta.appendChild(childInfo);
+          childMetaWrap.appendChild(selectWrap);
+          childMetaWrap.appendChild(thumb);
+          childMetaWrap.appendChild(childMeta);
 
           const childActions = document.createElement("div");
           childActions.className = "recent-actions";
@@ -4443,6 +4931,21 @@
           childViewBtn.dataset.action = "view-file";
           childViewBtn.dataset.fileId = String(file.id || "");
           childViewBtn.innerHTML = "<i class=\"fa-regular fa-image\"></i> View";
+
+          const childReprocessBtn = document.createElement("button");
+          childReprocessBtn.type = "button";
+          childReprocessBtn.className = "recent-btn";
+          childReprocessBtn.dataset.action = "reprocess-file";
+          childReprocessBtn.dataset.fileId = String(file.id || "");
+          childReprocessBtn.innerHTML = "<i class=\"fa-solid fa-rotate\"></i> Re-process";
+
+          const childRenameBtn = document.createElement("button");
+          childRenameBtn.type = "button";
+          childRenameBtn.className = "recent-btn";
+          childRenameBtn.dataset.action = "rename-file";
+          childRenameBtn.dataset.fileId = String(file.id || "");
+          childRenameBtn.dataset.fileName = String(file.name || "");
+          childRenameBtn.innerHTML = "<i class=\"fa-regular fa-pen-to-square\"></i> Rename";
 
           const childDownloadBtn = document.createElement("button");
           childDownloadBtn.type = "button";
@@ -4456,52 +4959,21 @@
           childDeleteBtn.className = "recent-btn delete recent-desktop-actions";
           childDeleteBtn.dataset.action = "delete-file";
           childDeleteBtn.dataset.fileId = String(file.id || "");
-          childDeleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i>";
+          childDeleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i> Delete";
           childDeleteBtn.setAttribute("aria-label", "Delete file");
 
-          const mobileMenu = document.createElement("div");
-          mobileMenu.className = "recent-mobile-menu";
-
-          const mobileToggle = document.createElement("button");
-          mobileToggle.type = "button";
-          mobileToggle.className = "recent-btn recent-mobile-toggle";
-          mobileToggle.dataset.action = "toggle-file-menu";
-          mobileToggle.innerHTML = "<i class=\"fa-solid fa-ellipsis-vertical\"></i>";
-          mobileToggle.setAttribute("aria-label", "Open file actions");
-
-          const mobilePanel = document.createElement("div");
-          mobilePanel.className = "recent-mobile-panel";
-
-          const mobileDownloadBtn = document.createElement("button");
-          mobileDownloadBtn.type = "button";
-          mobileDownloadBtn.className = "recent-btn recent-mobile-item";
-          mobileDownloadBtn.dataset.action = "download-file";
-          mobileDownloadBtn.dataset.fileId = String(file.id || "");
-          mobileDownloadBtn.innerHTML = "<i class=\"fa-solid fa-download\"></i> Download";
-
-          const mobileDeleteBtn = document.createElement("button");
-          mobileDeleteBtn.type = "button";
-          mobileDeleteBtn.className = "recent-btn delete recent-mobile-item";
-          mobileDeleteBtn.dataset.action = "delete-file";
-          mobileDeleteBtn.dataset.fileId = String(file.id || "");
-          mobileDeleteBtn.innerHTML = "<i class=\"fa-regular fa-trash-can\"></i> Delete";
-
-          mobilePanel.appendChild(mobileDownloadBtn);
-          mobilePanel.appendChild(mobileDeleteBtn);
-          mobileMenu.appendChild(mobileToggle);
-          mobileMenu.appendChild(mobilePanel);
-
           childActions.appendChild(childViewBtn);
+          childActions.appendChild(childReprocessBtn);
+          childActions.appendChild(childRenameBtn);
           childActions.appendChild(childDownloadBtn);
           childActions.appendChild(childDeleteBtn);
-          childActions.appendChild(mobileMenu);
-          child.appendChild(childMeta);
+          child.appendChild(childMetaWrap);
           child.appendChild(childActions);
           recentCompressedList.appendChild(child);
         }
       }
+      syncRecentToolsCheckboxes();
     }
-
     function closeRecentMobileMenus() {
       const menus = recentCompressedList.querySelectorAll(".recent-mobile-menu.open");
       menus.forEach((menu) => menu.classList.remove("open"));
@@ -4915,6 +5387,86 @@
       }
     }
 
+    async function renameRecentFileById(id, nextName) {
+      const authToken = getAuthToken();
+      if (!authToken || !id) {
+        setStatus("Sign in to rename files.");
+        return;
+      }
+      if (!nextName || !nextName.trim()) {
+        throw new Error("File name is required.");
+      }
+
+      const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates(`/assets/${encodeURIComponent(id)}/rename`), {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ name: nextName.trim() })
+      });
+      if (!response.ok) {
+        throw new Error(data.details || data.error || "Could not rename file.");
+      }
+      await fetchRecentCompressedFromBackend();
+      setStatus("File renamed successfully.");
+    }
+
+    async function reprocessRecentFileById(id) {
+      const authToken = getAuthToken();
+      if (!authToken || !id) {
+        setStatus("Sign in to re-process files.");
+        return;
+      }
+      startActionLoader("Loading file for re-processing...");
+      try {
+        const current = readRecentCompressed();
+        const allFiles = current.flatMap((entry) => Array.isArray(entry.files) ? entry.files : []);
+        const item = allFiles.find((entry) => String(entry.id) === String(id));
+        const { response } = await fetchWithAuthFallback(buildEndpointCandidates(`/assets/${encodeURIComponent(id)}`), authToken, { method: "GET" });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.details || data.error || "Could not load selected file.");
+        }
+        const blob = await response.blob();
+        const fallbackName = item && item.name ? item.name : `reprocess-${Date.now()}.png`;
+        const file = new File([blob], fallbackName, { type: blob.type || "image/png" });
+
+        if (uploadedFiles.length >= getSelectionLimit()) {
+          setStatus(`Selection limit reached (${getSelectionLimit()}). Clear one file before re-processing.`);
+          return;
+        }
+
+        uploadedFiles.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          file
+        });
+        const newActiveId = uploadedFiles[uploadedFiles.length - 1].id;
+        setActiveUpload(newActiveId);
+        setStatus("File loaded into workflow. You can re-process now.");
+      } finally {
+        stopActionLoader();
+      }
+    }
+
+    async function deleteSelectedRecentFiles() {
+      const ids = [...new Set(selectedRecentFileIds.map((id) => String(id || "")).filter(Boolean))];
+      if (!ids.length) {
+        setStatus("Select files first to delete.");
+        return;
+      }
+      startActionLoader("Deleting selected files...");
+      try {
+        for (const id of ids) {
+          await removeRecentCompressedById(id);
+        }
+        selectedRecentFileIds = [];
+        await fetchRecentCompressedFromBackend();
+        setStatus("Selected files deleted.");
+      } finally {
+        stopActionLoader();
+      }
+    }
     async function blobToDataUrl(blob) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -5147,6 +5699,31 @@
           recentDeleteText.textContent = "Are you sure you want to delete this compressed file from your account history?";
         }
       }
+    }
+
+    function setRecentRenameModalState(open) {
+      if (!open && recentRenameModal.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
+      recentRenameModal.classList.toggle("open", open);
+      recentRenameModal.setAttribute("aria-hidden", String(!open));
+      if (open) {
+        requestAnimationFrame(() => {
+          recentRenameInput.focus();
+          recentRenameInput.select();
+        });
+        return;
+      }
+      pendingRecentRenameId = "";
+      pendingRecentRenameValue = "";
+      recentRenameInput.value = "";
+    }
+
+    function openRecentRenameModal(fileId, currentName) {
+      pendingRecentRenameId = String(fileId || "");
+      pendingRecentRenameValue = String(currentName || "");
+      recentRenameInput.value = pendingRecentRenameValue;
+      setRecentRenameModalState(true);
     }
 
     function setRecentPreviewModalState(open) {
@@ -6737,8 +7314,8 @@
       }
 
       try {
-        startActionLoader("Generating passport photo...");
-        setStatus("Processing...");
+        startActionLoader("Generating passport photo with AI background removal...");
+        setStatus("Processing... Background removed via industry-leading AI.");
         setProcessingState(true);
 
         const state = readAppState();
@@ -6806,7 +7383,7 @@
         }
 
         setStatus(`Passport photo generated for ${getCurrentPassportPreset().label} from ${sourceType} image with ${passportBgColor} background.`);
-        addNotification("Passport Generated", `Passport PNG is ready from ${sourceType} source.`);
+        addNotification("Passport Generated", `Passport ready with AI background removal from ${sourceType} source.`);
       } catch (error) {
         const state = readAppState();
         if (state) {
@@ -7227,6 +7804,19 @@
         return;
       }
 
+      if (action === "select-group") {
+        closeRecentMobileMenus();
+        const workflowId = String(actionBtn.dataset.workflow || "");
+        if (!workflowId) return;
+        const groups = readRecentCompressed();
+        const group = groups.find((g) => String(g.workflowId || "") === workflowId);
+        const ids = Array.isArray(group && group.files) ? group.files.map((f) => String(f.id || "")).filter(Boolean) : [];
+        const allSelected = ids.length > 0 && ids.every((id) => isRecentFileSelected(id));
+        ids.forEach((id) => setRecentFileSelection(id, !allSelected));
+        renderRecentCompressed();
+        return;
+      }
+
       if (action === "download-group") {
         closeRecentMobileMenus();
         const workflowId = String(actionBtn.dataset.workflow || "");
@@ -7243,6 +7833,25 @@
         if (!fileId) return;
         downloadRecentCompressedById(fileId).catch(() => {
           setStatus("Could not download selected recent file.");
+        });
+        return;
+      }
+
+      if (action === "rename-file") {
+        closeRecentMobileMenus();
+        const fileId = String(actionBtn.dataset.fileId || "");
+        const fileName = String(actionBtn.dataset.fileName || "");
+        if (!fileId) return;
+        openRecentRenameModal(fileId, fileName);
+        return;
+      }
+
+      if (action === "reprocess-file") {
+        closeRecentMobileMenus();
+        const fileId = String(actionBtn.dataset.fileId || "");
+        if (!fileId) return;
+        reprocessRecentFileById(fileId).catch(() => {
+          setStatus("Could not load selected file for re-processing.");
         });
         return;
       }
@@ -7287,10 +7896,155 @@
       setRecentDeleteModalState(false);
     });
 
+    recentRenameCancelBtn.addEventListener("click", () => {
+      setRecentRenameModalState(false);
+    });
+
+    recentRenameConfirmBtn.addEventListener("click", () => {
+      const fileId = String(pendingRecentRenameId || "");
+      const nextName = String(recentRenameInput.value || "").trim();
+      if (!fileId) {
+        setRecentRenameModalState(false);
+        return;
+      }
+      if (!nextName) {
+        setStatus("Please enter a valid file name.");
+        recentRenameInput.focus();
+        return;
+      }
+      startActionLoader("Saving file name...");
+      renameRecentFileById(fileId, nextName)
+        .then(() => {
+          setStatus("File renamed successfully.");
+          setRecentRenameModalState(false);
+        })
+        .catch((error) => {
+          setStatus(error.message || "Could not rename selected file.");
+        })
+        .finally(() => {
+          stopActionLoader();
+        });
+    });
+
+    recentRenameInput.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      recentRenameConfirmBtn.click();
+    });
+
     recentPreviewCloseBtn.addEventListener("click", () => {
       setRecentPreviewModalState(false);
     });
 
+    recentCompressedList.addEventListener("change", (e) => {
+      const checkbox = e.target.closest(".recent-file-select");
+      if (!checkbox) return;
+      const fileId = String(checkbox.dataset.fileId || "");
+      if (!fileId) return;
+      setRecentFileSelection(fileId, !!checkbox.checked);
+      syncRecentToolsCheckboxes();
+    });
+
+    recentSearchInput.addEventListener("input", (e) => {
+      recentSearchQuery = String(e.target.value || "");
+      renderRecentCompressed();
+    });
+
+    recentSearchInput.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      recentSearchBtn.click();
+    });
+
+    recentSearchBtn.addEventListener("click", async () => {
+      recentSearchQuery = String(recentSearchInput.value || "");
+      startActionLoader("Searching files...");
+      try {
+        await fetchRecentCompressedFromBackend();
+      } finally {
+        stopActionLoader();
+      }
+      renderRecentCompressed();
+    });
+
+    recentFilterToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setRecentFilterMenuState(!isRecentFilterMenuOpen);
+    });
+
+    recentFilterMenu.addEventListener("click", async (e) => {
+      const optionBtn = e.target.closest(".action-dropdown-item");
+      if (!optionBtn) return;
+      const value = String(optionBtn.dataset.filter || "all");
+      startActionLoader("Applying filter...");
+      try {
+        await fetchRecentCompressedFromBackend();
+      } finally {
+        stopActionLoader();
+      }
+      setRecentTypeFilter(value, true);
+      setRecentFilterMenuState(false);
+    });
+
+    function selectAllVisibleRecentFiles() {
+      const ids = getVisibleRecentFileIds();
+      selectedRecentFileIds = [...new Set(ids)];
+      renderRecentCompressed();
+      setStatus(`${selectedRecentFileIds.length} file(s) selected.`);
+    }
+
+    function clearVisibleRecentSelection() {
+      const visible = new Set(getVisibleRecentFileIds());
+      selectedRecentFileIds = selectedRecentFileIds.filter((id) => !visible.has(String(id || "")));
+      renderRecentCompressed();
+      setStatus("Selection cleared.");
+    }
+
+    recentSelectAllBtn.addEventListener("click", () => {
+      selectAllVisibleRecentFiles();
+    });
+
+    recentClearSelectionBtn.addEventListener("click", () => {
+      clearVisibleRecentSelection();
+    });
+
+    recentSelectAllCheckbox.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    recentClearSelectionCheckbox.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    recentSelectAllCheckbox.addEventListener("change", () => {
+      if (recentSelectAllCheckbox.checked || recentSelectAllCheckbox.indeterminate) {
+        selectAllVisibleRecentFiles();
+        return;
+      }
+      clearVisibleRecentSelection();
+    });
+
+    recentClearSelectionCheckbox.addEventListener("change", () => {
+      clearVisibleRecentSelection();
+    });
+
+    recentSelectAllBtn.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      selectAllVisibleRecentFiles();
+    });
+
+    recentClearSelectionBtn.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      clearVisibleRecentSelection();
+    });
+
+    recentDeleteSelectedBtn.addEventListener("click", () => {
+      deleteSelectedRecentFiles().catch(() => {
+        setStatus("Could not delete selected files.");
+      });
+    });
     recentDeleteConfirmBtn.addEventListener("click", () => {
       const id = pendingRecentDeleteId;
       if (!id) {
@@ -7341,11 +8095,17 @@
       if (isPassportCountryMenuOpen && !passportCountryDropdown.contains(e.target)) {
         setPassportCountryMenuState(false);
       }
+      if (isRecentFilterMenuOpen && !recentFilterDropdown.contains(e.target)) {
+        setRecentFilterMenuState(false);
+      }
       if (upgradeModal.classList.contains("open") && !e.target.closest("#upgradeModal .modal-card")) {
         setUpgradeModalState(false);
       }
       if (recentDeleteModal.classList.contains("open") && !e.target.closest("#recentDeleteModal .modal-card")) {
         setRecentDeleteModalState(false);
+      }
+      if (recentRenameModal.classList.contains("open") && !e.target.closest("#recentRenameModal .modal-card")) {
+        setRecentRenameModalState(false);
       }
       if (recentPreviewModal.classList.contains("open") && !e.target.closest("#recentPreviewModal .modal-card")) {
         setRecentPreviewModalState(false);
@@ -7403,6 +8163,10 @@
           setPassportCountryMenuState(false);
           return;
         }
+        if (isRecentFilterMenuOpen) {
+          setRecentFilterMenuState(false);
+          return;
+        }
         if (authPage.classList.contains("open")) {
           pendingBillingCheckout = false;
           setAuthPageState(false);
@@ -7423,6 +8187,10 @@
         }
         if (recentDeleteModal.classList.contains("open")) {
           setRecentDeleteModalState(false);
+          return;
+        }
+        if (recentRenameModal.classList.contains("open")) {
+          setRecentRenameModalState(false);
           return;
         }
         if (recentPreviewModal.classList.contains("open")) {
@@ -7574,6 +8342,7 @@
     setPassportBgColor("white", false);
     setDownloadFormat("png", false);
     setPrintSheetCopies(4, false);
+    setRecentTypeFilter("all", false);
     setBillingMethod("stripe");
     restoreBillingPageState();
     renderFileQueue();
@@ -7592,10 +8361,31 @@
       if (compressedObjectUrl) URL.revokeObjectURL(compressedObjectUrl);
       if (passportObjectUrl) URL.revokeObjectURL(passportObjectUrl);
       if (recentPreviewObjectUrl) URL.revokeObjectURL(recentPreviewObjectUrl);
+      for (const thumbUrl of recentThumbnailMap.values()) {
+        URL.revokeObjectURL(thumbUrl);
+      }
+      recentThumbnailMap.clear();
     });
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

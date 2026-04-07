@@ -596,4 +596,37 @@ router.delete("/assets/compressed/:id", authMiddleware, async (req, res) => {
   }
 });
 
+router.patch("/assets/:id/rename", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const id = String(req.params.id || "").trim();
+    const name = String(req.body.name || "").trim();
+    if (!id) {
+      return res.status(400).json({ error: "Asset id is required." });
+    }
+    if (!name) {
+      return res.status(400).json({ error: "New file name is required." });
+    }
+
+    const safeName = name.slice(0, 140);
+    const updated = await ImageAsset.findOneAndUpdate(
+      { _id: id, userId: user._id },
+      { $set: { originalName: safeName } },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Asset not found." });
+    }
+
+    return res.json({ ok: true, message: "Asset renamed.", item: toAssetSummary(updated) });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to rename asset.", details: error.message });
+  }
+});
 module.exports = router;
+
