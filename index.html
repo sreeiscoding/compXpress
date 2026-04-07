@@ -3312,6 +3312,29 @@
 
       .recent-more-dropdown {
         display: block;
+        justify-self: center;
+      }
+
+      .recent-more-dropdown .action-dropdown-toggle {
+        width: 40px;
+        min-width: 40px;
+      }
+
+      .recent-more-dropdown .action-dropdown-menu {
+        left: 50% !important;
+        right: auto !important;
+        width: max-content;
+        min-width: 176px;
+        max-width: 82vw;
+        transform: translateX(-50%) translateY(-6px) !important;
+      }
+
+      .recent-more-dropdown.open .action-dropdown-menu {
+        transform: translateX(-50%) translateY(0) !important;
+      }
+
+      .recent-more-dropdown .action-dropdown-item {
+        white-space: nowrap;
       }
 
       .recent-bulk-controls {
@@ -3326,6 +3349,18 @@
 
       .recent-mobile-toggle {
         width: auto;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .recent-more-dropdown.open .action-dropdown-menu {
+        transform: translateX(-70%) translateY(0) !important;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .recent-more-dropdown.open .action-dropdown-menu {
+        transform: translateX(-70%) translateY(0) !important;
       }
     }
 
