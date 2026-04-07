@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
 const { sendPasswordRecoveryEmail } = require("../utils/mailer");
+const { getUsageSnapshot, resolveUserFromRequest } = require("../utils/usage");
 
 const router = express.Router();
 
@@ -134,7 +135,8 @@ router.get("/me", authMiddleware, async (req, res) => {
         id: String(user._id),
         name: user.name,
         email: user.email,
-        subscribed: !!user.subscribed
+        subscribed: !!user.subscribed,
+        usage: getUsageSnapshot(user)
       }
     });
   } catch (error) {
@@ -142,7 +144,22 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/forgot-password", async (req, res) => {
+
+router.get("/usage/monthly", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUserFromRequest(req);
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.json({
+      ok: true,
+      usage: getUsageSnapshot(user)
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to fetch usage." });
+  }
+});router.post("/forgot-password", async (req, res) => {
   try {
     const email = String(req.body.email || "").trim().toLowerCase();
 
@@ -219,3 +236,4 @@ router.post("/reset-password", async (req, res) => {
 });
 
 module.exports = router;
+

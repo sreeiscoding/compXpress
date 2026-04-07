@@ -4,11 +4,12 @@ Com/pass is a SaaS-style image utility app with a single-page frontend and a Nod
 
 Core capabilities:
 - Image compression (quality-balanced canvas pipeline)
-- Passport photo generation (remove.bg + passport canvas framing)
+- Passport photo generation (remove.bg + country-specific size presets + face-position guides)
 - Authentication (signup/signin/JWT + forgot/reset password)
 - Subscription billing flow (UPI, Razorpay, Stripe UI flow)
 - User-scoped asset history in MongoDB with grouped workflow records
 - Pro batch upload and processing (5-75 images) with single ZIP download
+- Print-ready passport PDF export (4/6/8 photos per sheet)
 
 ## Current Stack
 
@@ -142,12 +143,14 @@ Auth:
 - `POST /api/signup`
 - `POST /api/login`
 - `GET /api/me`
+- `GET /api/usage/monthly`
 - `POST /api/forgot-password`
 - `POST /api/reset-password`
 
 Image processing:
 - `POST /api/remove-bg` (protected)
 - `POST /api/process-passport` (protected)
+- `POST /api/passport/print-pdf` (protected)
 - `POST /api/batch/process-zip` (protected, Pro only)
 
 Asset persistence:
@@ -173,6 +176,7 @@ Authorization: Bearer <jwt_token>
 ## Current User Workflow
 
 1. User opens app (`index.html`) and can use free flow up to 5 uploads in a batch.
+- Free tier monthly usage counter is shown in Upload and Pricing sections (10/month, includes remove.bg calls).
 2. User uploads images (drag/drop or picker, multi-select max 5 for free flow, up to 75 for Pro).
 3. User compresses image(s):
 - Compression runs in browser.

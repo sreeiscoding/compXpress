@@ -2308,6 +2308,50 @@
       display: none;
     }
 
+    .passport-guide-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: none;
+      z-index: 2;
+    }
+
+    .preview-shell.passport.has-image .passport-guide-overlay {
+      display: block;
+    }
+
+    .passport-guide-band {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: var(--head-min-top, 25%);
+      bottom: var(--head-max-bottom, 31%);
+      border: 1px dashed rgba(191, 219, 254, 0.85);
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.5);
+    }
+
+    .passport-guide-meta {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .passport-guide-pill {
+      font-family: var(--font-secondary);
+      font-size: 0.68rem;
+      color: #dbeafe;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      border-radius: 999px;
+      padding: 3px 8px;
+      line-height: 1.2;
+    }
     .actions {
       margin-top: 20px;
       display: grid;
@@ -2498,6 +2542,14 @@
       color: #eff6ff;
     }
 
+    #printSheetToggle {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #printSheetToggle .download-format-btn {
+      font-size: 0.7rem;
+      padding: 8px 6px;
+    }
     .btn-reset {
       min-width: 48px;
       padding: 12px 0;
@@ -3070,8 +3122,10 @@
       }
 
       #passportSourceDropdown,
+      #passportCountryDropdown,
       .bg-color-toggle,
-      .download-format-toggle {
+      .download-format-toggle,
+      #printSheetToggle {
         width: 100%;
       }
 
@@ -3513,7 +3567,8 @@
                   <p id="fileNameText" class="file-name">No file selected</p>
                   <button id="clearFileBtn" class="file-clear" type="button" disabled>Clear</button>
                 </div>
-                <p class="file-limit-note">Free plan: up to 5 images. Pro batch workflow: 5-75 images at once.</p>
+                <p class="file-limit-note">Free plan upload limit: up to 5 images at once. Pro: up to 75 at once.</p>
+                <p id="freeTierUsageUpload" class="file-limit-note">Free monthly usage: 0/10 images used this month (includes remove.bg calls).</p>
                 <div id="fileQueue" class="file-queue" aria-live="polite"></div>
               </div>
               <div id="uploadPreviewWrap" class="upload-preview-wrap">
@@ -3555,6 +3610,13 @@
                 <h4>Passport Photo</h4>
                 <div id="passportPreviewShell" class="preview-shell passport">
                   <img id="passportPreview" class="preview-media" alt="Passport Photo Preview" />
+                  <div id="passportGuideOverlay" class="passport-guide-overlay" aria-hidden="true">
+                    <div class="passport-guide-band"></div>
+                    <div class="passport-guide-meta">
+                      <span id="passportGuideSize" class="passport-guide-pill">Size: 51x51 mm</span>
+                      <span id="passportGuideHead" class="passport-guide-pill">Head: 50-69%</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3586,6 +3648,13 @@
                   </li>
                 </ul>
               </div>
+              <div id="passportCountryDropdown" class="action-dropdown">
+                <button id="passportCountryToggle" class="action-dropdown-toggle" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="passportCountryMenu">
+                  <span id="passportCountryLabel">Preset: USA (51x51 mm)</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <ul id="passportCountryMenu" class="action-dropdown-menu" role="listbox" aria-label="Passport country preset selection"></ul>
+              </div>
               <div id="passportBgToggle" class="bg-color-toggle" role="group" aria-label="Passport background color">
                 <button id="passportBgWhiteBtn" class="bg-color-btn active" type="button" data-bg="white"><i class="fa-solid fa-circle"></i>White</button>
                 <button id="passportBgBlueBtn" class="bg-color-btn" type="button" data-bg="blue"><i class="fa-solid fa-circle"></i>Blue</button>
@@ -3596,6 +3665,12 @@
               </div>
               <button id="downloadCompressedBtn" class="btn" disabled><i class="fa-solid fa-download"></i>Download Compressed</button>
               <button id="downloadPassportBtn" class="btn" disabled><i class="fa-solid fa-file-arrow-down"></i>Download Passport</button>
+              <div id="printSheetToggle" class="download-format-toggle" role="group" aria-label="Print sheet copies">
+                <button class="download-format-btn active" type="button" data-copies="4">4/Sheet</button>
+                <button class="download-format-btn" type="button" data-copies="6">6/Sheet</button>
+                <button class="download-format-btn" type="button" data-copies="8">8/Sheet</button>
+              </div>
+              <button id="downloadPrintPdfBtn" class="btn" type="button" disabled><i class="fa-solid fa-file-pdf"></i>Download Print PDF</button>
               <button id="resetRegenerateBtn" class="btn btn-reset" type="button" title="Reset and regenerate once" aria-label="Reset and regenerate once" disabled><i class="fa-solid fa-rotate-right"></i></button>
               <button id="batchProcessBtn" class="btn" type="button" disabled><i class="fa-solid fa-layer-group"></i>Batch Process + ZIP (Pro)</button>
             </div>
@@ -3632,7 +3707,8 @@
             <h3 class="pricing-plan">Free</h3>
             <p class="pricing-price">$0 / month</p>
             <ul class="pricing-list">
-              <li>Upload up to 5 images without login</li>
+              <li>Upload up to 5 images at once (Free)</li>
+              <li id="freeTierUsagePricing">Free monthly usage: 0/10 images used this month (includes remove.bg calls)</li>
               <li>Image compression and passport generation</li>
               <li>Local processing in browser</li>
             </ul>
@@ -3774,6 +3850,8 @@
     const pricingUpgradeBtn = document.getElementById("pricingUpgradeBtn");
     const recentCompressedList = document.getElementById("recentCompressedList");
     const recentReloadBtn = document.getElementById("recentReloadBtn");
+    const freeTierUsageUploadEl = document.getElementById("freeTierUsageUpload");
+    const freeTierUsagePricingEl = document.getElementById("freeTierUsagePricing");
 
     const uploadPreviewWrap = document.getElementById("uploadPreviewWrap");
     const uploadPreviewGrid = document.getElementById("uploadPreviewGrid");
@@ -3793,6 +3871,12 @@
     const passportSourceToggle = document.getElementById("passportSourceToggle");
     const passportSourceLabel = document.getElementById("passportSourceLabel");
     const passportSourceMenu = document.getElementById("passportSourceMenu");
+    const passportCountryDropdown = document.getElementById("passportCountryDropdown");
+    const passportCountryToggle = document.getElementById("passportCountryToggle");
+    const passportCountryLabel = document.getElementById("passportCountryLabel");
+    const passportCountryMenu = document.getElementById("passportCountryMenu");
+    const passportGuideSize = document.getElementById("passportGuideSize");
+    const passportGuideHead = document.getElementById("passportGuideHead");
     const passportBgToggle = document.getElementById("passportBgToggle");
     const passportBgWhiteBtn = document.getElementById("passportBgWhiteBtn");
     const passportBgBlueBtn = document.getElementById("passportBgBlueBtn");
@@ -3823,9 +3907,12 @@
     let isBillingPageOpen = false;
     let isMobileMenuOpen = false;
     let isPassportSourceMenuOpen = false;
+    let isPassportCountryMenuOpen = false;
     let passportSource = "compressed";
     let passportBgColor = "white";
     let selectedDownloadFormat = "png";
+    let selectedCountryPreset = "usa";
+    let printSheetCopies = 4;
     let selectedBillingMethod = "stripe";
     let signedInDisplayName = "";
     let recentCompressedServerItems = [];
@@ -3837,6 +3924,7 @@
     let authMode = "signin";
     let pendingBillingCheckout = false;
     let apiReachabilityChecked = false;
+    let freeTierUsageState = { monthKey: "", used: 0, limit: 10, remaining: 10, includes: "remove.bg calls" };
     let isApiReachable = true;
     const toastTimers = new Map();
     const APP_STATE_KEY = "comxpress_session_state_v1";
@@ -3853,7 +3941,26 @@
     const FREE_UPLOAD_LIMIT = 5;
     const PRO_UPLOAD_LIMIT = 75;
     const PRO_BATCH_MIN = 5;
-
+    const FREE_MONTHLY_LIMIT = 10;
+    const LOCAL_MONTHLY_USAGE_KEY = "comxpress_free_monthly_usage_v1";
+    const PASSPORT_PRESETS = {
+      usa: { label: "USA", widthMm: 51, heightMm: 51, headMinPct: 0.50, headMaxPct: 0.69 },
+      india: { label: "India", widthMm: 51, heightMm: 51, headMinPct: 0.49, headMaxPct: 0.69 },
+      india35x45: { label: "India (35x45)", widthMm: 35, heightMm: 45, headMinPct: 0.56, headMaxPct: 0.78 },
+      uk: { label: "UK", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 },
+      canada: { label: "Canada", widthMm: 50, heightMm: 70, headMinPct: 0.44, headMaxPct: 0.51 },
+      australia: { label: "Australia", widthMm: 35, heightMm: 45, headMinPct: 0.71, headMaxPct: 0.80 },
+      schengen: { label: "Schengen (EU)", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 },
+      china: { label: "China", widthMm: 33, heightMm: 48, pixelWidth: 354, pixelHeight: 472, headMinPct: 0.64, headMaxPct: 0.74 },
+      japan: { label: "Japan", widthMm: 35, heightMm: 45, headMinPct: 0.64, headMaxPct: 0.74 },
+      japanVisa: { label: "Japan Visa", widthMm: 45, heightMm: 45, headMinPct: 0.56, headMaxPct: 0.68 },
+      uae: { label: "UAE / Dubai", widthMm: 40, heightMm: 60, headMinPct: 0.60, headMaxPct: 0.72 },
+      uaeAlt: { label: "UAE Alt", widthMm: 43, heightMm: 55, headMinPct: 0.60, headMaxPct: 0.72 },
+      singapore: { label: "Singapore", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 },
+      russia: { label: "Russia", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 },
+      france: { label: "France", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 },
+      germany: { label: "Germany", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 }
+    };
     function resolveApiBaseUrl() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -4762,6 +4869,52 @@
       }
     }
 
+    async function downloadPrintReadyPdf() {
+      const authToken = getAuthToken();
+      if (!authToken) {
+        setStatus("Sign in to generate print-ready PDF.");
+        setAuthPageState(true);
+        return;
+      }
+      if (!passportBlob) {
+        setStatus("Generate passport photo first.");
+        return;
+      }
+
+      startActionLoader("Preparing print-ready PDF...");
+      try {
+        const formData = new FormData();
+        const fileExt = selectedDownloadFormat === "jpg" ? "jpg" : "png";
+        const mime = selectedDownloadFormat === "jpg" ? "image/jpeg" : "image/png";
+        const pdfSource = new File([passportBlob], `passport-photo.${fileExt}`, { type: mime });
+        formData.append("image", pdfSource, pdfSource.name);
+        formData.append("copies", String(printSheetCopies));
+
+        const { response } = await fetchWithAuthFallback(buildEndpointCandidates("/passport/print-pdf"), authToken, {
+          method: "POST",
+          body: formData
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.details || data.error || "Could not generate print-ready PDF.");
+        }
+
+        const blob = await response.blob();
+        const fileName = getDownloadFilenameFromHeaders(response, `passport-sheet-${printSheetCopies}.pdf`);
+        const ok = downloadBlob(blob, fileName);
+        if (!ok) {
+          throw new Error("PDF download failed.");
+        }
+        addNotification("Download Complete", `Print-ready PDF (${printSheetCopies}/sheet) downloaded.`);
+        setStatus(`Print-ready PDF downloaded (${printSheetCopies} photos per sheet).`);
+      } catch (error) {
+        setStatus(error.message || "Failed to download print-ready PDF.");
+      } finally {
+        stopActionLoader();
+      }
+    }
+
     async function blobToDataUrl(blob) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -5112,6 +5265,96 @@
       return String(value || "").trim().toLowerCase();
     }
 
+    function getUsageMonthKey(date = new Date()) {
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+      return `${year}-${month}`;
+    }
+
+    function readLocalMonthlyUsage() {
+      const monthKey = getUsageMonthKey();
+      try {
+        const raw = localStorage.getItem(LOCAL_MONTHLY_USAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : null;
+        if (!parsed || parsed.monthKey !== monthKey) {
+          return { monthKey, used: 0, limit: FREE_MONTHLY_LIMIT, remaining: FREE_MONTHLY_LIMIT, includes: "remove.bg calls" };
+        }
+        const used = Math.max(0, Number(parsed.used || 0));
+        const remaining = Math.max(0, FREE_MONTHLY_LIMIT - used);
+        return { monthKey, used, limit: FREE_MONTHLY_LIMIT, remaining, includes: "remove.bg calls" };
+      } catch (error) {
+        return { monthKey, used: 0, limit: FREE_MONTHLY_LIMIT, remaining: FREE_MONTHLY_LIMIT, includes: "remove.bg calls" };
+      }
+    }
+
+    function writeLocalMonthlyUsage(usage) {
+      try {
+        localStorage.setItem(LOCAL_MONTHLY_USAGE_KEY, JSON.stringify({
+          monthKey: String(usage.monthKey || getUsageMonthKey()),
+          used: Math.max(0, Number(usage.used || 0))
+        }));
+      } catch (error) {
+      }
+    }
+
+    function updateFreeTierUsageUI() {
+      const usage = freeTierUsageState || { used: 0, limit: FREE_MONTHLY_LIMIT, includes: "remove.bg calls" };
+      const used = Math.max(0, Number(usage.used || 0));
+      const limit = usage.limit === null ? null : (Number.isFinite(Number(usage.limit)) ? Number(usage.limit) : FREE_MONTHLY_LIMIT);
+      const includes = String(usage.includes || "remove.bg calls");
+      const freeText = `Free monthly usage: ${used}/${FREE_MONTHLY_LIMIT} images used this month (includes ${includes}).`;
+      const proText = `Pro usage: ${used} image operations this month (includes ${includes}). Unlimited on Pro.`;
+
+      if (freeTierUsageUploadEl) {
+        if (!isSignedIn) {
+          freeTierUsageUploadEl.textContent = `${freeText} Sign in to sync usage across devices.`;
+        } else {
+          freeTierUsageUploadEl.textContent = limit === null ? proText : freeText;
+        }
+      }
+      if (freeTierUsagePricingEl) {
+        if (!isSignedIn) {
+          freeTierUsagePricingEl.textContent = `Free monthly usage cap: ${FREE_MONTHLY_LIMIT} images/month (includes ${includes}). Sign in to track usage.`;
+        } else {
+          freeTierUsagePricingEl.textContent = limit === null ? proText : freeText;
+        }
+      }
+    }
+
+    async function refreshFreeTierUsage() {
+      const authToken = getAuthToken();
+      if (!authToken || !isSignedIn) {
+        freeTierUsageState = readLocalMonthlyUsage();
+        updateFreeTierUsageUI();
+        return;
+      }
+
+      try {
+        const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates("/usage/monthly"), {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error(data.error || "Could not fetch monthly usage.");
+        }
+        const usage = data && data.usage ? data.usage : {};
+        const isUnlimited = usage.limit === null;
+        const used = Math.max(0, Number(usage.used || 0));
+        freeTierUsageState = {
+          monthKey: String(usage.monthKey || getUsageMonthKey()),
+          used,
+          limit: isUnlimited ? null : (Number.isFinite(Number(usage.limit)) ? Number(usage.limit) : FREE_MONTHLY_LIMIT),
+          remaining: isUnlimited ? null : (Number.isFinite(Number(usage.remaining)) ? Number(usage.remaining) : Math.max(0, FREE_MONTHLY_LIMIT - used)),
+          includes: String(usage.includes || "remove.bg calls")
+        };
+      } catch (error) {
+        freeTierUsageState = readLocalMonthlyUsage();
+      }
+      updateFreeTierUsageUI();
+    }
+
     function getSelectionLimit() {
       return isSubscribed ? PRO_UPLOAD_LIMIT : FREE_UPLOAD_LIMIT;
     }
@@ -5301,6 +5544,7 @@
 
     function initializeSubscriptionState() {
       updatePricingState();
+      refreshFreeTierUsage();
     }
 
     async function syncAuthFromBackend() {
@@ -5311,6 +5555,7 @@
         signedInDisplayName = "";
         updateAuthUI();
         updatePricingState();
+        await refreshFreeTierUsage();
         return false;
       }
       try {
@@ -5324,8 +5569,20 @@
         isSubscribed = !!user.subscribed;
         signedInDisplayName = name;
         sessionStorage.setItem(AUTH_SESSION_KEY, "1");
+        if (user.usage && typeof user.usage === "object") {
+          const profileUnlimited = user.usage.limit === null;
+          const profileUsed = Math.max(0, Number(user.usage.used || 0));
+          freeTierUsageState = {
+            monthKey: String(user.usage.monthKey || getUsageMonthKey()),
+            used: profileUsed,
+            limit: profileUnlimited ? null : (Number.isFinite(Number(user.usage.limit)) ? Number(user.usage.limit) : FREE_MONTHLY_LIMIT),
+            remaining: profileUnlimited ? null : (Number.isFinite(Number(user.usage.remaining)) ? Number(user.usage.remaining) : Math.max(0, FREE_MONTHLY_LIMIT - profileUsed)),
+            includes: String(user.usage.includes || "remove.bg calls")
+          };
+        }
         updateAuthUI();
         updatePricingState();
+        await refreshFreeTierUsage();
         return true;
       } catch (error) {
         setAuthToken("");
@@ -5335,6 +5592,7 @@
         sessionStorage.removeItem(AUTH_SESSION_KEY);
         updateAuthUI();
         updatePricingState();
+        await refreshFreeTierUsage();
         return false;
       }
     }
@@ -5368,6 +5626,7 @@
       }
       updateAuthUI();
       updatePricingState();
+      refreshFreeTierUsage();
       fetchRecentCompressedFromBackend();
       if (getAuthToken()) {
         syncAuthFromBackend().then(() => {
@@ -6070,6 +6329,77 @@
       return `${clean}.${ext}`;
     }
 
+    function mmToPx(mm, dpi = 300) {
+      return Math.max(1, Math.round((Number(mm || 0) / 25.4) * dpi));
+    }
+
+    function getCurrentPassportPreset() {
+      return PASSPORT_PRESETS[selectedCountryPreset] || PASSPORT_PRESETS.usa;
+    }
+
+    function renderPassportCountryMenu() {
+      if (!passportCountryMenu) return;
+      passportCountryMenu.innerHTML = "";
+      const entries = Object.entries(PASSPORT_PRESETS);
+      for (const [key, preset] of entries) {
+        const li = document.createElement("li");
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "action-dropdown-item" + (selectedCountryPreset === key ? " active" : "");
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", String(selectedCountryPreset === key));
+        option.dataset.value = key;
+        option.innerHTML = `<span>${preset.label} (${preset.widthMm}x${preset.heightMm} mm)</span><i class="fa-solid fa-check check"></i>`;
+        li.appendChild(option);
+        passportCountryMenu.appendChild(li);
+      }
+    }
+
+    function setPassportCountryMenuState(open) {
+      isPassportCountryMenuOpen = !!open;
+      passportCountryDropdown.classList.toggle("open", isPassportCountryMenuOpen);
+      passportCountryToggle.setAttribute("aria-expanded", String(isPassportCountryMenuOpen));
+    }
+
+    function setPassportCountryPreset(value, announce = true) {
+      selectedCountryPreset = PASSPORT_PRESETS[value] ? value : "usa";
+      const preset = getCurrentPassportPreset();
+      if (passportCountryLabel) {
+        passportCountryLabel.textContent = `Preset: ${preset.label} (${preset.widthMm}x${preset.heightMm} mm)`;
+      }
+      if (passportGuideSize) {
+        const pxText = preset.pixelWidth && preset.pixelHeight
+          ? ` | ${preset.pixelWidth}x${preset.pixelHeight}px`
+          : "";
+        passportGuideSize.textContent = `Size: ${preset.widthMm}x${preset.heightMm} mm${pxText}`;
+      }
+      if (passportGuideHead) {
+        passportGuideHead.textContent = `Head: ${Math.round(preset.headMinPct * 100)}-${Math.round(preset.headMaxPct * 100)}%`;
+      }
+
+      const minTop = Math.max(0, (1 - preset.headMaxPct) * 100);
+      const maxBottom = Math.max(0, (1 - preset.headMinPct) * 100);
+      passportPreviewShell.style.setProperty("--head-min-top", `${minTop.toFixed(1)}%`);
+      passportPreviewShell.style.setProperty("--head-max-bottom", `${maxBottom.toFixed(1)}%`);
+
+      renderPassportCountryMenu();
+      if (announce) {
+        setStatus(`Passport preset set to ${preset.label} (${preset.widthMm}x${preset.heightMm} mm).`);
+      }
+    }
+
+    function setPrintSheetCopies(copies, announce = true) {
+      const parsed = Number(copies);
+      printSheetCopies = [4, 6, 8].includes(parsed) ? parsed : 4;
+      const buttons = printSheetToggle ? printSheetToggle.querySelectorAll(".download-format-btn") : [];
+      buttons.forEach((btn) => {
+        const isActive = Number(btn.dataset.copies) === printSheetCopies;
+        btn.classList.toggle("active", isActive);
+      });
+      if (announce) {
+        setStatus(`Print sheet set to ${printSheetCopies} passport photos per page.`);
+      }
+    }
     function setProcessingState(isProcessing) {
       const hasImage = !!getActiveUpload();
       const wantsCompressedSource = passportSource === "compressed";
@@ -6078,14 +6408,24 @@
       passportBtn.disabled = isProcessing || !hasPassportSource;
       passportSourceDropdown.classList.toggle("disabled", isProcessing || !hasImage);
       passportSourceToggle.disabled = isProcessing || !hasImage;
+      passportCountryDropdown.classList.toggle("disabled", isProcessing || !hasImage);
+      passportCountryToggle.disabled = isProcessing || !hasImage;
       passportBgToggle.style.opacity = isProcessing || !hasImage ? "0.6" : "1";
       passportBgWhiteBtn.disabled = isProcessing || !hasImage;
       passportBgBlueBtn.disabled = isProcessing || !hasImage;
       downloadFormatToggle.style.opacity = isProcessing ? "0.6" : "1";
       downloadFormatPngBtn.disabled = isProcessing;
       downloadFormatJpgBtn.disabled = isProcessing;
+      if (printSheetToggle) {
+        printSheetToggle.style.opacity = isProcessing ? "0.6" : "1";
+        const printButtons = printSheetToggle.querySelectorAll(".download-format-btn");
+        printButtons.forEach((btn) => {
+          btn.disabled = isProcessing;
+        });
+      }
       downloadCompressedBtn.disabled = isProcessing || !compressedBlob;
       downloadPassportBtn.disabled = isProcessing || !passportBlob;
+      downloadPrintPdfBtn.disabled = isProcessing || !passportBlob;
       resetRegenerateBtn.disabled = isProcessing || !compressedBlob || !hasImage;
       const canRunBatch = isSubscribed && uploadedFiles.length >= PRO_BATCH_MIN;
       batchProcessBtn.disabled = isProcessing || !canRunBatch;
@@ -6114,6 +6454,7 @@
       passportPreview.removeAttribute("src");
       passportPreviewShell.classList.remove("has-image");
       downloadPassportBtn.disabled = true;
+      downloadPrintPdfBtn.disabled = true;
 
       if (passportObjectUrl) {
         URL.revokeObjectURL(passportObjectUrl);
@@ -6360,6 +6701,7 @@
         setStatus("Compression cancelled or failed. Please try another image.");
         addNotification("Compression Cancelled", "Compression was cancelled or could not be completed.");
       } finally {
+        await refreshFreeTierUsage();
         setProcessingState(false);
         stopActionLoader();
       }
@@ -6406,9 +6748,17 @@
         }
 
         const sourceBlob = sourceType === "compressed" ? compressedBlob : originalFile;
+        const preset = getCurrentPassportPreset();
+        const targetWidthPx = preset.pixelWidth || mmToPx(preset.widthMm);
+        const targetHeightPx = preset.pixelHeight || mmToPx(preset.heightMm);
+        const headTargetPct = ((preset.headMinPct + preset.headMaxPct) / 2).toFixed(3);
         const formData = new FormData();
         formData.append("image", sourceBlob, sourceType === "compressed" ? "compressed-source.png" : (originalFile.name || "original-source.png"));
         formData.append("bgColor", passportBgColor);
+        formData.append("targetWidthPx", String(targetWidthPx));
+        formData.append("targetHeightPx", String(targetHeightPx));
+        formData.append("headTargetPct", String(headTargetPct));
+        formData.append("outputFormat", selectedDownloadFormat === "jpg" ? "jpg" : "png");
 
         const { response } = await fetchWithAuthFallback(buildEndpointCandidates("/process-passport"), authToken, {
           method: "POST",
@@ -6440,13 +6790,14 @@
         }
 
         try {
+          const passportExt = selectedDownloadFormat === "jpg" ? "jpg" : "png";
           await storeImageAssetToBackend("passport", passportBlob, {
-            filename: withDownloadExt("passport-photo", "png"),
-            originalName: "passport-photo.png",
+            filename: withDownloadExt("passport-photo", passportExt),
+            originalName: withDownloadExt("passport-photo", passportExt),
             sourceType,
             bgColor: passportBgColor,
             workflowId: String(activeFileId || ""),
-            ext: "png"
+            ext: passportExt
           });
         } catch (assetError) {
           const saveMsg = String(assetError && assetError.message ? assetError.message : "Passport image generated, but database save failed.");
@@ -6454,7 +6805,7 @@
           setStatus(saveMsg);
         }
 
-        setStatus(`Passport photo generated from ${sourceType} image with ${passportBgColor} background.`);
+        setStatus(`Passport photo generated for ${getCurrentPassportPreset().label} from ${sourceType} image with ${passportBgColor} background.`);
         addNotification("Passport Generated", `Passport PNG is ready from ${sourceType} source.`);
       } catch (error) {
         const state = readAppState();
@@ -6465,6 +6816,7 @@
         setStatus(error.message || "Passport generation failed. Please try another image.");
         addNotification("Passport Generation Failed", "Could not generate passport photo. Please try again.");
       } finally {
+        await refreshFreeTierUsage();
         setProcessingState(false);
         stopActionLoader();
       }
@@ -6533,6 +6885,8 @@
       updateAuthUI();
       updatePricingState();
       signedInDisplayName = "";
+      freeTierUsageState = readLocalMonthlyUsage();
+      updateFreeTierUsageUI();
       writeRecentCompressed([]);
       setAuthToken("");
       sessionStorage.removeItem(AUTH_SESSION_KEY);
@@ -6984,6 +7338,9 @@
       if (isPassportSourceMenuOpen && !passportSourceDropdown.contains(e.target)) {
         setPassportSourceMenuState(false);
       }
+      if (isPassportCountryMenuOpen && !passportCountryDropdown.contains(e.target)) {
+        setPassportCountryMenuState(false);
+      }
       if (upgradeModal.classList.contains("open") && !e.target.closest("#upgradeModal .modal-card")) {
         setUpgradeModalState(false);
       }
@@ -7040,6 +7397,10 @@
         }
         if (isPassportSourceMenuOpen) {
           setPassportSourceMenuState(false);
+          return;
+        }
+        if (isPassportCountryMenuOpen) {
+          setPassportCountryMenuState(false);
           return;
         }
         if (authPage.classList.contains("open")) {
@@ -7136,6 +7497,21 @@
       setPassportSourceMenuState(false);
     });
 
+    passportCountryToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (passportCountryToggle.disabled) return;
+      setPassportCountryMenuState(!isPassportCountryMenuOpen);
+    });
+
+    passportCountryMenu.addEventListener("click", (e) => {
+      const optionBtn = e.target.closest(".action-dropdown-item");
+      if (!optionBtn) return;
+      const value = optionBtn.dataset.value;
+      if (!value) return;
+      setPassportCountryPreset(value, true);
+      setPassportCountryMenuState(false);
+    });
+
     passportBgToggle.addEventListener("click", (e) => {
       const bgBtn = e.target.closest(".bg-color-btn");
       if (!bgBtn || bgBtn.disabled) return;
@@ -7148,6 +7524,13 @@
       if (!formatBtn || formatBtn.disabled) return;
       const format = formatBtn.dataset.format;
       setDownloadFormat(format, true);
+    });
+
+    printSheetToggle.addEventListener("click", (e) => {
+      const copiesBtn = e.target.closest(".download-format-btn");
+      if (!copiesBtn || copiesBtn.disabled) return;
+      const copies = Number(copiesBtn.dataset.copies || 4);
+      setPrintSheetCopies(copies, true);
     });
 
     downloadCompressedBtn.addEventListener("click", async () => {
@@ -7180,12 +7563,17 @@
       }
     });
 
+    downloadPrintPdfBtn.addEventListener("click", downloadPrintReadyPdf);
+
     initializeTheme();
     initializeAuthState();
     initializeSubscriptionState();
     setPassportSource("compressed", false);
+    renderPassportCountryMenu();
+    setPassportCountryPreset("usa", false);
     setPassportBgColor("white", false);
     setDownloadFormat("png", false);
+    setPrintSheetCopies(4, false);
     setBillingMethod("stripe");
     restoreBillingPageState();
     renderFileQueue();
@@ -7208,6 +7596,37 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

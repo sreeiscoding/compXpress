@@ -29,6 +29,14 @@ const userSchema = new mongoose.Schema(
     passwordResetExpiresAt: {
       type: Date,
       default: null
+    },
+    usageMonthKey: {
+      type: String,
+      default: ""
+    },
+    usageCount: {
+      type: Number,
+      default: 0
     }
   },
   {
@@ -37,3 +45,4 @@ const userSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("User", userSchema);
+

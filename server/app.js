@@ -32,10 +32,12 @@ app.get("/", (_req, res) => {
       "POST /api/signup",
       "POST /api/login",
       "GET /api/me",
+      "GET /api/usage/monthly",
       "POST /api/forgot-password",
       "POST /api/reset-password",
       "POST /api/remove-bg",
       "POST /api/process-passport",
+      "POST /api/passport/print-pdf",
       "POST /api/assets/compressed",
       "POST /api/assets/passport",
       "POST /api/batch/process-zip",
@@ -172,4 +174,6 @@ app.use((error, _req, res, _next) => {
 });
 
 module.exports = app;
+
+
 
