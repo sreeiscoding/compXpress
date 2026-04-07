@@ -2642,8 +2642,15 @@
 
     .recent-tools {
       display: grid;
-      grid-template-columns: minmax(220px, 0.9fr) minmax(180px, 0.8fr) repeat(3, auto);
+      grid-template-columns: minmax(220px, 0.9fr) minmax(280px, 0.9fr) auto;
       gap: 12px;
+      align-items: center;
+    }
+
+    .recent-filter-actions {
+      display: grid;
+      grid-template-columns: minmax(170px, 1fr) auto;
+      gap: 8px;
       align-items: center;
     }
 
@@ -2697,6 +2704,37 @@
       padding-top: 8px;
       padding-bottom: 8px;
       font-size: 0.76rem;
+    }
+
+    .recent-more-dropdown {
+      display: none;
+    }
+
+    .recent-more-dropdown .action-dropdown-toggle {
+      min-height: 36px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      font-size: 0.76rem;
+      min-width: 40px;
+      width: 40px;
+      padding-left: 0;
+      padding-right: 0;
+      justify-content: center;
+    }
+
+    .recent-more-dropdown .action-dropdown-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    .recent-bulk-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      justify-self: end;
+      flex-wrap: wrap;
     }
     .recent-file-layout {
       display: grid;
@@ -3266,6 +3304,18 @@
 
       .recent-tools {
         grid-template-columns: 1fr;
+      }
+
+      .recent-filter-actions {
+        grid-template-columns: 1fr auto;
+      }
+
+      .recent-more-dropdown {
+        display: block;
+      }
+
+      .recent-bulk-controls {
+        display: none;
       }
 
       .recent-mobile-menu {
@@ -3975,27 +4025,41 @@
                     <i class="fa-solid fa-magnifying-glass"></i>
                   </button>
                 </div>
-                <div id="recentFilterDropdown" class="action-dropdown recent-filter-dropdown">
-                  <button id="recentFilterToggle" class="action-dropdown-toggle" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="recentFilterMenu">
-                    <span id="recentFilterLabel">Filter: All Types</span>
-                    <i class="fa-solid fa-chevron-down"></i>
-                  </button>
-                  <ul id="recentFilterMenu" class="action-dropdown-menu" role="listbox" aria-label="Filter recent files">
-                    <li><button class="action-dropdown-item active" type="button" role="option" data-filter="all" aria-selected="true"><span>All Types</span><i class="fa-solid fa-check check"></i></button></li>
-                    <li><button class="action-dropdown-item" type="button" role="option" data-filter="compressed" aria-selected="false"><span>Compressed</span><i class="fa-solid fa-check check"></i></button></li>
-                    <li><button class="action-dropdown-item" type="button" role="option" data-filter="passport" aria-selected="false"><span>Passport</span><i class="fa-solid fa-check check"></i></button></li>
-                    <li><button class="action-dropdown-item" type="button" role="option" data-filter="removebg" aria-selected="false"><span>Bg removal AI used</span><i class="fa-solid fa-check check"></i></button></li>
-                  </ul>
+                <div class="recent-filter-actions">
+                  <div id="recentFilterDropdown" class="action-dropdown recent-filter-dropdown">
+                    <button id="recentFilterToggle" class="action-dropdown-toggle" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="recentFilterMenu">
+                      <span id="recentFilterLabel">Filter: All Types</span>
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <ul id="recentFilterMenu" class="action-dropdown-menu" role="listbox" aria-label="Filter recent files">
+                      <li><button class="action-dropdown-item active" type="button" role="option" data-filter="all" aria-selected="true"><span>All Types</span><i class="fa-solid fa-check check"></i></button></li>
+                      <li><button class="action-dropdown-item" type="button" role="option" data-filter="compressed" aria-selected="false"><span>Compressed</span><i class="fa-solid fa-check check"></i></button></li>
+                      <li><button class="action-dropdown-item" type="button" role="option" data-filter="passport" aria-selected="false"><span>Passport</span><i class="fa-solid fa-check check"></i></button></li>
+                      <li><button class="action-dropdown-item" type="button" role="option" data-filter="removebg" aria-selected="false"><span>Bg removal AI used</span><i class="fa-solid fa-check check"></i></button></li>
+                    </ul>
+                  </div>
+                  <div id="recentMoreDropdown" class="action-dropdown recent-more-dropdown">
+                    <button id="recentMoreToggle" class="action-dropdown-toggle" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="recentMoreMenu">
+                      <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <ul id="recentMoreMenu" class="action-dropdown-menu" role="menu" aria-label="More recent tools">
+                      <li><button class="action-dropdown-item" type="button" role="menuitem" data-action="select-all"><i class="fa-regular fa-square-check"></i><span>Select All</span></button></li>
+                      <li><button class="action-dropdown-item" type="button" role="menuitem" data-action="clear"><i class="fa-regular fa-square"></i><span>Clear</span></button></li>
+                      <li><button class="action-dropdown-item" type="button" role="menuitem" data-action="delete-selected"><i class="fa-regular fa-trash-can"></i><span>Delete Selected</span></button></li>
+                    </ul>
+                  </div>
                 </div>
-                <div id="recentSelectAllBtn" class="recent-btn recent-check-control" role="button" tabindex="0" aria-label="Select all recent files">
-                  <input id="recentSelectAllCheckbox" class="recent-btn-checkbox" type="checkbox" aria-label="Select all recent files" />
-                  <span>Select All</span>
+                <div class="recent-bulk-controls">
+                  <div id="recentSelectAllBtn" class="recent-btn recent-check-control" role="button" tabindex="0" aria-label="Select all recent files">
+                    <input id="recentSelectAllCheckbox" class="recent-btn-checkbox" type="checkbox" aria-label="Select all recent files" />
+                    <span>Select All</span>
+                  </div>
+                  <div id="recentClearSelectionBtn" class="recent-btn recent-check-control" role="button" tabindex="0" aria-label="Clear selected recent files">
+                    <input id="recentClearSelectionCheckbox" class="recent-btn-checkbox" type="checkbox" aria-label="Clear selected recent files" />
+                    <span>Clear</span>
+                  </div>
+                  <button id="recentDeleteSelectedBtn" class="recent-btn delete" type="button"><i class="fa-regular fa-trash-can"></i>Delete Selected</button>
                 </div>
-                <div id="recentClearSelectionBtn" class="recent-btn recent-check-control" role="button" tabindex="0" aria-label="Clear selected recent files">
-                  <input id="recentClearSelectionCheckbox" class="recent-btn-checkbox" type="checkbox" aria-label="Clear selected recent files" />
-                  <span>Clear</span>
-                </div>
-                <button id="recentDeleteSelectedBtn" class="recent-btn delete" type="button"><i class="fa-regular fa-trash-can"></i>Delete Selected</button>
               </div>
               <ul id="recentCompressedList" class="recent-list" aria-live="polite"></ul>
             </div>
@@ -4171,6 +4235,9 @@
     const recentFilterToggle = document.getElementById("recentFilterToggle");
     const recentFilterLabel = document.getElementById("recentFilterLabel");
     const recentFilterMenu = document.getElementById("recentFilterMenu");
+    const recentMoreDropdown = document.getElementById("recentMoreDropdown");
+    const recentMoreToggle = document.getElementById("recentMoreToggle");
+    const recentMoreMenu = document.getElementById("recentMoreMenu");
     const recentSelectAllBtn = document.getElementById("recentSelectAllBtn");
     const recentSelectAllCheckbox = document.getElementById("recentSelectAllCheckbox");
     const recentClearSelectionBtn = document.getElementById("recentClearSelectionBtn");
@@ -4255,6 +4322,7 @@
     let recentSearchQuery = "";
     let recentTypeFilterValue = "all";
     let isRecentFilterMenuOpen = false;
+    let isRecentMoreMenuOpen = false;
     const recentThumbnailMap = new Map();
     let pendingBillingCheckout = false;
     let apiReachabilityChecked = false;
@@ -4661,6 +4729,12 @@
       isRecentFilterMenuOpen = !!open;
       recentFilterDropdown.classList.toggle("open", isRecentFilterMenuOpen);
       recentFilterToggle.setAttribute("aria-expanded", String(isRecentFilterMenuOpen));
+    }
+
+    function setRecentMoreMenuState(open) {
+      isRecentMoreMenuOpen = !!open;
+      recentMoreDropdown.classList.toggle("open", isRecentMoreMenuOpen);
+      recentMoreToggle.setAttribute("aria-expanded", String(isRecentMoreMenuOpen));
     }
 
     function getRecentFilterLabel(value) {
@@ -7984,6 +8058,7 @@
 
     recentFilterToggle.addEventListener("click", (e) => {
       e.stopPropagation();
+      setRecentMoreMenuState(false);
       setRecentFilterMenuState(!isRecentFilterMenuOpen);
     });
 
@@ -7999,6 +8074,28 @@
       }
       setRecentTypeFilter(value, true);
       setRecentFilterMenuState(false);
+    });
+
+    recentMoreToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setRecentFilterMenuState(false);
+      setRecentMoreMenuState(!isRecentMoreMenuOpen);
+    });
+
+    recentMoreMenu.addEventListener("click", (e) => {
+      const optionBtn = e.target.closest(".action-dropdown-item");
+      if (!optionBtn) return;
+      const action = String(optionBtn.dataset.action || "");
+      if (action === "select-all") {
+        selectAllVisibleRecentFiles();
+      } else if (action === "clear") {
+        clearVisibleRecentSelection();
+      } else if (action === "delete-selected") {
+        deleteSelectedRecentFiles().catch(() => {
+          setStatus("Could not delete selected files.");
+        });
+      }
+      setRecentMoreMenuState(false);
     });
 
     function selectAllVisibleRecentFiles() {
@@ -8017,10 +8114,12 @@
 
     recentSelectAllBtn.addEventListener("click", () => {
       selectAllVisibleRecentFiles();
+      setRecentMoreMenuState(false);
     });
 
     recentClearSelectionBtn.addEventListener("click", () => {
       clearVisibleRecentSelection();
+      setRecentMoreMenuState(false);
     });
 
     recentSelectAllCheckbox.addEventListener("click", (e) => {
@@ -8113,6 +8212,9 @@
       if (isRecentFilterMenuOpen && !recentFilterDropdown.contains(e.target)) {
         setRecentFilterMenuState(false);
       }
+      if (isRecentMoreMenuOpen && !recentMoreDropdown.contains(e.target)) {
+        setRecentMoreMenuState(false);
+      }
       if (upgradeModal.classList.contains("open") && !e.target.closest("#upgradeModal .modal-card")) {
         setUpgradeModalState(false);
       }
@@ -8180,6 +8282,10 @@
         }
         if (isRecentFilterMenuOpen) {
           setRecentFilterMenuState(false);
+          return;
+        }
+        if (isRecentMoreMenuOpen) {
+          setRecentMoreMenuState(false);
           return;
         }
         if (authPage.classList.contains("open")) {
