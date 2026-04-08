@@ -67,6 +67,30 @@ async function getAlphaBoundingBox(imageBuffer) {
   };
 }
 
+function computePassportPlacement(boxW, boxH, innerW, innerH, headTargetPct) {
+  const normalizedHeadTarget = clampNumber(headTargetPct, 0.45, 0.86, 0.68);
+  const subjectTargetPct = Math.min(0.92, Math.max(0.72, normalizedHeadTarget * 1.28));
+  const topPadding = Math.max(8, Math.round(innerH * 0.06));
+  const maxDrawHeight = Math.max(1, innerH - topPadding);
+
+  let drawH = Math.min(maxDrawHeight, Math.round(innerH * subjectTargetPct));
+  let drawW = Math.max(1, Math.round((Math.max(1, boxW) / Math.max(1, boxH)) * drawH));
+
+  if (drawW > innerW) {
+    const widthScale = innerW / drawW;
+    drawW = innerW;
+    drawH = Math.max(1, Math.round(drawH * widthScale));
+  }
+
+  const left = Math.max(0, Math.floor((innerW - drawW) / 2));
+  let top = topPadding;
+  if (top + drawH > innerH) {
+    top = Math.max(0, Math.floor((innerH - drawH) / 2));
+  }
+
+  return { drawW, drawH, left, top };
+}
+
 router.post("/remove-bg", authMiddleware, upload.single("image"), async (req, res) => {
   try {
     if (!req.file || !req.file.buffer) {
@@ -150,30 +174,33 @@ router.post("/process-passport", authMiddleware, upload.single("image"), async (
       .png()
       .toBuffer();
 
-    const alphaBox = await getAlphaBoundingBox(removed);
-    const desiredHeadPx = Math.round(targetH * headTargetPct);
-    const sourceHeadPx = Math.max(1, alphaBox.height);
-    const scaleFromHead = desiredHeadPx / sourceHeadPx;
-
     const sourceMeta = await sharp(removed).metadata();
-    const baseWidth = Number(sourceMeta.width || innerW);
-    const baseHeight = Number(sourceMeta.height || innerH);
-    const maxScaleFit = Math.min(innerW / Math.max(1, baseWidth), innerH / Math.max(1, baseHeight));
-    const finalScale = Math.max(0.2, Math.min(scaleFromHead, maxScaleFit));
+    const sourceWidth = Number(sourceMeta.width || innerW);
+    const sourceHeight = Number(sourceMeta.height || innerH);
+    const alphaBox = await getAlphaBoundingBox(removed);
+    const cropBox = {
+      left: Math.max(0, Math.min(sourceWidth - 1, alphaBox.x)),
+      top: Math.max(0, Math.min(sourceHeight - 1, alphaBox.y)),
+      width: Math.max(1, Math.min(sourceWidth, alphaBox.width || sourceWidth)),
+      height: Math.max(1, Math.min(sourceHeight, alphaBox.height || sourceHeight))
+    };
+    const placement = computePassportPlacement(cropBox.width, cropBox.height, innerW, innerH, headTargetPct);
 
-    const drawW = Math.max(1, Math.round(baseWidth * finalScale));
-    const drawH = Math.max(1, Math.round(baseHeight * finalScale));
+    const foregroundSource = await sharp(removed)
+      .extract(cropBox)
+      .png()
+      .toBuffer();
 
-    const foreground = await sharp(removed)
-      .resize(drawW, drawH, {
-        fit: "contain",
+    const foreground = await sharp(foregroundSource)
+      .resize(placement.drawW, placement.drawH, {
+        fit: "fill",
         background: { r: 0, g: 0, b: 0, alpha: 0 }
       })
       .png()
       .toBuffer();
 
-    const left = margin + Math.max(0, Math.floor((innerW - drawW) / 2));
-    const top = margin + Math.max(0, Math.floor((innerH - drawH) / 2));
+    const left = margin + placement.left;
+    const top = margin + placement.top;
 
     let output = sharp({
       create: {

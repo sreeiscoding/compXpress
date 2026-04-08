@@ -1130,6 +1130,16 @@
       background: rgba(30, 64, 175, 0.35);
     }
 
+    .upi-open-mobile-only {
+      display: none !important;
+    }
+
+    @media (max-width: 820px) {
+      .upi-open-mobile-only {
+        display: inline-flex !important;
+      }
+    }
+
     .upi-qr-wrap {
       display: none;
       gap: 8px;
@@ -4059,7 +4069,7 @@
             </div>
             <div class="upi-actions">
               <button id="showUpiQrBtn" class="upi-btn" type="button"><i class="fa-solid fa-qrcode"></i>Show UPI QR</button>
-              <button id="openUpiAppBtn" class="upi-btn" type="button"><i class="fa-solid fa-mobile-screen-button"></i>Open UPI App</button>
+              <button id="openUpiAppBtn" class="upi-btn upi-open-mobile-only" type="button"><i class="fa-solid fa-mobile-screen-button"></i>Open UPI App</button>
             </div>
             <div id="upiQrWrap" class="upi-qr-wrap" aria-live="polite">
               <img id="upiQrImage" class="upi-qr-image" alt="UPI QR Code" />
@@ -4122,7 +4132,7 @@
       <span class="label">Com/pass Utility</span>
       <h1>Compress Images & Create Passport Photos Instantly</h1>
       <p class="subtitle">
-        Compress images and generate passport-ready photos in secondsâ€”simple, fast, and built for real-world applications.
+        Compress images and generate passport-ready photos in seconds - simple, fast, and built for real-world applications.
       </p>
       <button id="getStartedBtn" class="btn btn-cta"><i class="fa-solid fa-arrow-right cta-icon"></i>Get Started</button>
     </section>
@@ -4657,6 +4667,9 @@
     const PRO_UPLOAD_LIMIT = 75;
     const PRO_BATCH_MIN = 5;
     const FREE_MONTHLY_LIMIT = 10;
+    const SESSION_SNAPSHOT_MAX_BYTES = 1.5 * 1024 * 1024;
+    const PASSPORT_SOURCE_MAX_DIM = 1600;
+    const PASSPORT_SOURCE_MAX_BYTES = 2.5 * 1024 * 1024;
     const LOCAL_MONTHLY_USAGE_KEY = "comxpress_free_monthly_usage_v1";
     const PASSPORT_PRESETS = {
       usa: { label: "USA", widthMm: 51, heightMm: 51, headMinPct: 0.50, headMaxPct: 0.69 },
@@ -6158,7 +6171,7 @@
         actionLoader.setAttribute("aria-hidden", "true");
         actionLoaderText.textContent = "Processing...";
         actionLoaderForceTimer = null;
-      }, 5000);
+      }, 3000);
     }
 
     function stopActionLoader() {
@@ -6200,6 +6213,27 @@
       if (method === "upi") return "UPI";
       if (method === "razorpay") return "Razorpay";
       return "Stripe";
+    }
+
+    function isMobileClient() {
+      try {
+        const ua = String(navigator.userAgent || "");
+        return /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function getUpiInstallSearchUrl() {
+      return "https://www.google.com/search?q=best+UPI+apps+play+store";
+    }
+
+    function updateUpiActionAvailability() {
+      const isUpi = selectedBillingMethod === "upi";
+      const isMobile = isMobileClient();
+      const showOpenApp = isUpi && isMobile;
+      openUpiAppBtn.hidden = !showOpenApp;
+      openUpiAppBtn.disabled = !showOpenApp;
     }
 
     function getBillingCountryConfig(code) {
@@ -6353,13 +6387,13 @@
       }
 
       if (resolved === "upi") {
-        renderUpiQr();
         billingPayBtn.innerHTML = "<i class=\"fa-solid fa-mobile-screen-button\"></i> Subscribe with UPI";
       } else if (resolved === "razorpay") {
         billingPayBtn.innerHTML = "<i class=\"fa-solid fa-bolt\"></i> Subscribe with Razorpay";
       } else {
         billingPayBtn.innerHTML = "<i class=\"fa-solid fa-credit-card\"></i> Subscribe with Stripe";
       }
+      updateUpiActionAvailability();
     }
 
     function normalizeEmail(value) {
@@ -7645,6 +7679,46 @@
       return canvasToBlob(canvas, "image/jpeg", 0.92);
     }
 
+    function shouldPersistBlobSnapshot(blob) {
+      return !!(blob && Number(blob.size || 0) > 0 && Number(blob.size || 0) <= SESSION_SNAPSHOT_MAX_BYTES);
+    }
+
+    async function optimizeBlobForPassportUpload(blob) {
+      if (!blob) return { blob, mimeType: "image/png", extension: "png" };
+      const currentSize = Number(blob.size || 0);
+      if (currentSize <= PASSPORT_SOURCE_MAX_BYTES) {
+        try {
+          const quickImage = await blobToImage(blob);
+          const w = Number(quickImage.naturalWidth || quickImage.width || 0);
+          const h = Number(quickImage.naturalHeight || quickImage.height || 0);
+          if (Math.max(w, h) <= PASSPORT_SOURCE_MAX_DIM) {
+            return {
+              blob,
+              mimeType: String(blob.type || "image/png"),
+              extension: mimeToExtension(blob.type || "image/png")
+            };
+          }
+        } catch (error) {
+        }
+      }
+
+      const image = await blobToImage(blob);
+      const sourceW = Number(image.naturalWidth || image.width || PASSPORT_SOURCE_MAX_DIM);
+      const sourceH = Number(image.naturalHeight || image.height || PASSPORT_SOURCE_MAX_DIM);
+      const scale = Math.min(1, PASSPORT_SOURCE_MAX_DIM / Math.max(sourceW, sourceH));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(sourceW * scale));
+      canvas.height = Math.max(1, Math.round(sourceH * scale));
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const optimizedBlob = await canvasToBlob(canvas, "image/jpeg", 0.9);
+      return { blob: optimizedBlob, mimeType: "image/jpeg", extension: "jpg" };
+    }
+
     function handleFile(file) {
       handleIncomingFiles(file ? [file] : []);
     }
@@ -7760,11 +7834,15 @@
 
         try {
           const currentState = readAppState() || {};
-          const compressedDataUrl = await blobToDataUrl(compressedBlob);
-          currentState.compressed = {
-            size: compressedBlob.size || 0,
-            dataUrl: compressedDataUrl
-          };
+          if (shouldPersistBlobSnapshot(compressedBlob)) {
+            const compressedDataUrl = await blobToDataUrl(compressedBlob);
+            currentState.compressed = {
+              size: compressedBlob.size || 0,
+              dataUrl: compressedDataUrl
+            };
+          } else {
+            currentState.compressed = null;
+          }
           currentState.pendingTask = null;
           writeAppState(currentState);
         } catch (error) {
@@ -7776,23 +7854,25 @@
 
         const authToken = getAuthToken();
         if (authToken) {
-          try {
-            await storeImageAssetToBackend("compressed", compressedBlob, {
-              filename: withDownloadExt(originalFile.name || "compressed-image", mimeToExtension(result.mimeType)),
-              originalName: withDownloadExt(originalFile.name || "compressed-image", mimeToExtension(result.mimeType)),
-              originalSize: Number(originalFile.size || 0),
-              workflowId: String(activeFileId || ""),
-              ext: mimeToExtension(result.mimeType)
-            });
-          } catch (assetError) {
-            const saveMsg = String(assetError && assetError.message ? assetError.message : "Compressed image generated, but database save failed.");
-            addNotification("Cloud Save Failed", saveMsg);
-            setStatus(saveMsg);
-          }
+          (async () => {
+            try {
+              await storeImageAssetToBackend("compressed", compressedBlob, {
+                filename: withDownloadExt(originalFile.name || "compressed-image", mimeToExtension(result.mimeType)),
+                originalName: withDownloadExt(originalFile.name || "compressed-image", mimeToExtension(result.mimeType)),
+                originalSize: Number(originalFile.size || 0),
+                workflowId: String(activeFileId || ""),
+                ext: mimeToExtension(result.mimeType)
+              });
+            } catch (assetError) {
+              const saveMsg = String(assetError && assetError.message ? assetError.message : "Compressed image generated, but database save failed.");
+              addNotification("Cloud Save Failed", saveMsg);
+              setStatus(saveMsg);
+            }
+          })();
         }
 
         setStatus(`Compression completed (${reduction}% smaller, resolution ${Math.round(result.scale * 100)}%, quality ${Math.round((result.quality || 0.8) * 100)}%).`);
-        await addRecentCompressed(originalFile.name, compressedBlob, originalFile.size);
+        addRecentCompressed(originalFile.name, compressedBlob, originalFile.size).catch(() => {});
         addNotification("Compression Completed", `Compressed image is ready (${formatBytes(compressedBlob.size)}).`);
       } catch (error) {
         const state = readAppState();
@@ -7803,7 +7883,7 @@
         setStatus("Compression cancelled or failed. Please try another image.");
         addNotification("Compression Cancelled", "Compression was cancelled or could not be completed.");
       } finally {
-        await refreshFreeTierUsage();
+        refreshFreeTierUsage().catch(() => {});
         setProcessingState(false);
         stopActionLoader();
       }
@@ -7850,12 +7930,20 @@
         }
 
         const sourceBlob = sourceType === "compressed" ? compressedBlob : originalFile;
+        const optimizedSource = await optimizeBlobForPassportUpload(sourceBlob);
         const preset = getCurrentPassportPreset();
         const targetWidthPx = preset.pixelWidth || mmToPx(preset.widthMm);
         const targetHeightPx = preset.pixelHeight || mmToPx(preset.heightMm);
-        const headTargetPct = ((preset.headMinPct + preset.headMaxPct) / 2).toFixed(3);
+        const headTargetPct = Math.max(
+          preset.headMinPct,
+          Math.min(preset.headMaxPct, preset.headMaxPct - 0.02)
+        ).toFixed(3);
         const formData = new FormData();
-        formData.append("image", sourceBlob, sourceType === "compressed" ? "compressed-source.png" : (originalFile.name || "original-source.png"));
+        formData.append(
+          "image",
+          optimizedSource.blob,
+          sourceType === "compressed" ? `compressed-source.${optimizedSource.extension}` : `original-source.${optimizedSource.extension}`
+        );
         formData.append("bgColor", passportBgColor);
         formData.append("targetWidthPx", String(targetWidthPx));
         formData.append("targetHeightPx", String(targetHeightPx));
@@ -7881,31 +7969,37 @@
 
         try {
           const currentState = readAppState() || {};
-          const passportDataUrl = await blobToDataUrl(passportBlob);
-          currentState.passport = {
-            size: passportBlob.size || 0,
-            dataUrl: passportDataUrl
-          };
+          if (shouldPersistBlobSnapshot(passportBlob)) {
+            const passportDataUrl = await blobToDataUrl(passportBlob);
+            currentState.passport = {
+              size: passportBlob.size || 0,
+              dataUrl: passportDataUrl
+            };
+          } else {
+            currentState.passport = null;
+          }
           currentState.pendingTask = null;
           writeAppState(currentState);
         } catch (error) {
         }
 
-        try {
-          const passportExt = selectedDownloadFormat === "jpg" ? "jpg" : "png";
-          await storeImageAssetToBackend("passport", passportBlob, {
-            filename: withDownloadExt("passport-photo", passportExt),
-            originalName: withDownloadExt("passport-photo", passportExt),
-            sourceType,
-            bgColor: passportBgColor,
-            workflowId: String(activeFileId || ""),
-            ext: passportExt
-          });
-        } catch (assetError) {
-          const saveMsg = String(assetError && assetError.message ? assetError.message : "Passport image generated, but database save failed.");
-          addNotification("Cloud Save Failed", saveMsg);
-          setStatus(saveMsg);
-        }
+        (async () => {
+          try {
+            const passportExt = selectedDownloadFormat === "jpg" ? "jpg" : "png";
+            await storeImageAssetToBackend("passport", passportBlob, {
+              filename: withDownloadExt("passport-photo", passportExt),
+              originalName: withDownloadExt("passport-photo", passportExt),
+              sourceType,
+              bgColor: passportBgColor,
+              workflowId: String(activeFileId || ""),
+              ext: passportExt
+            });
+          } catch (assetError) {
+            const saveMsg = String(assetError && assetError.message ? assetError.message : "Passport image generated, but database save failed.");
+            addNotification("Cloud Save Failed", saveMsg);
+            setStatus(saveMsg);
+          }
+        })();
 
         setStatus(`Passport photo generated for ${getCurrentPassportPreset().label} from ${sourceType} image with ${passportBgColor} background.`);
         addNotification("Passport Generated", `Passport ready with AI background removal from ${sourceType} source.`);
@@ -7918,7 +8012,7 @@
         setStatus(error.message || "Passport generation failed. Please try another image.");
         addNotification("Passport Generation Failed", "Could not generate passport photo. Please try again.");
       } finally {
-        await refreshFreeTierUsage();
+        refreshFreeTierUsage().catch(() => {});
         setProcessingState(false);
         stopActionLoader();
       }
@@ -8232,7 +8326,36 @@
 
     openUpiAppBtn.addEventListener("click", () => {
       setBillingMethod("upi");
+      if (!isMobileClient()) {
+        setStatus("Open UPI App is available only on mobile devices.");
+        return;
+      }
       const upiUrl = buildUpiPaymentUrl();
+      let fallbackTriggered = false;
+      let fallbackTimer = null;
+      const cleanupFallback = () => {
+        if (fallbackTimer) {
+          clearTimeout(fallbackTimer);
+          fallbackTimer = null;
+        }
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+      };
+      const onVisibilityChange = () => {
+        if (document.visibilityState === "hidden") {
+          cleanupFallback();
+        }
+      };
+      fallbackTimer = setTimeout(() => {
+        if (document.visibilityState === "visible" && !fallbackTriggered) {
+          fallbackTriggered = true;
+          cleanupFallback();
+          window.location.href = getUpiInstallSearchUrl();
+          setStatus("No UPI app detected. Redirecting to install options.");
+          return;
+        }
+        cleanupFallback();
+      }, 1500);
+      document.addEventListener("visibilitychange", onVisibilityChange);
       window.location.href = upiUrl;
       setStatus("Opening UPI app...");
     });
@@ -8254,6 +8377,10 @@
       const next = String(optionBtn.dataset.value || "AUTO").toUpperCase();
       setBillingCountry(next, { announce: true, keepAutoSelection: next === "AUTO" });
       setBillingCountryMenuState(false);
+    });
+
+    window.addEventListener("resize", () => {
+      updateUpiActionAvailability();
     });
 
     billingCardInput.addEventListener("input", formatBillingCardInput);
@@ -8922,6 +9049,7 @@
     setRecentTypeFilter("all", false);
     setBillingMethod("stripe");
     setBillingCountry("AUTO", { keepAutoSelection: true });
+    updateUpiActionAvailability();
     restoreBillingPageState();
     renderFileQueue();
     renderNotifications();

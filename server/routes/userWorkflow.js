@@ -94,6 +94,79 @@ function toMimeFromFormat(format) {
   return format === "jpg" ? "image/jpeg" : "image/png";
 }
 
+function clampNumber(value, min, max, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
+
+async function getAlphaBoundingBox(imageBuffer) {
+  const { data, info } = await sharp(imageBuffer)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const width = info.width || 0;
+  const height = info.height || 0;
+  const channels = info.channels || 4;
+  if (!width || !height || channels < 4) {
+    return { x: 0, y: 0, width, height };
+  }
+
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const offset = (y * width + x) * channels;
+      const alpha = data[offset + 3];
+      if (alpha > 8) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
+  if (maxX < minX || maxY < minY) {
+    return { x: 0, y: 0, width, height };
+  }
+
+  return {
+    x: minX,
+    y: minY,
+    width: Math.max(1, maxX - minX + 1),
+    height: Math.max(1, maxY - minY + 1)
+  };
+}
+
+function computePassportPlacement(boxW, boxH, innerW, innerH, headTargetPct = 0.68) {
+  const normalizedHeadTarget = clampNumber(headTargetPct, 0.45, 0.86, 0.68);
+  const subjectTargetPct = Math.min(0.92, Math.max(0.72, normalizedHeadTarget * 1.28));
+  const topPadding = Math.max(8, Math.round(innerH * 0.06));
+  const maxDrawHeight = Math.max(1, innerH - topPadding);
+
+  let drawH = Math.min(maxDrawHeight, Math.round(innerH * subjectTargetPct));
+  let drawW = Math.max(1, Math.round((Math.max(1, boxW) / Math.max(1, boxH)) * drawH));
+
+  if (drawW > innerW) {
+    const widthScale = innerW / drawW;
+    drawW = innerW;
+    drawH = Math.max(1, Math.round(drawH * widthScale));
+  }
+
+  const left = Math.max(0, Math.floor((innerW - drawW) / 2));
+  let top = topPadding;
+  if (top + drawH > innerH) {
+    top = Math.max(0, Math.floor((innerH - drawH) / 2));
+  }
+
+  return { drawW, drawH, left, top };
+}
+
 function getCompressionSettings(size) {
   const bytes = Number(size || 0);
   if (bytes <= 150 * 1024) return { quality: 76, maxDim: 2200 };
@@ -123,7 +196,7 @@ async function compressInputBuffer(fileBuffer, sourceSize, outputFormat) {
     .toBuffer();
 }
 
-async function buildPassportBuffer(removedBuffer, bgColor, outputFormat) {
+async function buildPassportBuffer(removedBuffer, bgColor, outputFormat, headTargetPct = 0.68) {
   const targetW = 413;
   const targetH = 531;
   const margin = 24;
@@ -142,9 +215,26 @@ async function buildPassportBuffer(removedBuffer, bgColor, outputFormat) {
     .png()
     .toBuffer();
 
-  const foreground = await sharp(removedBuffer)
-    .resize(innerW, innerH, {
-      fit: "contain",
+  const sourceMeta = await sharp(removedBuffer).metadata();
+  const sourceWidth = Number(sourceMeta.width || innerW);
+  const sourceHeight = Number(sourceMeta.height || innerH);
+  const alphaBox = await getAlphaBoundingBox(removedBuffer);
+  const cropBox = {
+    left: Math.max(0, Math.min(sourceWidth - 1, alphaBox.x)),
+    top: Math.max(0, Math.min(sourceHeight - 1, alphaBox.y)),
+    width: Math.max(1, Math.min(sourceWidth, alphaBox.width || sourceWidth)),
+    height: Math.max(1, Math.min(sourceHeight, alphaBox.height || sourceHeight))
+  };
+  const placement = computePassportPlacement(cropBox.width, cropBox.height, innerW, innerH, headTargetPct);
+
+  const foregroundSource = await sharp(removedBuffer)
+    .extract(cropBox)
+    .png()
+    .toBuffer();
+
+  const foreground = await sharp(foregroundSource)
+    .resize(placement.drawW, placement.drawH, {
+      fit: "fill",
       background: { r: 0, g: 0, b: 0, alpha: 0 }
     })
     .png()
@@ -159,7 +249,7 @@ async function buildPassportBuffer(removedBuffer, bgColor, outputFormat) {
     }
   }).composite([
     { input: innerBg, left: margin, top: margin },
-    { input: foreground, left: margin, top: margin }
+    { input: foreground, left: margin + placement.left, top: margin + placement.top }
   ]);
 
   if (outputFormat === "jpg") {
@@ -357,6 +447,7 @@ router.post("/billing/subscribe", authMiddleware, async (req, res) => {
     const plan = String(req.body.plan || "pro").trim().toLowerCase();
     const currency = String(req.body.currency || "USD").trim().toUpperCase();
     const amount = Number(req.body.amount || 9);
+    const billingCountry = String(req.body.billingCountry || "US").trim().toUpperCase();
 
     if (!billingName || !billingEmail || !method) {
       return res.status(400).json({ error: "Billing name, email and payment method are required." });
@@ -378,6 +469,7 @@ router.post("/billing/subscribe", authMiddleware, async (req, res) => {
       transactionRef: String(req.body.transactionRef || `txn_${Date.now()}`),
       meta: {
         source: "web-app",
+        billingCountry,
         upiId: String(req.body.upiId || "").trim(),
         razorpayPhone: String(req.body.razorpayPhone || "").trim()
       }
