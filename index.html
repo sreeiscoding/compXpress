@@ -3312,7 +3312,7 @@
 
       .recent-more-dropdown {
         display: block;
-        justify-self: center;
+        justify-self: end;
       }
 
       .recent-more-dropdown .action-dropdown-toggle {
@@ -3352,15 +3352,16 @@
       }
     }
 
-    @media (max-width: 520px) {
-      .recent-more-dropdown.open .action-dropdown-menu {
-        transform: translateX(-70%) translateY(0) !important;
+    @media (max-width: 420px) {
+      .recent-more-dropdown .action-dropdown-menu {
+        left: auto !important;
+        right: 0 !important;
+        max-width: min(260px, 88vw);
+        transform: translateY(-6px) !important;
       }
-    }
 
-    @media (max-width: 400px) {
       .recent-more-dropdown.open .action-dropdown-menu {
-        transform: translateX(-70%) translateY(0) !important;
+        transform: translateY(0) !important;
       }
     }
 
