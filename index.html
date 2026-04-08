@@ -1028,6 +1028,23 @@
       border-color: rgba(96, 165, 250, 0.8);
     }
 
+    .billing-country-dropdown .action-dropdown-toggle {
+      min-height: 40px;
+      font-size: 0.82rem;
+      padding: 10px 12px;
+    }
+
+    .billing-country-dropdown .action-dropdown-menu {
+      max-height: 250px;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .billing-country-dropdown .action-dropdown-menu::-webkit-scrollbar {
+      display: none;
+    }
+
     .billing-methods {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1377,6 +1394,40 @@
 
     body[data-theme="light"] .pricing-price {
       color: #1d4ed8;
+    }
+
+    body[data-theme="light"] .pricing-compare {
+      background: rgba(255, 255, 255, 0.96);
+      border-color: rgba(100, 116, 139, 0.3);
+    }
+
+    body[data-theme="light"] .pricing-compare-title {
+      color: #0f172a;
+      border-bottom-color: rgba(100, 116, 139, 0.22);
+    }
+
+    body[data-theme="light"] .pricing-compare-table thead th {
+      color: #1e40af;
+      background: rgba(219, 234, 254, 0.6);
+    }
+
+    body[data-theme="light"] .pricing-compare-table th:first-child,
+    body[data-theme="light"] .pricing-compare-table td:first-child {
+      color: #0f172a;
+    }
+
+    body[data-theme="light"] .pricing-compare-table td:nth-child(2) {
+      color: #475569;
+    }
+
+    body[data-theme="light"] .pricing-compare-table td:nth-child(3) {
+      color: #1d4ed8;
+    }
+
+    body[data-theme="light"] .pricing-trust-pill {
+      border-color: rgba(100, 116, 139, 0.3);
+      background: rgba(241, 245, 249, 0.95);
+      color: #334155;
     }
 
     .drawer-head {
@@ -1802,11 +1853,147 @@
 
     .pricing-list {
       margin: 0;
-      padding-left: 16px;
+      padding-left: 0;
+      list-style: none;
       color: var(--muted);
       font-family: var(--font-secondary);
       font-size: 0.8rem;
       line-height: 1.45;
+    }
+
+    .pricing-list li {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .pricing-list li + li {
+      margin-top: 4px;
+    }
+
+    .pricing-list li::before {
+      content: "\f00c";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      left: 0;
+      top: 1px;
+      color: #22c55e;
+      font-size: 0.72rem;
+      line-height: 1;
+    }
+
+    .pricing-compare {
+      margin-top: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.62);
+      overflow: hidden;
+    }
+
+    .pricing-compare-title {
+      margin: 0;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      color: #dbeafe;
+      font-family: var(--font-heading);
+      font-size: 0.92rem;
+    }
+
+    .pricing-compare-wrap {
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .pricing-compare-wrap::-webkit-scrollbar {
+      display: none;
+    }
+
+    .pricing-compare-table {
+      width: 100%;
+      min-width: 520px;
+      border-collapse: collapse;
+      font-family: var(--font-secondary);
+      font-size: 0.79rem;
+    }
+
+    .pricing-compare-table th,
+    .pricing-compare-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .pricing-compare-table thead th {
+      color: #bfdbfe;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(30, 41, 59, 0.5);
+    }
+
+    .pricing-compare-table th:first-child,
+    .pricing-compare-table td:first-child {
+      width: 42%;
+      color: #e2e8f0;
+    }
+
+    .pricing-compare-table td:nth-child(2) {
+      color: #94a3b8;
+    }
+
+    .pricing-compare-table td:nth-child(3) {
+      color: #dbeafe;
+      font-weight: 600;
+    }
+
+    .pricing-compare-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .pricing-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      font-size: 0.73rem;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .pricing-chip.free {
+      color: #94a3b8;
+      background: rgba(15, 23, 42, 0.65);
+    }
+
+    .pricing-chip.pro {
+      color: #dbeafe;
+      border-color: rgba(96, 165, 250, 0.6);
+      background: rgba(30, 64, 175, 0.24);
+    }
+
+    .pricing-trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .pricing-trust-pill {
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      background: rgba(15, 23, 42, 0.64);
+      color: #cbd5e1;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.72rem;
+      font-family: var(--font-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
     }
 
     .pricing-actions {
@@ -3248,6 +3435,11 @@
         width: 100%;
       }
 
+      .pricing-compare-table {
+        min-width: 460px;
+        font-size: 0.76rem;
+      }
+
       .flow-step {
         flex-wrap: wrap;
         row-gap: 4px;
@@ -3829,6 +4021,32 @@
             <label class="billing-label" for="billingEmailInput">Billing Email</label>
             <input id="billingEmailInput" class="billing-input" type="email" autocomplete="email" />
           </div>
+          <div class="billing-row">
+            <label class="billing-label" for="billingCountryToggle">Billing Country</label>
+            <div id="billingCountryDropdown" class="action-dropdown billing-country-dropdown">
+              <button id="billingCountryToggle" class="action-dropdown-toggle" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="billingCountryMenu">
+                <span id="billingCountryLabel">Country: Auto Detect</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+              <ul id="billingCountryMenu" class="action-dropdown-menu" role="listbox" aria-label="Billing country selection">
+                <li><button class="action-dropdown-item active" type="button" role="option" data-value="AUTO" aria-selected="true"><span id="billingCountryAutoOptionLabel">Auto Detect</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="IN" aria-selected="false"><span>India</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="US" aria-selected="false"><span>United States</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="GB" aria-selected="false"><span>United Kingdom</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="CA" aria-selected="false"><span>Canada</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="AU" aria-selected="false"><span>Australia</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="AE" aria-selected="false"><span>UAE</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="SG" aria-selected="false"><span>Singapore</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="DE" aria-selected="false"><span>Germany</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="FR" aria-selected="false"><span>France</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="JP" aria-selected="false"><span>Japan</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="CN" aria-selected="false"><span>China</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="RU" aria-selected="false"><span>Russia</span><i class="fa-solid fa-check check"></i></button></li>
+                <li><button class="action-dropdown-item" type="button" role="option" data-value="OTHER" aria-selected="false"><span>Other</span><i class="fa-solid fa-check check"></i></button></li>
+              </ul>
+            </div>
+            <p id="billingCountryHint" class="billing-method-note">Auto-detecting available payment options for your region.</p>
+          </div>
           <div class="billing-methods" role="tablist" aria-label="Choose payment method">
             <button id="billingMethodUpi" class="billing-method" type="button" aria-controls="billingPanelUpi" aria-selected="false"><i class="fa-solid fa-mobile-screen-button"></i>UPI</button>
             <button id="billingMethodRazorpay" class="billing-method" type="button" aria-controls="billingPanelRazorpay" aria-selected="false"><i class="fa-solid fa-bolt"></i>Razorpay</button>
@@ -3886,8 +4104,8 @@
             <li>Pro-grade productivity for creators and teams</li>
           </ul>
           <div class="billing-trust-row">
-            <span class="billing-trust-pill"><i class="fa-solid fa-lock"></i>Secure Checkout</span>
-            <span class="billing-trust-pill"><i class="fa-solid fa-shield-halved"></i>Protected Billing</span>
+            <span class="billing-trust-pill"><i class="fa-solid fa-arrows-rotate"></i>Cancel Anytime</span>
+            <span id="billingSecurePaymentPill" class="billing-trust-pill"><i class="fa-solid fa-lock"></i>Secure payment via UPI, Razorpay, Stripe</span>
             <span class="billing-trust-pill"><i class="fa-solid fa-receipt"></i>Instant Invoice</span>
           </div>
           <div class="billing-actions">
@@ -4132,7 +4350,57 @@
               <li>Priority processing experience</li>
               <li>Best for creators, studios, and teams</li>
             </ul>
+            <div class="pricing-trust-row" aria-label="Pro plan trust signals">
+              <span class="pricing-trust-pill"><i class="fa-solid fa-arrows-rotate"></i>Cancel Anytime</span>
+              <span class="pricing-trust-pill"><i class="fa-solid fa-lock"></i>Secure payment via UPI, Razorpay, Stripe</span>
+            </div>
           </article>
+        </div>
+        <div class="pricing-compare" aria-label="Plan feature comparison">
+          <h3 class="pricing-compare-title">Plan Comparison</h3>
+          <div class="pricing-compare-wrap">
+            <table class="pricing-compare-table">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th><span class="pricing-chip free">Free</span></th>
+                  <th><span class="pricing-chip pro">Pro</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Monthly AI background removals</td>
+                  <td>10 images / month</td>
+                  <td>Higher quota with billing plan</td>
+                </tr>
+                <tr>
+                  <td>Upload capacity per workflow</td>
+                  <td>Up to 5 images</td>
+                  <td>5-50+ images (batch)</td>
+                </tr>
+                <tr>
+                  <td>Batch processing + ZIP export</td>
+                  <td>Not available</td>
+                  <td>Included</td>
+                </tr>
+                <tr>
+                  <td>Country passport presets + print PDF</td>
+                  <td>Basic flow</td>
+                  <td>Advanced workflow support</td>
+                </tr>
+                <tr>
+                  <td>Priority processing workflow</td>
+                  <td>Standard queue</td>
+                  <td>Priority queue</td>
+                </tr>
+                <tr>
+                  <td>Account-synced history</td>
+                  <td>Included</td>
+                  <td>Included</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <div class="pricing-actions">
           <button id="pricingUpgradeBtn" class="pricing-btn" type="button">Upgrade to Pro</button>
@@ -4243,6 +4511,13 @@
     const billingCloseBtn = document.getElementById("billingCloseBtn");
     const billingNameInput = document.getElementById("billingNameInput");
     const billingEmailInput = document.getElementById("billingEmailInput");
+    const billingCountryDropdown = document.getElementById("billingCountryDropdown");
+    const billingCountryToggle = document.getElementById("billingCountryToggle");
+    const billingCountryLabel = document.getElementById("billingCountryLabel");
+    const billingCountryMenu = document.getElementById("billingCountryMenu");
+    const billingCountryAutoOptionLabel = document.getElementById("billingCountryAutoOptionLabel");
+    const billingCountryHint = document.getElementById("billingCountryHint");
+    const billingSecurePaymentPill = document.getElementById("billingSecurePaymentPill");
     const billingCardInput = document.getElementById("billingCardInput");
     const billingExpiryInput = document.getElementById("billingExpiryInput");
     const billingCvcInput = document.getElementById("billingCvcInput");
@@ -4343,6 +4618,8 @@
     let selectedCountryPreset = "usa";
     let printSheetCopies = 4;
     let selectedBillingMethod = "stripe";
+    let selectedBillingCountry = "US";
+    let isBillingCountryMenuOpen = false;
     let signedInDisplayName = "";
     let recentCompressedServerItems = [];
     let expandedRecentWorkflows = [];
@@ -4398,6 +4675,21 @@
       russia: { label: "Russia", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 },
       france: { label: "France", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 },
       germany: { label: "Germany", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 }
+    };
+    const BILLING_COUNTRY_CONFIG = {
+      IN: { label: "India", currency: "INR", methods: ["upi", "razorpay", "stripe"] },
+      US: { label: "United States", currency: "USD", methods: ["stripe"] },
+      GB: { label: "United Kingdom", currency: "GBP", methods: ["stripe"] },
+      CA: { label: "Canada", currency: "CAD", methods: ["stripe"] },
+      AU: { label: "Australia", currency: "AUD", methods: ["stripe"] },
+      AE: { label: "UAE", currency: "AED", methods: ["stripe"] },
+      SG: { label: "Singapore", currency: "SGD", methods: ["stripe"] },
+      DE: { label: "Germany", currency: "EUR", methods: ["stripe"] },
+      FR: { label: "France", currency: "EUR", methods: ["stripe"] },
+      JP: { label: "Japan", currency: "JPY", methods: ["stripe"] },
+      CN: { label: "China", currency: "CNY", methods: ["stripe"] },
+      RU: { label: "Russia", currency: "RUB", methods: ["stripe"] },
+      OTHER: { label: "Other", currency: "USD", methods: ["stripe"] }
     };
     function resolveApiBaseUrl() {
       try {
@@ -5910,6 +6202,111 @@
       return "Stripe";
     }
 
+    function getBillingCountryConfig(code) {
+      const key = String(code || "").toUpperCase();
+      return BILLING_COUNTRY_CONFIG[key] || BILLING_COUNTRY_CONFIG.OTHER;
+    }
+
+    function getAvailableBillingMethods(countryCode = selectedBillingCountry) {
+      const config = getBillingCountryConfig(countryCode);
+      return Array.isArray(config.methods) && config.methods.length ? config.methods : ["stripe"];
+    }
+
+    function setBillingCountryMenuState(open) {
+      isBillingCountryMenuOpen = !!open;
+      billingCountryDropdown.classList.toggle("open", isBillingCountryMenuOpen);
+      billingCountryToggle.setAttribute("aria-expanded", String(isBillingCountryMenuOpen));
+    }
+
+    function detectCountryFromClient() {
+      try {
+        const langCandidates = [navigator.language].concat(Array.isArray(navigator.languages) ? navigator.languages : []).filter(Boolean);
+        for (const lang of langCandidates) {
+          const match = String(lang).match(/-([A-Za-z]{2})$/);
+          if (!match) continue;
+          const region = match[1].toUpperCase();
+          if (BILLING_COUNTRY_CONFIG[region]) return region;
+        }
+      } catch (error) {
+      }
+
+      try {
+        const tz = String(Intl.DateTimeFormat().resolvedOptions().timeZone || "");
+        if (/Kolkata|Calcutta/i.test(tz)) return "IN";
+        if (/New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Honolulu/i.test(tz)) return "US";
+        if (/London/i.test(tz)) return "GB";
+        if (/Toronto|Vancouver|Montreal|Edmonton|Winnipeg/i.test(tz)) return "CA";
+        if (/Sydney|Melbourne|Perth|Brisbane|Adelaide/i.test(tz)) return "AU";
+        if (/Dubai/i.test(tz)) return "AE";
+        if (/Singapore/i.test(tz)) return "SG";
+        if (/Berlin/i.test(tz)) return "DE";
+        if (/Paris/i.test(tz)) return "FR";
+        if (/Tokyo/i.test(tz)) return "JP";
+        if (/Shanghai|Beijing/i.test(tz)) return "CN";
+        if (/Moscow/i.test(tz)) return "RU";
+      } catch (error) {
+      }
+      return "US";
+    }
+
+    function setBillingCountry(code, options = {}) {
+      const opts = options || {};
+      const requested = String(code || "").toUpperCase();
+      const resolved = requested === "AUTO" ? detectCountryFromClient() : (BILLING_COUNTRY_CONFIG[requested] ? requested : "OTHER");
+      selectedBillingCountry = resolved;
+      const config = getBillingCountryConfig(resolved);
+      const methods = getAvailableBillingMethods(resolved);
+      const activeOption = opts.keepAutoSelection ? "AUTO" : resolved;
+
+      if (billingCountryLabel) {
+        billingCountryLabel.textContent = activeOption === "AUTO"
+          ? `Country: Auto Detect (${config.label})`
+          : `Country: ${config.label}`;
+      }
+      if (billingCountryAutoOptionLabel) {
+        billingCountryAutoOptionLabel.textContent = `Auto Detect (${config.label})`;
+      }
+      if (billingCountryMenu) {
+        const optionsList = billingCountryMenu.querySelectorAll(".action-dropdown-item");
+        optionsList.forEach((option) => {
+          const isActive = String(option.dataset.value || "").toUpperCase() === activeOption;
+          option.classList.toggle("active", isActive);
+          option.setAttribute("aria-selected", String(isActive));
+        });
+      }
+
+      const methodUi = {
+        upi: { btn: billingMethodUpi, panel: billingPanelUpi, label: "UPI" },
+        razorpay: { btn: billingMethodRazorpay, panel: billingPanelRazorpay, label: "Razorpay" },
+        stripe: { btn: billingMethodStripe, panel: billingPanelStripe, label: "Stripe" }
+      };
+
+      Object.keys(methodUi).forEach((methodKey) => {
+        const available = methods.includes(methodKey);
+        const ui = methodUi[methodKey];
+        if (!ui || !ui.btn || !ui.panel) return;
+        ui.btn.style.display = available ? "" : "none";
+        ui.btn.disabled = !available;
+        ui.btn.setAttribute("aria-disabled", String(!available));
+        ui.panel.style.display = available ? "" : "none";
+      });
+
+      const preferred = methods.includes(selectedBillingMethod) ? selectedBillingMethod : methods[0];
+      setBillingMethod(preferred);
+
+      if (billingCountryHint) {
+        const methodNames = methods.map(getBillingMethodLabel).join(", ");
+        const prefix = requested === "AUTO" ? "Auto-detected" : "Selected";
+        billingCountryHint.textContent = `${prefix}: ${config.label}. Available payments: ${methodNames}.`;
+      }
+      if (billingSecurePaymentPill) {
+        billingSecurePaymentPill.innerHTML = `<i class="fa-solid fa-lock"></i>Secure payment via ${methods.map(getBillingMethodLabel).join(", ")}`;
+      }
+      if (opts.announce) {
+        setStatus(`${config.label} selected. Payment options updated.`);
+      }
+    }
+
     function buildUpiPaymentUrl() {
       const payeeVpa = "comxpress@upi";
       const payeeName = "Com/pass Pro";
@@ -5936,7 +6333,9 @@
     }
 
     function setBillingMethod(method) {
-      const resolved = method === "upi" || method === "razorpay" ? method : "stripe";
+      const candidate = method === "upi" || method === "razorpay" ? method : "stripe";
+      const available = getAvailableBillingMethods(selectedBillingCountry);
+      const resolved = available.includes(candidate) ? candidate : (available[0] || "stripe");
       selectedBillingMethod = resolved;
 
       billingMethodUpi.classList.toggle("active", resolved === "upi");
@@ -6147,8 +6546,9 @@
       const payload = {
         plan: "pro",
         amount: 9,
-        currency: "USD",
+        currency: getBillingCountryConfig(selectedBillingCountry).currency,
         method: billingData.method,
+        billingCountry: selectedBillingCountry,
         billingName: billingData.name,
         billingEmail: billingData.email,
         upiId: billingData.method === "upi" ? billingUpiInput.value.trim() : "",
@@ -7843,6 +8243,19 @@
       }
     });
 
+    billingCountryToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setBillingCountryMenuState(!isBillingCountryMenuOpen);
+    });
+
+    billingCountryMenu.addEventListener("click", (e) => {
+      const optionBtn = e.target.closest(".action-dropdown-item");
+      if (!optionBtn) return;
+      const next = String(optionBtn.dataset.value || "AUTO").toUpperCase();
+      setBillingCountry(next, { announce: true, keepAutoSelection: next === "AUTO" });
+      setBillingCountryMenuState(false);
+    });
+
     billingCardInput.addEventListener("input", formatBillingCardInput);
     billingExpiryInput.addEventListener("input", formatBillingExpiryInput);
     billingCvcInput.addEventListener("input", formatBillingCvcInput);
@@ -8251,6 +8664,9 @@
       if (isRecentMoreMenuOpen && !recentMoreDropdown.contains(e.target)) {
         setRecentMoreMenuState(false);
       }
+      if (isBillingCountryMenuOpen && !billingCountryDropdown.contains(e.target)) {
+        setBillingCountryMenuState(false);
+      }
       if (upgradeModal.classList.contains("open") && !e.target.closest("#upgradeModal .modal-card")) {
         setUpgradeModalState(false);
       }
@@ -8322,6 +8738,10 @@
         }
         if (isRecentMoreMenuOpen) {
           setRecentMoreMenuState(false);
+          return;
+        }
+        if (isBillingCountryMenuOpen) {
+          setBillingCountryMenuState(false);
           return;
         }
         if (authPage.classList.contains("open")) {
@@ -8501,6 +8921,7 @@
     setPrintSheetCopies(4, false);
     setRecentTypeFilter("all", false);
     setBillingMethod("stripe");
+    setBillingCountry("AUTO", { keepAutoSelection: true });
     restoreBillingPageState();
     renderFileQueue();
     renderNotifications();
