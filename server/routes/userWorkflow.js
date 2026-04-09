@@ -3,12 +3,13 @@ const multer = require("multer");
 const sharp = require("sharp");
 const JSZip = require("jszip");
 const path = require("path");
+const axios = require("axios");
+const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 const authMiddleware = require("../middleware/authMiddleware");
 const User = require("../models/User");
 const ImageAsset = require("../models/ImageAsset");
 const BillingRecord = require("../models/BillingRecord");
 const { removeBackgroundBuffer } = require("../utils/removeBgClient");
-
 const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -98,6 +99,209 @@ function clampNumber(value, min, max, fallback) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
   return Math.min(max, Math.max(min, parsed));
+}
+
+function getBaseAppUrl(req) {
+  const incoming = String(req.body.frontendReturnUrl || req.query.frontendReturnUrl || "").trim();
+  if (incoming) {
+    try {
+      const parsed = new URL(incoming);
+      return `${parsed.origin}${parsed.pathname}`;
+    } catch (error) {
+    }
+  }
+
+  const appBase = String(process.env.APP_BASE_URL || "").trim();
+  if (appBase) {
+    try {
+      const parsed = new URL(appBase);
+      return `${parsed.origin}${parsed.pathname}`;
+    } catch (error) {
+    }
+  }
+
+  const proto = String(req.headers["x-forwarded-proto"] || req.protocol || "https").split(",")[0].trim() || "https";
+  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "").split(",")[0].trim();
+  if (!host) {
+    return "";
+  }
+  return `${proto}://${host}/`;
+}
+
+function buildInvoiceNumber() {
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(now.getUTCDate()).padStart(2, "0");
+  const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `CMP-${y}${m}${d}-${rand}`;
+}
+
+function safePositiveAmount(value, fallback = 9) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return parsed;
+}
+
+function getStripeSecretKey() {
+  return String(process.env.STRIPE_SECRET_KEY || "").trim();
+}
+
+function getStripePriceId() {
+  return String(process.env.STRIPE_PRICE_ID || "").trim();
+}
+
+async function createStripeCheckoutSession({ amount, currency, customerEmail, customerName, successUrl, cancelUrl, metadata }) {
+  const secretKey = getStripeSecretKey();
+  if (!secretKey) {
+    throw new Error("STRIPE_SECRET_KEY is not configured.");
+  }
+
+  const params = new URLSearchParams();
+  params.append("mode", "payment");
+  params.append("success_url", successUrl);
+  params.append("cancel_url", cancelUrl);
+  params.append("customer_email", customerEmail);
+
+  const normalizedCurrency = String(currency || "usd").toLowerCase();
+  const priceId = getStripePriceId();
+  if (priceId) {
+    params.append("line_items[0][price]", priceId);
+    params.append("line_items[0][quantity]", "1");
+  } else {
+    const unitAmount = Math.max(50, Math.round(safePositiveAmount(amount, 9) * 100));
+    params.append("line_items[0][price_data][currency]", normalizedCurrency);
+    params.append("line_items[0][price_data][product_data][name]", "Com/pass Pro Plan");
+    if (customerName) {
+      params.append("line_items[0][price_data][product_data][description]", `Subscription for ${customerName}`);
+    }
+    params.append("line_items[0][price_data][unit_amount]", String(unitAmount));
+    params.append("line_items[0][quantity]", "1");
+  }
+
+  const safeMetadata = metadata && typeof metadata === "object" ? metadata : {};
+  Object.keys(safeMetadata).forEach((key) => {
+    const value = safeMetadata[key];
+    if (value === undefined || value === null) return;
+    params.append(`metadata[${key}]`, String(value));
+  });
+
+  const response = await axios.post("https://api.stripe.com/v1/checkout/sessions", params.toString(), {
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    timeout: 20000
+  });
+
+  return response.data || {};
+}
+
+async function fetchStripeCheckoutSession(sessionId) {
+  const secretKey = getStripeSecretKey();
+  if (!secretKey) {
+    throw new Error("STRIPE_SECRET_KEY is not configured.");
+  }
+  const trimmed = String(sessionId || "").trim();
+  if (!trimmed) {
+    throw new Error("Stripe session id is required.");
+  }
+
+  const encoded = encodeURIComponent(trimmed);
+  const response = await axios.get(`https://api.stripe.com/v1/checkout/sessions/${encoded}?expand[]=payment_intent&expand[]=customer_details`, {
+    headers: {
+      Authorization: `Bearer ${secretKey}`
+    },
+    timeout: 20000
+  });
+
+  return response.data || {};
+}
+
+function mapStripeStatusToBillingStatus(session) {
+  const paymentStatus = String(session && session.payment_status ? session.payment_status : "").toLowerCase();
+  if (paymentStatus === "paid") return "paid";
+  if (paymentStatus === "unpaid") return "pending";
+  return "failed";
+}
+
+function buildInvoicePayload(record) {
+  return {
+    id: String(record._id || ""),
+    invoiceNumber: String(record.invoiceNumber || ""),
+    issuedAt: record.invoiceIssuedAt || record.createdAt,
+    amount: record.amount,
+    currency: record.currency,
+    method: record.method,
+    status: record.status,
+    transactionRef: String(record.transactionRef || "")
+  };
+}
+
+function formatInvoiceCurrency(amount, currency) {
+  const value = Number.isFinite(Number(amount)) ? Number(amount) : 0;
+  const code = String(currency || "USD").toUpperCase();
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: code }).format(value);
+  } catch (error) {
+    return `${code} ${value.toFixed(2)}`;
+  }
+}
+
+async function createInvoicePdfBuffer(record, user) {
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([595.28, 841.89]);
+  const fontRegular = await doc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+
+  const marginX = 48;
+  let y = page.getHeight() - 56;
+
+  page.drawText("Com/pass Invoice", {
+    x: marginX,
+    y,
+    size: 24,
+    font: fontBold,
+    color: rgb(0.07, 0.16, 0.32)
+  });
+
+  y -= 30;
+  page.drawText(`Invoice #: ${String(record.invoiceNumber || "-")}`, { x: marginX, y, size: 11, font: fontRegular });
+  y -= 16;
+  page.drawText(`Issued: ${new Date(record.invoiceIssuedAt || record.createdAt || Date.now()).toLocaleString()}`, { x: marginX, y, size: 11, font: fontRegular });
+  y -= 16;
+  page.drawText(`Status: ${String(record.status || "pending").toUpperCase()}`, { x: marginX, y, size: 11, font: fontRegular });
+
+  y -= 28;
+  page.drawText("Billed To", { x: marginX, y, size: 13, font: fontBold, color: rgb(0.12, 0.2, 0.4) });
+  y -= 18;
+  page.drawText(String(record.billingName || user.name || "User"), { x: marginX, y, size: 11, font: fontRegular });
+  y -= 15;
+  page.drawText(String(record.billingEmail || user.email || ""), { x: marginX, y, size: 11, font: fontRegular });
+
+  y -= 30;
+  page.drawText("Description", { x: marginX, y, size: 11, font: fontBold });
+  page.drawText("Amount", { x: 440, y, size: 11, font: fontBold });
+
+  y -= 16;
+  page.drawLine({ start: { x: marginX, y }, end: { x: 548, y }, thickness: 1, color: rgb(0.8, 0.84, 0.9) });
+
+  y -= 18;
+  page.drawText(`Com/pass Pro Plan (${String(record.method || "stripe").toUpperCase()})`, { x: marginX, y, size: 11, font: fontRegular });
+  page.drawText(formatInvoiceCurrency(record.amount, record.currency), { x: 440, y, size: 11, font: fontRegular });
+
+  y -= 24;
+  page.drawLine({ start: { x: 390, y }, end: { x: 548, y }, thickness: 1, color: rgb(0.8, 0.84, 0.9) });
+  y -= 18;
+  page.drawText("Total", { x: 390, y, size: 12, font: fontBold });
+  page.drawText(formatInvoiceCurrency(record.amount, record.currency), { x: 440, y, size: 12, font: fontBold });
+
+  y -= 28;
+  page.drawText(`Transaction Ref: ${String(record.transactionRef || "-")}`, { x: marginX, y, size: 10, font: fontRegular, color: rgb(0.35, 0.41, 0.52) });
+  y -= 18;
+  page.drawText("Secure payment processed by Com/pass partner gateway.", { x: marginX, y, size: 10, font: fontRegular, color: rgb(0.35, 0.41, 0.52) });
+
+  return Buffer.from(await doc.save());
 }
 
 async function getAlphaBoundingBox(imageBuffer) {
@@ -434,6 +638,343 @@ router.post("/batch/process-zip", authMiddleware, batchUpload.array("images", 75
   }
 });
 
+router.post("/billing/stripe/checkout-session", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const billingName = String(req.body.billingName || user.name || "").trim();
+    const billingEmail = String(req.body.billingEmail || user.email || "").trim().toLowerCase();
+    const plan = String(req.body.plan || "pro").trim().toLowerCase();
+    const currency = String(req.body.currency || "USD").trim().toUpperCase();
+    const amount = safePositiveAmount(req.body.amount, 9);
+    const billingCountry = String(req.body.billingCountry || "US").trim().toUpperCase();
+
+    if (!billingName || !billingEmail) {
+      return res.status(400).json({ error: "Billing name and email are required for Stripe checkout." });
+    }
+
+    const baseAppUrl = getBaseAppUrl(req);
+    if (!baseAppUrl) {
+      return res.status(400).json({ error: "Unable to resolve frontend return URL." });
+    }
+
+    const separator = baseAppUrl.includes("?") ? "&" : "?";
+    const successUrl = `${baseAppUrl}${separator}checkout=success&provider=stripe&session_id={CHECKOUT_SESSION_ID}#pricing`;
+    const cancelUrl = `${baseAppUrl}${separator}checkout=cancelled&provider=stripe#pricing`;
+
+    const session = await createStripeCheckoutSession({
+      amount,
+      currency,
+      customerEmail: billingEmail,
+      customerName: billingName,
+      successUrl,
+      cancelUrl,
+      metadata: {
+        app: "com-pass",
+        userId: String(user._id),
+        userEmail: String(user.email || "").toLowerCase(),
+        billingCountry,
+        plan
+      }
+    });
+
+    if (!session || !session.id || !session.url) {
+      return res.status(502).json({ error: "Stripe checkout session was not created." });
+    }
+
+    return res.status(201).json({
+      ok: true,
+      method: "stripe",
+      checkoutUrl: session.url,
+      sessionId: session.id
+    });
+  } catch (error) {
+    const details = error && error.response && error.response.data
+      ? JSON.stringify(error.response.data)
+      : error.message;
+    return res.status(502).json({ error: "Failed to create Stripe checkout session.", details });
+  }
+});
+
+router.post("/billing/stripe/complete", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const sessionId = String(req.body.sessionId || "").trim();
+    if (!sessionId) {
+      return res.status(400).json({ error: "Stripe session id is required." });
+    }
+
+    const existing = await BillingRecord.findOne({ providerSessionId: sessionId, userId: user._id });
+    if (existing) {
+      if (!user.subscribed && existing.status === "paid") {
+        user.subscribed = true;
+        await user.save();
+      }
+      return res.json({
+        ok: true,
+        subscribed: !!user.subscribed,
+        billingId: String(existing._id),
+        invoice: buildInvoicePayload(existing),
+        message: "Stripe checkout already finalized."
+      });
+    }
+
+    const session = await fetchStripeCheckoutSession(sessionId);
+    if (!session || String(session.id || "") !== sessionId) {
+      return res.status(404).json({ error: "Stripe checkout session not found." });
+    }
+
+    const meta = session.metadata && typeof session.metadata === "object" ? session.metadata : {};
+    const ownerId = String(meta.userId || "").trim();
+    if (ownerId && ownerId !== String(user._id)) {
+      return res.status(403).json({ error: "This checkout session belongs to another account." });
+    }
+
+    const status = mapStripeStatusToBillingStatus(session);
+    if (status !== "paid") {
+      return res.status(409).json({
+        error: "Stripe payment is not completed yet.",
+        paymentStatus: String(session.payment_status || "pending")
+      });
+    }
+
+    const amountTotal = Number(session.amount_total || 0);
+    const amount = amountTotal > 0 ? amountTotal / 100 : safePositiveAmount(req.body.amount, 9);
+    const currency = String(session.currency || req.body.currency || "USD").toUpperCase();
+    const billingName = String(
+      req.body.billingName
+      || session.customer_details?.name
+      || session.customer_details?.email
+      || user.name
+      || "Com/pass User"
+    ).trim();
+    const billingEmail = String(
+      req.body.billingEmail
+      || session.customer_details?.email
+      || user.email
+      || ""
+    ).trim().toLowerCase();
+
+    const billingCountry = String(req.body.billingCountry || meta.billingCountry || "US").trim().toUpperCase();
+    const invoiceIssuedAt = new Date();
+    const billing = await BillingRecord.create({
+      userId: user._id,
+      plan: String(req.body.plan || meta.plan || "pro").trim().toLowerCase(),
+      amount,
+      currency,
+      method: "stripe",
+      status: "paid",
+      billingName,
+      billingEmail,
+      transactionRef: String(session.payment_intent?.id || session.payment_intent || session.id || `txn_${Date.now()}`),
+      providerSessionId: session.id,
+      invoiceNumber: buildInvoiceNumber(),
+      invoiceIssuedAt,
+      meta: {
+        source: "stripe-checkout",
+        checkoutStatus: String(session.status || ""),
+        paymentStatus: String(session.payment_status || ""),
+        billingCountry,
+        stripeSessionId: String(session.id || ""),
+        stripeCustomerId: String(session.customer || ""),
+        stripePaymentIntentId: String(session.payment_intent?.id || session.payment_intent || "")
+      }
+    });
+
+    user.subscribed = true;
+    await user.save();
+
+    return res.status(201).json({
+      ok: true,
+      message: "Stripe payment verified and subscription activated.",
+      billingId: String(billing._id),
+      subscribed: true,
+      invoice: buildInvoicePayload(billing)
+    });
+  } catch (error) {
+    const details = error && error.response && error.response.data
+      ? JSON.stringify(error.response.data)
+      : error.message;
+    return res.status(500).json({ error: "Failed to finalize Stripe checkout.", details });
+  }
+});
+
+router.post("/billing/card/checkout-session", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const billingName = String(req.body.billingName || user.name || "").trim();
+    const billingEmail = String(req.body.billingEmail || user.email || "").trim().toLowerCase();
+    const plan = String(req.body.plan || "pro").trim().toLowerCase();
+    const currency = String(req.body.currency || "USD").trim().toUpperCase();
+    const amount = safePositiveAmount(req.body.amount, 9);
+    const billingCountry = String(req.body.billingCountry || "US").trim().toUpperCase();
+
+    if (!billingName || !billingEmail) {
+      return res.status(400).json({ error: "Billing name and email are required for Card checkout." });
+    }
+
+    const baseAppUrl = getBaseAppUrl(req);
+    if (!baseAppUrl) {
+      return res.status(400).json({ error: "Unable to resolve frontend return URL." });
+    }
+
+    const separator = baseAppUrl.includes("?") ? "&" : "?";
+    const successUrl = `${baseAppUrl}${separator}checkout=success&provider=card&session_id={CHECKOUT_SESSION_ID}#pricing`;
+    const cancelUrl = `${baseAppUrl}${separator}checkout=cancelled&provider=card#pricing`;
+
+    const session = await createStripeCheckoutSession({
+      amount,
+      currency,
+      customerEmail: billingEmail,
+      customerName: billingName,
+      successUrl,
+      cancelUrl,
+      metadata: {
+        app: "com-pass",
+        provider: "card",
+        userId: String(user._id),
+        userEmail: String(user.email || "").toLowerCase(),
+        billingCountry,
+        plan
+      }
+    });
+
+    if (!session || !session.id || !session.url) {
+      return res.status(502).json({ error: "Card checkout session was not created." });
+    }
+
+    return res.status(201).json({
+      ok: true,
+      method: "card",
+      checkoutUrl: session.url,
+      sessionId: session.id
+    });
+  } catch (error) {
+    const details = error && error.response && error.response.data
+      ? JSON.stringify(error.response.data)
+      : error.message;
+    return res.status(502).json({ error: "Failed to create Card checkout session.", details });
+  }
+});
+
+router.post("/billing/card/complete", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const sessionId = String(req.body.sessionId || "").trim();
+    if (!sessionId) {
+      return res.status(400).json({ error: "Card session id is required." });
+    }
+
+    const existing = await BillingRecord.findOne({ providerSessionId: sessionId, userId: user._id });
+    if (existing) {
+      if (!user.subscribed && existing.status === "paid") {
+        user.subscribed = true;
+        await user.save();
+      }
+      return res.json({
+        ok: true,
+        subscribed: !!user.subscribed,
+        billingId: String(existing._id),
+        invoice: buildInvoicePayload(existing),
+        message: "Card checkout already finalized."
+      });
+    }
+
+    const session = await fetchStripeCheckoutSession(sessionId);
+    if (!session || String(session.id || "") !== sessionId) {
+      return res.status(404).json({ error: "Card checkout session not found." });
+    }
+
+    const meta = session.metadata && typeof session.metadata === "object" ? session.metadata : {};
+    const ownerId = String(meta.userId || "").trim();
+    if (ownerId && ownerId !== String(user._id)) {
+      return res.status(403).json({ error: "This checkout session belongs to another account." });
+    }
+
+    const status = mapStripeStatusToBillingStatus(session);
+    if (status !== "paid") {
+      return res.status(409).json({
+        error: "Card payment is not completed yet.",
+        paymentStatus: String(session.payment_status || "pending")
+      });
+    }
+
+    const amountTotal = Number(session.amount_total || 0);
+    const amount = amountTotal > 0 ? amountTotal / 100 : safePositiveAmount(req.body.amount, 9);
+    const currency = String(session.currency || req.body.currency || "USD").toUpperCase();
+    const billingName = String(
+      req.body.billingName
+      || session.customer_details?.name
+      || session.customer_details?.email
+      || user.name
+      || "Com/pass User"
+    ).trim();
+    const billingEmail = String(
+      req.body.billingEmail
+      || session.customer_details?.email
+      || user.email
+      || ""
+    ).trim().toLowerCase();
+
+    const billingCountry = String(req.body.billingCountry || meta.billingCountry || "US").trim().toUpperCase();
+    const invoiceIssuedAt = new Date();
+    const billing = await BillingRecord.create({
+      userId: user._id,
+      plan: String(req.body.plan || meta.plan || "pro").trim().toLowerCase(),
+      amount,
+      currency,
+      method: "card",
+      status: "paid",
+      billingName,
+      billingEmail,
+      transactionRef: String(session.payment_intent?.id || session.payment_intent || session.id || `txn_${Date.now()}`),
+      providerSessionId: session.id,
+      invoiceNumber: buildInvoiceNumber(),
+      invoiceIssuedAt,
+      meta: {
+        source: "card-checkout",
+        checkoutStatus: String(session.status || ""),
+        paymentStatus: String(session.payment_status || ""),
+        billingCountry,
+        stripeSessionId: String(session.id || ""),
+        stripeCustomerId: String(session.customer || ""),
+        stripePaymentIntentId: String(session.payment_intent?.id || session.payment_intent || "")
+      }
+    });
+
+    user.subscribed = true;
+    await user.save();
+
+    return res.status(201).json({
+      ok: true,
+      message: "Card payment verified and subscription activated.",
+      billingId: String(billing._id),
+      subscribed: true,
+      invoice: buildInvoicePayload(billing)
+    });
+  } catch (error) {
+    const details = error && error.response && error.response.data
+      ? JSON.stringify(error.response.data)
+      : error.message;
+    return res.status(500).json({ error: "Failed to finalize Card checkout.", details });
+  }
+});
+
 router.post("/billing/subscribe", authMiddleware, async (req, res) => {
   try {
     const user = await resolveUser(req);
@@ -446,15 +987,19 @@ router.post("/billing/subscribe", authMiddleware, async (req, res) => {
     const billingEmail = String(req.body.billingEmail || "").trim().toLowerCase();
     const plan = String(req.body.plan || "pro").trim().toLowerCase();
     const currency = String(req.body.currency || "USD").trim().toUpperCase();
-    const amount = Number(req.body.amount || 9);
+    const amount = safePositiveAmount(req.body.amount, 9);
     const billingCountry = String(req.body.billingCountry || "US").trim().toUpperCase();
 
     if (!billingName || !billingEmail || !method) {
       return res.status(400).json({ error: "Billing name, email and payment method are required." });
     }
 
-    if (!["upi", "razorpay", "stripe"].includes(method)) {
+    if (!["upi", "razorpay", "stripe", "card"].includes(method)) {
       return res.status(400).json({ error: "Unsupported billing method." });
+    }
+
+    if (method === "stripe" || method === "card") {
+      return res.status(400).json({ error: "Use /billing/stripe/checkout-session or /billing/card/checkout-session for hosted card payments." });
     }
 
     const billing = await BillingRecord.create({
@@ -467,6 +1012,8 @@ router.post("/billing/subscribe", authMiddleware, async (req, res) => {
       billingName,
       billingEmail,
       transactionRef: String(req.body.transactionRef || `txn_${Date.now()}`),
+      invoiceNumber: buildInvoiceNumber(),
+      invoiceIssuedAt: new Date(),
       meta: {
         source: "web-app",
         billingCountry,
@@ -482,10 +1029,70 @@ router.post("/billing/subscribe", authMiddleware, async (req, res) => {
       ok: true,
       message: "Subscription activated.",
       billingId: String(billing._id),
-      subscribed: true
+      subscribed: true,
+      invoice: buildInvoicePayload(billing)
     });
   } catch (error) {
     return res.status(500).json({ error: "Failed to store billing record.", details: error.message });
+  }
+});
+router.get("/billing/invoices", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const docs = await BillingRecord.find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .select("plan amount currency method status billingName billingEmail transactionRef invoiceNumber invoiceIssuedAt createdAt")
+      .lean();
+
+    const items = docs.map((doc) => ({
+      id: String(doc._id),
+      plan: String(doc.plan || "pro"),
+      amount: Number(doc.amount || 0),
+      currency: String(doc.currency || "USD").toUpperCase(),
+      method: String(doc.method || "stripe"),
+      status: String(doc.status || "pending"),
+      billingName: String(doc.billingName || ""),
+      billingEmail: String(doc.billingEmail || ""),
+      transactionRef: String(doc.transactionRef || ""),
+      invoiceNumber: String(doc.invoiceNumber || ""),
+      issuedAt: doc.invoiceIssuedAt || doc.createdAt,
+      createdAt: doc.createdAt
+    }));
+
+    return res.json({ ok: true, items });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to fetch invoices.", details: error.message });
+  }
+});
+
+router.get("/billing/invoices/:id/download", authMiddleware, async (req, res) => {
+  try {
+    const user = await resolveUser(req);
+    if (!user) {
+      return res.status(401).json({ error: "User not found for current token." });
+    }
+
+    const id = String(req.params.id || "").trim();
+    if (!id) {
+      return res.status(400).json({ error: "Invoice id is required." });
+    }
+
+    const record = await BillingRecord.findOne({ _id: id, userId: user._id });
+    if (!record) {
+      return res.status(404).json({ error: "Invoice not found." });
+    }
+
+    const pdf = await createInvoicePdfBuffer(record, user);
+    const invoiceNumber = String(record.invoiceNumber || `invoice-${String(record._id)}`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${invoiceNumber}.pdf"`);
+    return res.status(200).send(pdf);
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to generate invoice PDF.", details: error.message });
   }
 });
 

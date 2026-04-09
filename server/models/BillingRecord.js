@@ -22,7 +22,7 @@ const billingRecordSchema = new mongoose.Schema(
     },
     method: {
       type: String,
-      enum: ["upi", "razorpay", "stripe"],
+      enum: ["upi", "razorpay", "stripe", "card"],
       required: true
     },
     status: {
@@ -43,6 +43,20 @@ const billingRecordSchema = new mongoose.Schema(
     transactionRef: {
       type: String,
       default: ""
+    },
+    providerSessionId: {
+      type: String,
+      default: "",
+      index: true
+    },
+    invoiceNumber: {
+      type: String,
+      default: "",
+      index: true
+    },
+    invoiceIssuedAt: {
+      type: Date,
+      default: null
     },
     meta: {
       type: Object,

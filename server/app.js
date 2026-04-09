@@ -42,6 +42,12 @@ app.get("/", (_req, res) => {
       "POST /api/assets/passport",
       "POST /api/batch/process-zip",
       "POST /api/billing/subscribe",
+      "POST /api/billing/stripe/checkout-session",
+      "POST /api/billing/stripe/complete",
+      "POST /api/billing/card/checkout-session",
+      "POST /api/billing/card/complete",
+      "GET /api/billing/invoices",
+      "GET /api/billing/invoices/:id/download",
       "GET /api/assets/recent/compressed"
     ]
   });

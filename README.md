@@ -1,4 +1,4 @@
-# ComXpress
+﻿# Com/pass
 
 Com/pass is a SaaS-style image utility app with a single-page frontend and a Node.js backend.
 
@@ -6,7 +6,7 @@ Core capabilities:
 - Image compression (quality-balanced canvas pipeline)
 - Passport photo generation (remove.bg + country-specific size presets + face-position guides)
 - Authentication (signup/signin/JWT + forgot/reset password)
-- Subscription billing flow (UPI, Razorpay, Stripe UI flow)
+- Subscription billing flow (UPI, Razorpay, Card Gateway, Stripe UI flow)
 - User-scoped asset history in MongoDB with grouped workflow records
 - Pro batch upload and processing (5-75 images) with single ZIP download
 - Print-ready passport PDF export (4/6/8 photos per sheet)
@@ -167,6 +167,12 @@ Asset persistence:
 
 Billing:
 - `POST /api/billing/subscribe` (protected)
+- `POST /api/billing/stripe/checkout-session` (protected)
+- `POST /api/billing/stripe/complete` (protected)
+- `POST /api/billing/card/checkout-session` (protected)
+- `POST /api/billing/card/complete` (protected)
+- `GET /api/billing/invoices` (protected)
+- `GET /api/billing/invoices/:id/download` (protected, PDF)
 
 Auth header format for protected routes:
 
@@ -201,8 +207,11 @@ Authorization: Bearer <jwt_token>
 - Per-file and per-group actions: view, download, delete, rename, re-process
 7. Billing:
 - Pricing section and upgrade actions open billing modal/page
-- Payment method UI: UPI / Razorpay / Stripe
-- Successful subscribe call stores billing record and marks user as subscribed
+- Payment method UI: UPI / Razorpay / Card Gateway / Stripe
+- Stripe flow redirects to Stripe Checkout and finalizes on app return
+- Credit/debit card details are entered only on Stripe-hosted checkout (not collected in local app form fields)
+- Successful payment stores billing record, marks user as subscribed, and creates invoice number
+- Invoices drawer/table lists all account invoices and supports PDF download per invoice
 8. Notifications and settings:
 - Notification drawer with actions/events
 - Settings drawer with theme toggle, auth actions, and signed-in state

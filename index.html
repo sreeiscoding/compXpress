@@ -1102,6 +1102,10 @@
       line-height: 1.45;
     }
 
+    .stripe-local-fields {
+      display: none !important;
+    }
+
     .upi-actions {
       display: grid;
       gap: 8px;
@@ -1240,6 +1244,179 @@
       padding: 9px 12px;
       font-family: var(--font-secondary);
       cursor: pointer;
+    }
+
+    .invoice-drawer {
+      width: min(960px, calc(100vw - 28px));
+      right: 14px;
+    }
+
+    .invoice-body {
+      gap: 12px;
+    }
+
+    .invoice-table-wrap {
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 56vh;
+      background: rgba(15, 23, 42, 0.48);
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .invoice-table-wrap::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    .invoice-table th,
+    .invoice-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      text-align: left;
+      font-size: 13px;
+      color: var(--text);
+      font-family: var(--font-secondary);
+    }
+
+    .invoice-table th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .invoice-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .invoice-status.paid {
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid rgba(34, 197, 94, 0.28);
+    }
+
+    .invoice-status.pending {
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.28);
+    }
+
+    .invoice-status.failed {
+      color: #f87171;
+      background: rgba(248, 113, 113, 0.14);
+      border: 1px solid rgba(248, 113, 113, 0.28);
+    }
+
+    .invoice-download-btn {
+      border: 1px solid rgba(148, 163, 184, 0.32);
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-secondary);
+    }
+
+    .invoice-download-btn:hover {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .skeleton-shimmer {
+      position: relative;
+      overflow: hidden;
+      background: rgba(148, 163, 184, 0.14);
+      border-radius: 8px;
+    }
+
+    .skeleton-shimmer::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+      animation: skeleton-shimmer 1.25s ease-in-out infinite;
+    }
+
+    @keyframes skeleton-shimmer {
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .skeleton-line {
+      height: 12px;
+      margin: 6px 0;
+      border-radius: 999px;
+    }
+
+    .skeleton-line.lg {
+      height: 15px;
+      width: 68%;
+    }
+
+    .skeleton-line.md {
+      width: 52%;
+    }
+
+    .skeleton-line.sm {
+      width: 36%;
+    }
+
+    .recent-item.skeleton-item {
+      pointer-events: none;
+    }
+
+    .recent-item.skeleton-item .recent-actions {
+      min-width: 180px;
+    }
+
+    .invoice-table tr.skeleton-row td {
+      padding-top: 14px;
+      padding-bottom: 14px;
+    }
+
+    .invoice-table tr.skeleton-row .skeleton-line {
+      margin: 0;
+      height: 12px;
+      width: 84%;
+    }
+
+    .global-skeleton .preview-shell {
+      opacity: 0.84;
+    }
+
+    .global-skeleton .preview-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgba(15, 23, 42, 0.2);
+      pointer-events: none;
     }
 
     .modal-card {
@@ -3361,6 +3538,11 @@
         max-height: calc(100vh - 24px);
       }
 
+      .invoice-drawer {
+        width: min(98vw, 980px);
+        right: 1vw;
+      }
+
       .coming-soon-tag {
         right: 12px;
       }
@@ -3608,7 +3790,8 @@
 
       .notif-drawer,
       .settings-drawer,
-      .privacy-drawer {
+      .privacy-drawer,
+      .invoice-drawer {
         top: 72px;
         width: 96vw;
       }
@@ -3728,7 +3911,8 @@
 
       .notif-drawer,
       .settings-drawer,
-      .privacy-drawer {
+      .privacy-drawer,
+      .invoice-drawer {
         width: min(360px, 94vw);
         right: 3vw;
       }
@@ -3827,6 +4011,9 @@
         <button id="signUpBtn" class="auth-btn" type="button">Sign Up</button>
       </div>
       <div class="setting-group">
+        <button id="openInvoicesBtn" class="auth-btn" type="button"><i class="fa-solid fa-file-invoice"></i>Invoices</button>
+      </div>
+      <div class="setting-group">
         <p class="setting-label">Color Theme</p>
         <div class="theme-toggle">
           <button id="themeDarkBtn" class="theme-option active" type="button">Dark</button>
@@ -3836,6 +4023,32 @@
       <div class="setting-group">
         <button id="logoutBtn" class="logout-btn" type="button" hidden><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
       </div>
+    </div>
+  </aside>
+
+  <aside id="invoiceDrawer" class="settings-drawer invoice-drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <h3 class="drawer-title">Invoices</h3>
+      <button id="invoiceCloseBtn" class="drawer-close" type="button" aria-label="Close invoices"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="settings-body invoice-body">
+      <p class="billing-subtitle">All invoices synced to your account. Download each invoice as PDF.</p>
+      <div class="invoice-table-wrap">
+        <table class="invoice-table" aria-label="Invoice list">
+          <thead>
+            <tr>
+              <th>Invoice</th>
+              <th>Date</th>
+              <th>Method</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="invoiceTableBody"></tbody>
+        </table>
+      </div>
+      <p id="invoiceDrawerHint" class="billing-method-note">Sign in to view invoice history.</p>
     </div>
   </aside>
 
@@ -4060,6 +4273,7 @@
           <div class="billing-methods" role="tablist" aria-label="Choose payment method">
             <button id="billingMethodUpi" class="billing-method" type="button" aria-controls="billingPanelUpi" aria-selected="false"><i class="fa-solid fa-mobile-screen-button"></i>UPI</button>
             <button id="billingMethodRazorpay" class="billing-method" type="button" aria-controls="billingPanelRazorpay" aria-selected="false"><i class="fa-solid fa-bolt"></i>Razorpay</button>
+            <button id="billingMethodCard" class="billing-method" type="button" aria-controls="billingPanelCard" aria-selected="false"><i class="fa-regular fa-credit-card"></i>Card</button>
             <button id="billingMethodStripe" class="billing-method active" type="button" aria-controls="billingPanelStripe" aria-selected="true"><i class="fa-solid fa-credit-card"></i>Stripe</button>
           </div>
           <div id="billingPanelUpi" class="billing-method-panel" role="tabpanel" aria-label="UPI payment">
@@ -4088,26 +4302,43 @@
             </div>
             <p class="billing-method-note">Checkout via Razorpay gateway with card, UPI, wallet, or netbanking support.</p>
           </div>
+          <div id="billingPanelCard" class="billing-method-panel" role="tabpanel" aria-label="Card payment gateway">
+            <div class="billing-row">
+              <label class="billing-label">Card Gateway (Credit / Debit)</label>
+              <p class="billing-method-note">
+                Use dedicated Card checkout for credit/debit payments. Card details are entered only on the hosted encrypted gateway with real-time network and bank verification.
+              </p>
+            </div>
+            <p class="billing-method-note">Supports Visa, Mastercard, RuPay and major debit/credit cards based on issuer and region.</p>
+          </div>
           <div id="billingPanelStripe" class="billing-method-panel active" role="tabpanel" aria-label="Stripe payment">
             <div class="billing-row">
-              <label class="billing-label" for="billingCardInput">Card Number</label>
-              <input id="billingCardInput" class="billing-input" type="text" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242" />
+              <label class="billing-label">Card Payments (Credit / Debit)</label>
+              <p class="billing-method-note">
+                You will be redirected to Stripe-hosted checkout for end-to-end encrypted card entry. Card validation, 3D Secure, and bank verification are handled securely by Stripe and your issuing bank.
+              </p>
             </div>
-            <div class="billing-split">
-              <div class="billing-row">
-                <label class="billing-label" for="billingExpiryInput">Expiry (MM/YY)</label>
-                <input id="billingExpiryInput" class="billing-input" type="text" maxlength="5" placeholder="MM/YY" />
+            <div class="stripe-local-fields" aria-hidden="true">
+                <div class="billing-row">
+                  <label class="billing-label" for="billingCardInput">Card Number</label>
+                  <input id="billingCardInput" class="billing-input" type="text" inputmode="numeric" maxlength="19" placeholder="Handled on Stripe Checkout" readonly disabled aria-disabled="true" />
+                </div>
+                <div class="billing-split">
+                  <div class="billing-row">
+                    <label class="billing-label" for="billingExpiryInput">Expiry (MM/YY)</label>
+                    <input id="billingExpiryInput" class="billing-input" type="text" maxlength="5" placeholder="Handled on Stripe Checkout" readonly disabled aria-disabled="true" />
+                  </div>
+                  <div class="billing-row">
+                    <label class="billing-label" for="billingCvcInput">CVC</label>
+                    <input id="billingCvcInput" class="billing-input" type="text" inputmode="numeric" maxlength="4" placeholder="Handled on Stripe Checkout" readonly disabled aria-disabled="true" />
+                  </div>
+                </div>
               </div>
-              <div class="billing-row">
-                <label class="billing-label" for="billingCvcInput">CVC</label>
-                <input id="billingCvcInput" class="billing-input" type="text" inputmode="numeric" maxlength="4" placeholder="123" />
-              </div>
-            </div>
-            <p class="billing-method-note">Stripe card checkout with encrypted processing and customer-grade protection.</p>
+            <p class="billing-method-note">Secure Stripe checkout supports both credit and debit cards.</p>
           </div>
         </div>
         <div class="billing-panel">
-          <p class="billing-price">$9/month - Pro Plan</p>
+          <p id="billingPriceText" class="billing-price">$9/month - Pro Plan</p>
           <ul class="billing-list">
             <li>Upload more than 5 images in one workflow</li>
             <li>Priority customer processing experience</li>
@@ -4115,11 +4346,12 @@
           </ul>
           <div class="billing-trust-row">
             <span class="billing-trust-pill"><i class="fa-solid fa-arrows-rotate"></i>Cancel Anytime</span>
-            <span id="billingSecurePaymentPill" class="billing-trust-pill"><i class="fa-solid fa-lock"></i>Secure payment via UPI, Razorpay, Stripe</span>
+            <span id="billingSecurePaymentPill" class="billing-trust-pill"><i class="fa-solid fa-lock"></i>Secure payment via UPI, Razorpay, Card Gateway, Stripe</span>
             <span class="billing-trust-pill"><i class="fa-solid fa-receipt"></i>Instant Invoice</span>
           </div>
           <div class="billing-actions">
             <button id="billingPayBtn" class="billing-pay" type="button">Subscribe & Continue</button>
+            <button id="billingInvoicesBtn" class="billing-cancel" type="button">View Invoices</button>
             <button id="billingCancelBtn" class="billing-cancel" type="button">Cancel</button>
           </div>
         </div>
@@ -4354,7 +4586,7 @@
           </article>
           <article class="pricing-card featured">
             <h3 class="pricing-plan">Pro</h3>
-            <p class="pricing-price">$9 / month</p>
+            <p id="proPricingPrice" class="pricing-price">$9 / month</p>
             <ul class="pricing-list">
               <li>Unlimited uploads and batch-ready workflow</li>
               <li>Priority processing experience</li>
@@ -4362,7 +4594,7 @@
             </ul>
             <div class="pricing-trust-row" aria-label="Pro plan trust signals">
               <span class="pricing-trust-pill"><i class="fa-solid fa-arrows-rotate"></i>Cancel Anytime</span>
-              <span class="pricing-trust-pill"><i class="fa-solid fa-lock"></i>Secure payment via UPI, Razorpay, Stripe</span>
+              <span class="pricing-trust-pill"><i class="fa-solid fa-lock"></i>Secure payment via UPI, Razorpay, Card Gateway, Stripe</span>
             </div>
           </article>
         </div>
@@ -4540,13 +4772,23 @@
     const billingRazorEmailInput = document.getElementById("billingRazorEmailInput");
     const billingMethodUpi = document.getElementById("billingMethodUpi");
     const billingMethodRazorpay = document.getElementById("billingMethodRazorpay");
+    const billingMethodCard = document.getElementById("billingMethodCard");
     const billingMethodStripe = document.getElementById("billingMethodStripe");
     const billingPanelUpi = document.getElementById("billingPanelUpi");
     const billingPanelRazorpay = document.getElementById("billingPanelRazorpay");
+    const billingPanelCard = document.getElementById("billingPanelCard");
     const billingPanelStripe = document.getElementById("billingPanelStripe");
     const billingPayBtn = document.getElementById("billingPayBtn");
+    const billingPriceText = document.getElementById("billingPriceText");
+    const billingInvoicesBtn = document.getElementById("billingInvoicesBtn");
     const billingCancelBtn = document.getElementById("billingCancelBtn");
+    const openInvoicesBtn = document.getElementById("openInvoicesBtn");
+    const invoiceDrawer = document.getElementById("invoiceDrawer");
+    const invoiceCloseBtn = document.getElementById("invoiceCloseBtn");
+    const invoiceTableBody = document.getElementById("invoiceTableBody");
+    const invoiceDrawerHint = document.getElementById("invoiceDrawerHint");
     const planPill = document.getElementById("planPill");
+    const proPricingPrice = document.getElementById("proPricingPrice");
     const pricingUpgradeBtn = document.getElementById("pricingUpgradeBtn");
     const recentCompressedList = document.getElementById("recentCompressedList");
     const recentReloadBtn = document.getElementById("recentReloadBtn");
@@ -4618,6 +4860,7 @@
     let isPrivacyDrawerOpen = false;
     let isNotifDrawerOpen = false;
     let isSettingsDrawerOpen = false;
+    let isInvoiceDrawerOpen = false;
     let isBillingPageOpen = false;
     let isMobileMenuOpen = false;
     let isPassportSourceMenuOpen = false;
@@ -4648,6 +4891,9 @@
     let isRecentMoreMenuOpen = false;
     const recentThumbnailMap = new Map();
     let pendingBillingCheckout = false;
+    let invoiceItems = [];
+    let isRecentLoading = false;
+    let isInvoiceLoading = false;
     let apiReachabilityChecked = false;
     let freeTierUsageState = { monthKey: "", used: 0, limit: 10, remaining: 10, includes: "remove.bg calls" };
     let isApiReachable = true;
@@ -4690,19 +4936,19 @@
       germany: { label: "Germany", widthMm: 35, heightMm: 45, headMinPct: 0.70, headMaxPct: 0.80 }
     };
     const BILLING_COUNTRY_CONFIG = {
-      IN: { label: "India", currency: "INR", methods: ["upi", "razorpay", "stripe"] },
-      US: { label: "United States", currency: "USD", methods: ["stripe"] },
-      GB: { label: "United Kingdom", currency: "GBP", methods: ["stripe"] },
-      CA: { label: "Canada", currency: "CAD", methods: ["stripe"] },
-      AU: { label: "Australia", currency: "AUD", methods: ["stripe"] },
-      AE: { label: "UAE", currency: "AED", methods: ["stripe"] },
-      SG: { label: "Singapore", currency: "SGD", methods: ["stripe"] },
-      DE: { label: "Germany", currency: "EUR", methods: ["stripe"] },
-      FR: { label: "France", currency: "EUR", methods: ["stripe"] },
-      JP: { label: "Japan", currency: "JPY", methods: ["stripe"] },
-      CN: { label: "China", currency: "CNY", methods: ["stripe"] },
-      RU: { label: "Russia", currency: "RUB", methods: ["stripe"] },
-      OTHER: { label: "Other", currency: "USD", methods: ["stripe"] }
+      IN: { label: "India", currency: "INR", methods: ["upi", "razorpay", "card", "stripe"] },
+      US: { label: "United States", currency: "USD", methods: ["card", "stripe"] },
+      GB: { label: "United Kingdom", currency: "GBP", methods: ["card", "stripe"] },
+      CA: { label: "Canada", currency: "CAD", methods: ["card", "stripe"] },
+      AU: { label: "Australia", currency: "AUD", methods: ["card", "stripe"] },
+      AE: { label: "UAE", currency: "AED", methods: ["card", "stripe"] },
+      SG: { label: "Singapore", currency: "SGD", methods: ["card", "stripe"] },
+      DE: { label: "Germany", currency: "EUR", methods: ["card", "stripe"] },
+      FR: { label: "France", currency: "EUR", methods: ["card", "stripe"] },
+      JP: { label: "Japan", currency: "JPY", methods: ["card", "stripe"] },
+      CN: { label: "China", currency: "CNY", methods: ["card", "stripe"] },
+      RU: { label: "Russia", currency: "RUB", methods: ["card", "stripe"] },
+      OTHER: { label: "Other", currency: "USD", methods: ["card", "stripe"] }
     };
     function resolveApiBaseUrl() {
       try {
@@ -5210,8 +5456,31 @@
       }
     }
 
+    function renderRecentSkeletonRows(count = 4) {
+      recentCompressedList.innerHTML = "";
+      for (let i = 0; i < count; i += 1) {
+        const row = document.createElement("li");
+        row.className = "recent-item skeleton-item";
+        row.innerHTML = `
+          <div class="recent-meta">
+            <div class="skeleton-line lg skeleton-shimmer"></div>
+            <div class="skeleton-line md skeleton-shimmer"></div>
+          </div>
+          <div class="recent-actions">
+            <div class="skeleton-line sm skeleton-shimmer"></div>
+          </div>
+        `;
+        recentCompressedList.appendChild(row);
+      }
+      syncRecentToolsCheckboxes();
+    }
+
     function renderRecentCompressed() {
       pruneRecentSelection();
+      if (isRecentLoading) {
+        renderRecentSkeletonRows(4);
+        return;
+      }
       const recent = getRecentFilteredGroups();
       recentCompressedList.innerHTML = "";
 
@@ -5489,11 +5758,14 @@
     async function fetchRecentCompressedFromBackend() {
       const authToken = getAuthToken();
       if (!authToken) {
+        isRecentLoading = false;
         writeRecentCompressed([]);
         renderRecentCompressed();
         return;
       }
 
+      isRecentLoading = true;
+      renderRecentCompressed();
       try {
         const groupCandidates = buildEndpointCandidates("/assets/recent/groups");
         const { response } = await fetchWithAuthFallback(groupCandidates, authToken, { method: "GET" });
@@ -5532,6 +5804,8 @@
         writeRecentCompressed([]);
         expandedRecentWorkflows = [];
         setStatus(error.message || "Could not fetch recent compressed files.");
+      } finally {
+        isRecentLoading = false;
       }
 
       renderRecentCompressed();
@@ -5935,6 +6209,175 @@
       settingsBtn.setAttribute("aria-expanded", String(open));
     }
 
+    function setInvoiceDrawerState(open) {
+      if (!open && invoiceDrawer.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
+      isInvoiceDrawerOpen = open;
+      invoiceDrawer.classList.toggle("open", open);
+      invoiceDrawer.setAttribute("aria-hidden", String(!open));
+    }
+
+    function getInvoiceStatusClass(status) {
+      const value = String(status || "").toLowerCase();
+      if (value === "paid" || value === "failed" || value === "pending") return value;
+      return "pending";
+    }
+
+    function sanitizeText(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function formatInvoiceAmount(amount, currency) {
+      const value = Number(amount || 0);
+      const code = String(currency || "USD").toUpperCase();
+      try {
+        return new Intl.NumberFormat("en-US", { style: "currency", currency: code }).format(value);
+      } catch (error) {
+        return `${code} ${value.toFixed(2)}`;
+      }
+    }
+
+    function renderInvoiceTable() {
+      if (!invoiceTableBody) return;
+      invoiceTableBody.innerHTML = "";
+
+      if (isInvoiceLoading) {
+        if (invoiceDrawerHint) {
+          invoiceDrawerHint.textContent = "Loading invoice history...";
+        }
+        for (let i = 0; i < 4; i += 1) {
+          const tr = document.createElement("tr");
+          tr.className = "skeleton-row";
+          tr.innerHTML = `
+            <td><div class="skeleton-line skeleton-shimmer"></div></td>
+            <td><div class="skeleton-line skeleton-shimmer"></div></td>
+            <td><div class="skeleton-line skeleton-shimmer"></div></td>
+            <td><div class="skeleton-line skeleton-shimmer"></div></td>
+            <td><div class="skeleton-line skeleton-shimmer"></div></td>
+            <td><div class="skeleton-line skeleton-shimmer"></div></td>
+          `;
+          invoiceTableBody.appendChild(tr);
+        }
+        return;
+      }
+
+      if (!isSignedIn) {
+        if (invoiceDrawerHint) {
+          invoiceDrawerHint.textContent = "Sign in to view and download your account invoices.";
+        }
+        return;
+      }
+
+      if (!invoiceItems.length) {
+        if (invoiceDrawerHint) {
+          invoiceDrawerHint.textContent = "No invoices available yet. Complete a billing transaction to generate one.";
+        }
+        return;
+      }
+
+      if (invoiceDrawerHint) {
+        invoiceDrawerHint.textContent = `Showing ${invoiceItems.length} invoice${invoiceItems.length > 1 ? "s" : ""} from your account.`;
+      }
+
+      for (const item of invoiceItems) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${sanitizeText(item.invoiceNumber || "-")}</td>
+          <td>${sanitizeText(formatDateTime(item.issuedAt || item.createdAt))}</td>
+          <td>${sanitizeText(String(item.method || "stripe").toUpperCase())}</td>
+          <td>${sanitizeText(formatInvoiceAmount(item.amount, item.currency))}</td>
+          <td><span class="invoice-status ${getInvoiceStatusClass(item.status)}">${sanitizeText(item.status || "pending")}</span></td>
+          <td><button class="invoice-download-btn" data-id="${sanitizeText(item.id || "")}" type="button"><i class="fa-solid fa-download"></i>Download</button></td>
+        `;
+        invoiceTableBody.appendChild(tr);
+      }
+    }
+
+    async function fetchInvoicesFromBackend() {
+      const authToken = getAuthToken();
+      if (!authToken || !isSignedIn) {
+        isInvoiceLoading = false;
+        invoiceItems = [];
+        renderInvoiceTable();
+        return;
+      }
+
+      isInvoiceLoading = true;
+      renderInvoiceTable();
+      try {
+        const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates("/billing/invoices"), {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${authToken}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error(data.details || data.error || "Could not fetch invoices.");
+        }
+        invoiceItems = Array.isArray(data.items) ? data.items : [];
+      } finally {
+        isInvoiceLoading = false;
+      }
+      renderInvoiceTable();
+    }
+
+    async function downloadInvoiceById(id) {
+      const authToken = getAuthToken();
+      if (!authToken || !isSignedIn) {
+        setStatus("Sign in required to download invoice.");
+        return;
+      }
+      const safeId = String(id || "").trim();
+      if (!safeId) {
+        setStatus("Invoice id is missing.");
+        return;
+      }
+
+      startActionLoader("Preparing invoice download...");
+      try {
+        const { response } = await fetchWithAuthFallback(
+          buildEndpointCandidates(`/billing/invoices/${encodeURIComponent(safeId)}/download`),
+          authToken,
+          { method: "GET" }
+        );
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.details || data.error || "Could not download invoice.");
+        }
+        const blob = await response.blob();
+        const current = invoiceItems.find((item) => String(item.id || "") === safeId);
+        const filename = `${String((current && current.invoiceNumber) || "invoice").replace(/[^\w-]+/g, "_")}.pdf`;
+        downloadBlob(blob, filename);
+        addNotification("Download Complete", `Invoice ${current && current.invoiceNumber ? current.invoiceNumber : ""} downloaded successfully.`);
+      } finally {
+        stopActionLoader();
+      }
+    }
+
+    async function openInvoicesDrawer() {
+      if (!isSignedIn) {
+        setStatus("Sign in to view invoice history.");
+        setAuthFeedback("Sign in to view invoice history.");
+        setAuthPageState(true);
+        return;
+      }
+      setInvoiceDrawerState(true);
+      startActionLoader("Loading invoices...");
+      try {
+        await fetchInvoicesFromBackend();
+      } catch (error) {
+        setStatus(error.message || "Could not fetch invoices.");
+      } finally {
+        stopActionLoader();
+      }
+    }
+
     function setMobileMenuState(open) {
       isMobileMenuOpen = open;
       navLinks.classList.toggle("open", open);
@@ -6157,19 +6600,31 @@
       }
     }
 
+    function setGlobalSkeletonState(loading) {
+      const isLoading = !!loading;
+      document.body.classList.toggle("global-skeleton", isLoading);
+      originalPreviewShell.classList.toggle("skeleton-shimmer", isLoading);
+      compressedPreviewShell.classList.toggle("skeleton-shimmer", isLoading);
+      passportPreviewShell.classList.toggle("skeleton-shimmer", isLoading);
+    }
+
     function startActionLoader(message) {
       activeLoaderCount += 1;
+      if (activeLoaderCount === 1) {
+        setGlobalSkeletonState(true);
+      }
       actionLoaderText.textContent = message || "Processing...";
       actionLoader.classList.add("open");
       actionLoader.setAttribute("aria-hidden", "false");
       if (actionLoaderForceTimer) {
         clearTimeout(actionLoaderForceTimer);
       }
-      actionLoaderForceTimer = setTimeout(() => {
-        activeLoaderCount = 0;
-        actionLoader.classList.remove("open");
-        actionLoader.setAttribute("aria-hidden", "true");
-        actionLoaderText.textContent = "Processing...";
+        actionLoaderForceTimer = setTimeout(() => {
+          activeLoaderCount = 0;
+          setGlobalSkeletonState(false);
+          actionLoader.classList.remove("open");
+          actionLoader.setAttribute("aria-hidden", "true");
+          actionLoaderText.textContent = "Processing...";
         actionLoaderForceTimer = null;
       }, 3000);
     }
@@ -6177,6 +6632,7 @@
     function stopActionLoader() {
       activeLoaderCount = Math.max(0, activeLoaderCount - 1);
       if (activeLoaderCount > 0) return;
+      setGlobalSkeletonState(false);
       actionLoader.classList.remove("open");
       actionLoader.setAttribute("aria-hidden", "true");
       actionLoaderText.textContent = "Processing...";
@@ -6212,7 +6668,8 @@
     function getBillingMethodLabel(method) {
       if (method === "upi") return "UPI";
       if (method === "razorpay") return "Razorpay";
-      return "Stripe";
+      if (method === "card") return "Card Gateway";
+      return "Stripe (Credit/Debit Cards)";
     }
 
     function isMobileClient() {
@@ -6241,9 +6698,37 @@
       return BILLING_COUNTRY_CONFIG[key] || BILLING_COUNTRY_CONFIG.OTHER;
     }
 
+    function getRegionalPlanMeta(countryCode = selectedBillingCountry) {
+      const code = String(countryCode || "").toUpperCase();
+      if (code === "IN") {
+        return {
+          amount: 499,
+          currency: "INR",
+          pricingHtml: "<i class=\"fa-solid fa-indian-rupee-sign\"></i>499 / month",
+          billingHtml: "<i class=\"fa-solid fa-indian-rupee-sign\"></i>499/month - Pro Plan"
+        };
+      }
+      return {
+        amount: 9,
+        currency: "USD",
+        pricingHtml: "<i class=\"fa-solid fa-dollar-sign\"></i>9 / month",
+        billingHtml: "<i class=\"fa-solid fa-dollar-sign\"></i>9/month - Pro Plan"
+      };
+    }
+
+    function updateRegionalPricingUI(countryCode = selectedBillingCountry) {
+      const plan = getRegionalPlanMeta(countryCode);
+      if (proPricingPrice) {
+        proPricingPrice.innerHTML = plan.pricingHtml;
+      }
+      if (billingPriceText) {
+        billingPriceText.innerHTML = plan.billingHtml;
+      }
+    }
+
     function getAvailableBillingMethods(countryCode = selectedBillingCountry) {
       const config = getBillingCountryConfig(countryCode);
-      return Array.isArray(config.methods) && config.methods.length ? config.methods : ["stripe"];
+      return Array.isArray(config.methods) && config.methods.length ? config.methods : ["card", "stripe"];
     }
 
     function setBillingCountryMenuState(open) {
@@ -6291,6 +6776,7 @@
       const config = getBillingCountryConfig(resolved);
       const methods = getAvailableBillingMethods(resolved);
       const activeOption = opts.keepAutoSelection ? "AUTO" : resolved;
+      updateRegionalPricingUI(resolved);
 
       if (billingCountryLabel) {
         billingCountryLabel.textContent = activeOption === "AUTO"
@@ -6312,6 +6798,7 @@
       const methodUi = {
         upi: { btn: billingMethodUpi, panel: billingPanelUpi, label: "UPI" },
         razorpay: { btn: billingMethodRazorpay, panel: billingPanelRazorpay, label: "Razorpay" },
+        card: { btn: billingMethodCard, panel: billingPanelCard, label: "Card" },
         stripe: { btn: billingMethodStripe, panel: billingPanelStripe, label: "Stripe" }
       };
 
@@ -6344,7 +6831,8 @@
     function buildUpiPaymentUrl() {
       const payeeVpa = "comxpress@upi";
       const payeeName = "Com/pass Pro";
-      const amount = "9.00";
+      const planMeta = getRegionalPlanMeta(selectedBillingCountry);
+      const amount = Number(planMeta.amount || 499).toFixed(2);
       const currency = "INR";
       const note = "Com/pass Pro Monthly Subscription";
       const txnRef = `COMX-${Date.now()}`;
@@ -6367,20 +6855,23 @@
     }
 
     function setBillingMethod(method) {
-      const candidate = method === "upi" || method === "razorpay" ? method : "stripe";
+      const candidate = method === "upi" || method === "razorpay" || method === "card" ? method : "stripe";
       const available = getAvailableBillingMethods(selectedBillingCountry);
       const resolved = available.includes(candidate) ? candidate : (available[0] || "stripe");
       selectedBillingMethod = resolved;
 
       billingMethodUpi.classList.toggle("active", resolved === "upi");
       billingMethodRazorpay.classList.toggle("active", resolved === "razorpay");
+      billingMethodCard.classList.toggle("active", resolved === "card");
       billingMethodStripe.classList.toggle("active", resolved === "stripe");
       billingMethodUpi.setAttribute("aria-selected", String(resolved === "upi"));
       billingMethodRazorpay.setAttribute("aria-selected", String(resolved === "razorpay"));
+      billingMethodCard.setAttribute("aria-selected", String(resolved === "card"));
       billingMethodStripe.setAttribute("aria-selected", String(resolved === "stripe"));
 
       billingPanelUpi.classList.toggle("active", resolved === "upi");
       billingPanelRazorpay.classList.toggle("active", resolved === "razorpay");
+      billingPanelCard.classList.toggle("active", resolved === "card");
       billingPanelStripe.classList.toggle("active", resolved === "stripe");
       if (resolved !== "upi") {
         upiQrWrap.classList.remove("open");
@@ -6390,8 +6881,10 @@
         billingPayBtn.innerHTML = "<i class=\"fa-solid fa-mobile-screen-button\"></i> Subscribe with UPI";
       } else if (resolved === "razorpay") {
         billingPayBtn.innerHTML = "<i class=\"fa-solid fa-bolt\"></i> Subscribe with Razorpay";
+      } else if (resolved === "card") {
+        billingPayBtn.innerHTML = "<i class=\"fa-regular fa-credit-card\"></i> Continue to Secure Card Checkout";
       } else {
-        billingPayBtn.innerHTML = "<i class=\"fa-solid fa-credit-card\"></i> Subscribe with Stripe";
+        billingPayBtn.innerHTML = "<i class=\"fa-solid fa-shield-halved\"></i> Continue to Secure Stripe Checkout";
       }
       updateUpiActionAvailability();
     }
@@ -6579,8 +7072,8 @@
 
       const payload = {
         plan: "pro",
-        amount: 9,
-        currency: getBillingCountryConfig(selectedBillingCountry).currency,
+        amount: getRegionalPlanMeta(selectedBillingCountry).amount,
+        currency: getRegionalPlanMeta(selectedBillingCountry).currency,
         method: billingData.method,
         billingCountry: selectedBillingCountry,
         billingName: billingData.name,
@@ -6603,6 +7096,131 @@
       return data;
     }
 
+    async function requestHostedCheckoutSession(method, billingData) {
+      const authToken = getAuthToken();
+      if (!authToken) {
+        throw new Error("Sign in required for hosted checkout.");
+      }
+      const provider = method === "card" ? "card" : "stripe";
+      const endpoint = provider === "card" ? "/billing/card/checkout-session" : "/billing/stripe/checkout-session";
+
+      const payload = {
+        plan: "pro",
+        amount: getRegionalPlanMeta(selectedBillingCountry).amount,
+        currency: getRegionalPlanMeta(selectedBillingCountry).currency,
+        billingCountry: selectedBillingCountry,
+        billingName: billingData.name,
+        billingEmail: billingData.email,
+        frontendReturnUrl: `${window.location.origin}${window.location.pathname}`
+      };
+
+      const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates(endpoint), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(data.details || data.error || "Unable to create hosted checkout session.");
+      }
+
+      if (!data.checkoutUrl) {
+        throw new Error("Checkout URL was not returned.");
+      }
+
+      return data;
+    }
+
+    async function finalizeStripeCheckoutFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const checkoutStatus = String(params.get("checkout") || "").toLowerCase();
+      const provider = String(params.get("provider") || "").toLowerCase();
+      if (provider !== "stripe" && provider !== "card") return;
+      const providerTitle = provider === "card" ? "Card" : "Stripe";
+      const completeEndpoint = provider === "card" ? "/billing/card/complete" : "/billing/stripe/complete";
+
+      const clearCheckoutParams = () => {
+        try {
+          const current = new URL(window.location.href);
+          current.searchParams.delete("checkout");
+          current.searchParams.delete("provider");
+          current.searchParams.delete("session_id");
+          const next = `${current.pathname}${current.search}${current.hash}`;
+          window.history.replaceState({}, "", next);
+        } catch (error) {
+        }
+      };
+
+      if (checkoutStatus === "cancelled") {
+        clearCheckoutParams();
+        setStatus(`${providerTitle} checkout was cancelled. You can retry anytime.`);
+        addNotification("Checkout Cancelled", `${providerTitle} checkout was cancelled before payment.`);
+        return;
+      }
+
+      if (checkoutStatus !== "success") {
+        return;
+      }
+
+      const authToken = getAuthToken();
+      const sessionId = String(params.get("session_id") || "").trim();
+      if (!authToken) {
+        setStatus(`Sign in to finalize your ${providerTitle} checkout.`);
+        pendingBillingCheckout = true;
+        setAuthPageState(true);
+        return;
+      }
+      if (!sessionId) {
+        clearCheckoutParams();
+        setStatus(`${providerTitle} session id is missing. Please retry checkout.`);
+        return;
+      }
+
+      startActionLoader(`Finalizing ${providerTitle} payment...`);
+      try {
+        const { response, data } = await fetchJsonWithFallback(buildEndpointCandidates(completeEndpoint), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            sessionId,
+            plan: "pro",
+            amount: getRegionalPlanMeta(selectedBillingCountry).amount,
+            currency: getRegionalPlanMeta(selectedBillingCountry).currency,
+            billingCountry: selectedBillingCountry,
+            billingName: billingNameInput.value.trim(),
+            billingEmail: normalizeEmail(billingEmailInput.value)
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(data.details || data.error || `Could not finalize ${providerTitle} payment.`);
+        }
+
+        isSubscribed = true;
+        pendingBillingCheckout = false;
+        updatePricingState();
+        await syncAuthFromBackend().catch(() => {});
+
+        const invoice = data && data.invoice ? data.invoice : null;
+        const invoiceNo = invoice && invoice.invoiceNumber ? invoice.invoiceNumber : "-";
+        setStatus(`${providerTitle} payment confirmed. Invoice ${invoiceNo} generated.`);
+        addNotification("Invoice Generated", `${providerTitle} payment confirmed. Invoice ${invoiceNo} is now available in your account records.`);
+        setBillingPageState(false);
+        setUpgradeModalState(false);
+      } catch (error) {
+        setStatus(error.message || `Could not finalize ${providerTitle} payment.`);
+        addNotification(`${providerTitle} Checkout Error`, error.message || `Could not finalize ${providerTitle} payment.`);
+      } finally {
+        stopActionLoader();
+        clearCheckoutParams();
+      }
+    }
     async function requestBackendAuth(mode, email, password, name = "") {
       const endpoint = mode === "signup" ? "/signup" : "/login";
       const payload = mode === "signup"
@@ -6764,9 +7382,11 @@
       updatePricingState();
       refreshFreeTierUsage();
       fetchRecentCompressedFromBackend();
+      fetchInvoicesFromBackend().catch(() => {});
       if (getAuthToken()) {
         syncAuthFromBackend().then(() => {
           fetchRecentCompressedFromBackend();
+          fetchInvoicesFromBackend().catch(() => {});
         });
       }
     }
@@ -6784,6 +7404,7 @@
         signinPromptText.textContent = "Signed in. Enjoy your personalized experience.";
         signinPrompt.style.display = "none";
         authActions.style.display = "none";
+        openInvoicesBtn.disabled = false;
         logoutBtn.disabled = false;
         logoutBtn.hidden = false;
         logoutBtn.style.display = "inline-flex";
@@ -6799,6 +7420,7 @@
         signinPromptText.textContent = "You're not signed in, signing for better experience.";
         signinPrompt.style.display = "flex";
         authActions.style.display = "grid";
+        openInvoicesBtn.disabled = false;
         logoutBtn.disabled = true;
         logoutBtn.hidden = true;
         logoutBtn.style.display = "none";
@@ -6889,6 +7511,7 @@
       updatePricingState();
       await syncAuthFromBackend().catch(() => {});
       fetchRecentCompressedFromBackend();
+      fetchInvoicesFromBackend().catch(() => {});
 
       if (pendingBillingCheckout) {
         setStatus("Authentication successful. Continue billing to activate Pro.");
@@ -7025,6 +7648,7 @@
       updatePricingState();
       await syncAuthFromBackend().catch(() => {});
       fetchRecentCompressedFromBackend();
+      fetchInvoicesFromBackend().catch(() => {});
 
       if (pendingBillingCheckout) {
         setStatus(`${identity.providerName} authentication successful. Continue billing to activate Pro.`);
@@ -7090,25 +7714,10 @@
         return { name, email, method: selectedBillingMethod };
       }
 
-      const cardNumber = billingCardInput.value.replace(/\s+/g, "");
-      const expiry = billingExpiryInput.value.trim();
-      const cvc = billingCvcInput.value.trim();
-      if (!cardNumber || !expiry || !cvc) {
-        setStatus("Please fill all Stripe card details.");
-        return null;
+      if (selectedBillingMethod === "stripe") {
+        return { name, email, method: selectedBillingMethod };
       }
-      if (!/^\d{16}$/.test(cardNumber)) {
-        setStatus("Card number must be 16 digits.");
-        return null;
-      }
-      if (!/^\d{2}\/\d{2}$/.test(expiry)) {
-        setStatus("Expiry must use MM/YY format.");
-        return null;
-      }
-      if (!/^\d{3,4}$/.test(cvc)) {
-        setStatus("CVC must be 3 or 4 digits.");
-        return null;
-      }
+
       return { name, email, method: selectedBillingMethod };
     }
 
@@ -7125,8 +7734,26 @@
         return;
       }
 
+      if (billingData.method === "stripe" || billingData.method === "card") {
+        const providerTitle = billingData.method === "card" ? "Card" : "Stripe";
+        startActionLoader(`Redirecting to ${providerTitle} checkout...`);
+        try {
+          const checkoutData = await requestHostedCheckoutSession(billingData.method, billingData);
+          pendingBillingCheckout = true;
+          setStatus(`Redirecting to secure ${providerTitle} checkout...`);
+          window.location.href = checkoutData.checkoutUrl;
+          return;
+        } catch (error) {
+          stopActionLoader();
+          setStatus(error.message || `Could not start ${providerTitle} checkout. Please retry.`);
+          addNotification(`${providerTitle} Checkout Error`, error.message || `Could not start ${providerTitle} checkout.`);
+          return;
+        }
+      }
+
       try {
-        await storeBillingToBackend(billingData);
+        const billingResponse = await storeBillingToBackend(billingData);
+        isSubscribed = !!(billingResponse && billingResponse.subscribed);
       } catch (error) {
         setStatus(error.message || "Could not complete billing. Please retry.");
         return;
@@ -7148,12 +7775,14 @@
     }
 
     function formatBillingCardInput() {
+      if (!billingCardInput) return;
       const digits = billingCardInput.value.replace(/\D/g, "").slice(0, 16);
       const groups = digits.match(/.{1,4}/g) || [];
       billingCardInput.value = groups.join(" ");
     }
 
     function formatBillingExpiryInput() {
+      if (!billingExpiryInput) return;
       const digits = billingExpiryInput.value.replace(/\D/g, "").slice(0, 4);
       if (digits.length <= 2) {
         billingExpiryInput.value = digits;
@@ -7163,6 +7792,7 @@
     }
 
     function formatBillingCvcInput() {
+      if (!billingCvcInput) return;
       billingCvcInput.value = billingCvcInput.value.replace(/\D/g, "").slice(0, 4);
     }
 
@@ -8093,7 +8723,10 @@
       setPrivacyDrawerState(false);
       setNotifDrawerState(false);
       setSettingsDrawerState(false);
+      setInvoiceDrawerState(false);
       setLogoutModalState(false);
+      invoiceItems = [];
+      renderInvoiceTable();
       renderRecentCompressed();
       setStatus("You have been logged out.");
     }
@@ -8150,6 +8783,9 @@
       if (isSettingsDrawerOpen) {
         setSettingsDrawerState(false);
       }
+      if (isInvoiceDrawerOpen) {
+        setInvoiceDrawerState(false);
+      }
       setPrivacyDrawerState(!isPrivacyDrawerOpen);
     });
 
@@ -8167,6 +8803,9 @@
       }
       if (isSettingsDrawerOpen) {
         setSettingsDrawerState(false);
+      }
+      if (isInvoiceDrawerOpen) {
+        setInvoiceDrawerState(false);
       }
       setNotifDrawerState(!isNotifDrawerOpen);
     });
@@ -8186,11 +8825,40 @@
       if (isNotifDrawerOpen) {
         setNotifDrawerState(false);
       }
+      if (isInvoiceDrawerOpen) {
+        setInvoiceDrawerState(false);
+      }
       setSettingsDrawerState(!isSettingsDrawerOpen);
     });
 
     settingsCloseBtn.addEventListener("click", () => {
       setSettingsDrawerState(false);
+    });
+
+    openInvoicesBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (isSettingsDrawerOpen) {
+        setSettingsDrawerState(false);
+      }
+      openInvoicesDrawer();
+    });
+
+    billingInvoicesBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openInvoicesDrawer();
+    });
+
+    invoiceCloseBtn.addEventListener("click", () => {
+      setInvoiceDrawerState(false);
+    });
+
+    invoiceTableBody.addEventListener("click", (e) => {
+      const btn = e.target.closest(".invoice-download-btn");
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const id = btn.getAttribute("data-id");
+      downloadInvoiceById(id);
     });
 
     signinPrompt.addEventListener("click", (e) => {
@@ -8314,6 +8982,10 @@
       setBillingMethod("razorpay");
     });
 
+    billingMethodCard.addEventListener("click", () => {
+      setBillingMethod("card");
+    });
+
     billingMethodStripe.addEventListener("click", () => {
       setBillingMethod("stripe");
     });
@@ -8383,9 +9055,9 @@
       updateUpiActionAvailability();
     });
 
-    billingCardInput.addEventListener("input", formatBillingCardInput);
-    billingExpiryInput.addEventListener("input", formatBillingExpiryInput);
-    billingCvcInput.addEventListener("input", formatBillingCvcInput);
+    if (billingCardInput) billingCardInput.addEventListener("input", formatBillingCardInput);
+    if (billingExpiryInput) billingExpiryInput.addEventListener("input", formatBillingExpiryInput);
+    if (billingCvcInput) billingCvcInput.addEventListener("input", formatBillingCvcInput);
     billingRazorPhoneInput.addEventListener("input", formatRazorPhoneInput);
     upiQrImage.addEventListener("error", () => {
       setStatus("Could not load QR image. Use Open UPI App on mobile to continue.");
@@ -8843,6 +9515,9 @@
       if (isSettingsDrawerOpen && !settingsDrawer.contains(e.target) && !settingsBtn.contains(e.target)) {
         setSettingsDrawerState(false);
       }
+      if (isInvoiceDrawerOpen && !invoiceDrawer.contains(e.target) && !e.target.closest("#openInvoicesBtn") && !e.target.closest("#billingInvoicesBtn")) {
+        setInvoiceDrawerState(false);
+      }
     });
 
     document.addEventListener("keydown", (e) => {
@@ -8869,6 +9544,10 @@
         }
         if (isBillingCountryMenuOpen) {
           setBillingCountryMenuState(false);
+          return;
+        }
+        if (isInvoiceDrawerOpen) {
+          setInvoiceDrawerState(false);
           return;
         }
         if (authPage.classList.contains("open")) {
@@ -9053,10 +9732,12 @@
     restoreBillingPageState();
     renderFileQueue();
     renderNotifications();
+    renderInvoiceTable();
     restoreAppState();
     openResetFromLocationHash();
     warnIfApiLikelyMisconfigured();
     checkApiConnectivity();
+    finalizeStripeCheckoutFromQuery().catch(() => {});
 
     window.addEventListener("beforeunload", () => {
       for (const timer of toastTimers.values()) {
