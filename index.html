@@ -4576,7 +4576,7 @@
         <div class="pricing-grid">
           <article class="pricing-card">
             <h3 class="pricing-plan">Free</h3>
-            <p class="pricing-price">$0 / month</p>
+            <p id="freePricingPrice" class="pricing-price">$0 / month</p>
             <ul class="pricing-list">
               <li>Upload up to 5 images at once (Free)</li>
               <li id="freeTierUsagePricing">Free monthly usage: 0/10 images used this month (includes remove.bg calls)</li>
@@ -4789,6 +4789,7 @@
     const invoiceDrawerHint = document.getElementById("invoiceDrawerHint");
     const planPill = document.getElementById("planPill");
     const proPricingPrice = document.getElementById("proPricingPrice");
+    const freePricingPrice = document.getElementById("freePricingPrice");
     const pricingUpgradeBtn = document.getElementById("pricingUpgradeBtn");
     const recentCompressedList = document.getElementById("recentCompressedList");
     const recentReloadBtn = document.getElementById("recentReloadBtn");
@@ -6704,6 +6705,7 @@
         return {
           amount: 499,
           currency: "INR",
+          freePricingHtml: "<i class=\"fa-solid fa-indian-rupee-sign\"></i>0 / month",
           pricingHtml: "<i class=\"fa-solid fa-indian-rupee-sign\"></i>499 / month",
           billingHtml: "<i class=\"fa-solid fa-indian-rupee-sign\"></i>499/month - Pro Plan"
         };
@@ -6711,6 +6713,7 @@
       return {
         amount: 9,
         currency: "USD",
+        freePricingHtml: "<i class=\"fa-solid fa-dollar-sign\"></i>0 / month",
         pricingHtml: "<i class=\"fa-solid fa-dollar-sign\"></i>9 / month",
         billingHtml: "<i class=\"fa-solid fa-dollar-sign\"></i>9/month - Pro Plan"
       };
@@ -6718,6 +6721,9 @@
 
     function updateRegionalPricingUI(countryCode = selectedBillingCountry) {
       const plan = getRegionalPlanMeta(countryCode);
+      if (freePricingPrice) {
+        freePricingPrice.innerHTML = plan.freePricingHtml;
+      }
       if (proPricingPrice) {
         proPricingPrice.innerHTML = plan.pricingHtml;
       }
